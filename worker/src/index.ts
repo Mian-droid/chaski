@@ -71,16 +71,21 @@ export async function handle(req: Request, env: Env, deps: { fetch?: Fetcher } =
   const call: Fetcher = deps.fetch ?? ((u, i) => fetch(u, i));
 
   let upstream: Response;
+  // AbortController y no AbortSignal.timeout: funciona igual en Workers, en Pages Functions y en Node sin depender de la fecha de compatibilidad.
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), TIMEOUT_MS);
   try {
     upstream = await call(`${API}/${modelName(env)}:generateContent`, {
       method: "POST",
       // La clave va en la cabecera y no en la dirección, para que no quede en registros.
       headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
       body: JSON.stringify(buildRequest(text, topic)),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      signal: abort.signal,
     });
   } catch {
     return json({ error: "sin conexión con el modelo" }, 502, h);
+  } finally {
+    clearTimeout(timer);
   }
 
   if (!upstream.ok) {

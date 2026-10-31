@@ -2,6 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { handle } from "../src/index.ts";
+import { onRequest } from "../../functions/extract.ts";
 import { createRequire } from "node:module";
 import { evidenceInText, SYSTEM_PROMPT, buildSystem, DEFAULT_MODEL, parseReply } from "../src/extract.ts";
 import { TOPICS, TOPIC_IDS } from "../src/topics.ts";
@@ -184,6 +185,18 @@ test("sin clave responde 500 con un mensaje claro y no llama a Gemini", async ()
   assert.equal(res.status, 500);
   assert.match(((await res.json()) as any).error, /clave/);
   assert.equal(f.calls.length, 0);
+});
+
+test("la función de Pages (functions/extract.ts) responde igual que el servidor", async () => {
+  const call = (r: Request, env: any = ENV) => onRequest({ request: r, env });
+  assert.equal((await call(req(null, { method: "GET" }))).status, 404);
+  assert.equal((await call(req(null, { method: "OPTIONS" }))).status, 204);
+  assert.equal((await call(req({ text: GOOD, topic: "geometria" }))).status, 400);
+  assert.equal((await call(req({ text: "hola" }))).status, 400);
+  const noKey = await call(req({ text: GOOD }), {});
+  assert.equal(noKey.status, 500);
+  assert.match(((await noKey.json()) as any).error, /clave/);
+  assert.equal((await call(req({ text: GOOD }, { origin: "https://otro.example" }), { ...ENV, ALLOWED_ORIGINS: "https://chaski.pages.dev" })).status, 403);
 });
 
 test("el tema elegido cambia el prompt del sistema, y por defecto es proporciones", async () => {

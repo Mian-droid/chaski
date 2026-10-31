@@ -13,5 +13,8 @@
     "build:site": "node scripts/build-site.mjs",
     "deploy:worker": "npm --prefix worker run deploy",
     "deploy:site": "npm run build:site && npx wrangler pages deploy dist --project-name chaski"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
   }
 }
