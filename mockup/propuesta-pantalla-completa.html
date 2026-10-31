@@ -26,6 +26,15 @@ button, input, textarea { font: inherit; color: inherit; } button { cursor: poin
 
 /* El paisaje cubre toda la ventana. */
 .world { position: fixed; inset: 0; z-index: 0; } .world svg { width: 100%; height: 100%; display: block; }
+/* El fondo es ambiente, no protagonista. Un velo crema lo aleja, los detalles (llamas, árboles, flores, casas) se atenúan
+   y una zona más clara queda detrás de la tarea. Se compara con el nivel original en el panel "Maqueta". */
+.det { opacity: var(--det, 1); }
+.veil { position: fixed; inset: 0; z-index: 0; pointer-events: none; background:
+  radial-gradient(ellipse 52% 62% at 66% 46%, rgba(255, 247, 226, var(--pool, 0)), rgba(255, 247, 226, 0) 100%),
+  linear-gradient(rgba(255, 247, 226, var(--veil, 0)), rgba(255, 247, 226, var(--veil, 0))); }
+@media (max-width: 879px) { .veil { background: linear-gradient(rgba(255, 247, 226, calc(var(--veil, 0) + var(--pool, 0) * .5)), rgba(255, 247, 226, calc(var(--veil, 0) + var(--pool, 0) * .5))); } }
+body[data-fondo="suave"] { --veil: .46; --pool: .34; --det: .32; }
+body[data-fondo="medio"] { --veil: .26; --pool: .22; --det: .6; }
 #app { position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 .screen { flex: 1; display: none; flex-direction: column; gap: 12px; width: 100%; max-width: 1120px; margin: 0 auto;
   padding: 14px clamp(14px, 3vw, 36px) 76px; }
@@ -80,9 +89,11 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 .cordbar .lbl { position: relative; font: 800 .8rem var(--display); color: var(--ink); padding: 0 8px 0 6px; background: var(--cream); white-space: nowrap; }
 .k { position: relative; flex: none; width: 26px; height: 26px; margin: 0 8px; border-radius: 50%; border: 3px dashed #A58A5A; background: var(--cream); padding: 0; }
 .k.on { border: 3px solid var(--ink); background: radial-gradient(circle at 35% 35%, #FF6FA3, var(--magenta)); box-shadow: 0 0 0 3px var(--cream); }
-.plaque { position: relative; background: linear-gradient(#E6DBC3, var(--stone)); border: 4px solid var(--stone-d); border-radius: 16px; padding: 16px 20px; box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .35), 0 6px 0 var(--shadow); color: #3A3020; text-align: center; }
-.plaque::before, .plaque::after { content: ""; position: absolute; top: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--stone-d); } .plaque::before { left: 9px; } .plaque::after { right: 9px; }
-.plaque .kicker { color: var(--magenta); } .plaque .q { font: 800 clamp(1.25rem, 2.4vw, 1.5rem)/1.18 var(--display); margin: 2px 0 0; color: #2F2616; text-wrap: balance; }
+/* La indicación es lo primero que se debe leer: placa oscura con letras claras, la de más contraste de la pantalla. */
+.plaque { position: relative; background: linear-gradient(#5E3D24, #3A2412); border: 4px solid #24140A; border-radius: 16px; padding: 18px 22px 20px; box-shadow: inset 0 0 0 3px rgba(255, 244, 218, .16), 0 7px 0 var(--shadow); color: var(--cream); text-align: center; }
+.plaque::before, .plaque::after { content: ""; position: absolute; top: 9px; width: 9px; height: 9px; border-radius: 50%; background: #C9A66B; } .plaque::before { left: 9px; } .plaque::after { right: 9px; }
+.plaque .kicker { color: var(--sun); font-size: .82rem; } .plaque .q { font: 800 clamp(1.4rem, 2.8vw, 1.85rem)/1.16 var(--display); margin: 4px 0 0; color: var(--cream); text-wrap: balance; }
+.ask { background: var(--cream); border: 3px solid var(--ink); border-radius: 14px; padding: 8px 14px; font-weight: 700; box-shadow: 0 4px 0 var(--shadow); } .ask b { color: var(--magenta); }
 .tablet { position: relative; background: linear-gradient(#EBC196, var(--clay)); border: 4px solid var(--clay-d); border-radius: 22px; padding: 14px 12px 10px; box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .25), 0 6px 0 var(--shadow); }
 .tablet label { position: absolute; top: -13px; left: 16px; background: var(--turqd); color: var(--cream); font: 800 .74rem var(--display); letter-spacing: .09em; text-transform: uppercase; padding: 2px 10px; border-radius: 99px; }
 .tablet textarea { display: block; width: 100%; height: 136px; resize: none; border: 0; outline: none; background: repeating-linear-gradient(transparent 0 31px, rgba(110, 70, 30, .28) 31px 32px); font: 1.4rem/32px var(--hand); color: #4A2E14; padding: 2px 6px; }
@@ -120,6 +131,7 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 </head>
 <body>
 <div class="world" id="world" aria-hidden="true"></div>
+<div class="veil" aria-hidden="true"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs"></defs></svg>
 
 <div id="app">
@@ -173,7 +185,7 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
       </div>
       <div class="panel-col">
         <div class="board">Chaski dice: 4 cuadernos cuestan 10 soles.</div>
-        <p class="small" style="color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);font-weight:700">Mira cómo lo resolvió. Si encuentras el error, toca el paso.</p>
+        <p class="ask"><b>Tu turno:</b> mira cómo lo resolvió. Si encuentras el error, toca ese paso.</p>
         <div class="quipu">
           <div class="step" data-n="1">2 cuadernos cuestan 6 soles.</div>
           <div class="step hot" data-n="2">Para 4 cuadernos, sumo 2 más: 6 + 2 + 2.</div>
@@ -190,6 +202,7 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
   <div class="box">
     <div class="grp"><b>Pantalla</b><button data-scene="welcome" aria-pressed="false">Bienvenida</button><button data-scene="teach" aria-pressed="true">Enseñar</button><button data-scene="review" aria-pressed="false">Revisar</button></div>
     <div class="grp"><b>Momento del día</b><button data-time="amanecer" aria-pressed="false">Amanecer</button><button data-time="dia" aria-pressed="true">Día</button><button data-time="atardecer" aria-pressed="false">Atardecer</button></div>
+    <div class="grp"><b>Fondo</b><button data-fondo="suave" aria-pressed="true">Suave</button><button data-fondo="medio" aria-pressed="false">Medio</button><button data-fondo="original" aria-pressed="false">Original</button></div>
     <div class="grp"><b>Otra maqueta</b><a href="propuesta-panel.html">Panel docente →</a></div>
   </div>
 </details>
@@ -205,20 +218,21 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
   }).join('');
   document.getElementById('defs').innerHTML = defs;
 
-  var scene = 'teach', time = 'dia';
+  var scene = 'teach', time = 'dia', fondo = 'suave';
   function paint() {
     document.getElementById('world').innerHTML = Paisaje.world(time);
     document.querySelectorAll('.screen').forEach(function (s) { s.classList.toggle('on', s.dataset.scene === scene); });
+    document.body.dataset.fondo = fondo;
     document.querySelectorAll('.mk button').forEach(function (b) {
-      var on = b.dataset.scene ? b.dataset.scene === scene : b.dataset.time === time;
+      var on = b.dataset.scene ? b.dataset.scene === scene : b.dataset.fondo ? b.dataset.fondo === fondo : b.dataset.time === time;
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
   }
   document.querySelectorAll('.mk button').forEach(function (b) {
-    b.addEventListener('click', function () { if (b.dataset.scene) scene = b.dataset.scene; if (b.dataset.time) time = b.dataset.time; paint(); });
+    b.addEventListener('click', function () { if (b.dataset.scene) scene = b.dataset.scene; if (b.dataset.time) time = b.dataset.time; if (b.dataset.fondo) fondo = b.dataset.fondo; paint(); });
   });
   var q = new URLSearchParams(location.search);
-  if (q.get('escena')) scene = q.get('escena'); if (q.get('hora')) time = q.get('hora'); if (q.get('menu') === '0') document.querySelector('.mk').open = false;
+  if (q.get('escena')) scene = q.get('escena'); if (q.get('hora')) time = q.get('hora'); if (q.get('fondo')) fondo = q.get('fondo'); if (q.get('menu') === '0') document.querySelector('.mk').open = false;
   function vp() { document.getElementById('vp').textContent = innerWidth + ' × ' + innerHeight; }
   addEventListener('resize', vp); vp(); paint();
 })();

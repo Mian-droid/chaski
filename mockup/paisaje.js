@@ -95,7 +95,7 @@
     s += '<rect x="0" y="360" width="' + W + '" height="140" fill="url(#w-haze)" opacity=".75"/>';
     s += ridge(peaks(11, 96, 392, 428, 440, 470), 540, p.mid, p.midShade, null, 0);
     s += '<rect x="0" y="400" width="' + W + '" height="140" fill="url(#w-haze)" opacity=".6"/>';
-    s += citadel(p, 150, 428, 0.7) + citadel(p, OX + 206, 424, 0.95) + citadel(p, 960, 430, 0.8);
+    s += '<g class="det">' + citadel(p, 150, 428, 0.7) + citadel(p, OX + 206, 424, 0.95) + citadel(p, 960, 430, 0.8) + '</g>';
     var rv = 'M' + (OX + 236) + ' 520 Q' + (OX + 196) + ' 534 ' + (OX + 222) + ' 556 T' + (OX + 168) + ' 598 T' + (OX + 214) + ' 646 T' + (OX + 120) + ' 706';
     s += '<path d="' + rv + '" fill="none" stroke="' + p.river + '" stroke-width="11" stroke-linecap="round"/><path d="' + rv + '" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 12" opacity=".7"/>';
     [[524, 22, 590, 540], [590, 26, 660, 606], [656, 22, 730, 674]].forEach(function (b, i) {
@@ -104,10 +104,12 @@
       for (var row = 0; row < 22; row++) s += '<path d="M' + (8 + row * 56) + ' ' + b[3] + ' l34 -2" stroke="' + INK + '" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/>';
       s += '<path d="' + top + '" fill="none" stroke="' + p.wall + '" stroke-width="6"/><path d="' + top + '" fill="none" stroke="' + INK + '" stroke-opacity=".25" stroke-width="2" stroke-dasharray="7 6"/>';
     });
+    s += '<g class="det">';
     for (var f = 0; f < 70; f++) s += '<circle cx="' + (14 + fixed(f + 3) * (W - 28)).toFixed(0) + '" cy="' + (540 + fixed(f + 9) * 170).toFixed(0) + '" r="2.4" fill="' + (f % 3 === 0 ? '#C2185B' : f % 3 === 1 ? '#FFC83D' : '#FFFFFF') + '" opacity=".9"/>';
     s += llama(OX + 40, 534, 0.62, '#C2185B') + llama(OX + 70, 540, 0.5, '#1593A8', true) + llama(OX + 318, 604, 0.7, '#E39A2D');
     s += llama(120, 556, 0.6, '#E39A2D') + llama(188, 566, 0.5, '#C2185B', true) + llama(930, 548, 0.62, '#1593A8') + llama(1000, 556, 0.5, '#C2185B', true) + llama(1080, 626, 0.78, '#E39A2D') + llama(70, 640, 0.8, '#1593A8', true);
     s += tree(OX + 352, 556, 0.5, p.gr[2]) + tree(OX + 34, 690, 0.8, p.gr[2]) + tree(90, 600, 0.7, p.gr[2]) + tree(270, 690, 0.75, p.gr[1]) + tree(870, 580, 0.55, p.gr[2]) + tree(1130, 690, 0.9, p.gr[2]) + tree(1010, 700, 0.6, p.gr[1]);
+    s += '</g>';
     s += '<rect y="722" width="' + W + '" height="90" fill="url(#w-earth)"/>';
     for (var g = 0; g < 56; g++) s += '<ellipse cx="' + (14 + g * 22 + fixed(g) * 10).toFixed(0) + '" cy="' + (752 + fixed(g + 5) * 38).toFixed(0) + '" rx="' + (5 + fixed(g + 2) * 6).toFixed(0) + '" ry="3.4" fill="' + INK + '" opacity=".18"/>';
     s += '<g class="w-sway" fill="' + p.gr[2] + '" stroke="' + INK + '" stroke-width="1.6" stroke-linejoin="round">';
