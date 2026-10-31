@@ -101,8 +101,8 @@
 
   /* ---------- piezas de pantalla ---------- */
   var ICON_PASS = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6l6 6-6 6M13 6l6 6-6 6"/></svg>';
-  var ICON_STOP = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M12 8v5M12 16.5v.1"/></svg>';
-  var ICON_KNOT = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h8M12 12c0-4 3-6 6-6s3 4 0 6-6 0-6 0 3 2 6 0 3-6 0-6"/></svg>';
+  var ICON_STOP = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.3l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/></svg>';
+  var ICON_TEACH = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L3 10.4l6.8 2.8L12.6 21z"/><path d="M21 3L9.8 13.2"/></svg>';
   function iconBtn(icon, text, cls, fn) { var b = h('button', { type: 'button', class: 'gbtn ' + cls, onclick: fn }); b.innerHTML = icon; b.appendChild(document.createTextNode(text)); return b; }
 
   /**
@@ -144,7 +144,7 @@
     st.voiceInfo = function () { return st.voiced ? { voz: true, editado: st.voiceChanged || st.area.value !== st.voiceSnap, vozMs: st.voiceMs } : {}; };
     /** El botón de enviar solo sirve con texto suficiente y mientras no se está pasando la voz a texto. */
     st.refreshSend = function () { st.send.disabled = !!st.busy || st.area.value.trim().length < (opts.min || 1); };
-    st.send = iconBtn(ICON_KNOT, opts.button || 'Enseñarle', 'go', function () {
+    st.send = iconBtn(ICON_TEACH, opts.button || 'Enseñarle', 'go', function () {
       var text = st.area.value.trim(), pd = Core.personalData(text);
       /* Un correo, un teléfono o un documento no se envían a la IA ni se guardan: se pide quitarlos. */
       if (pd) { warn.textContent = 'Parece que escribiste un ' + pd + '. Bórralo: Chaski no necesita datos personales.'; return; }
@@ -164,7 +164,7 @@
    * El estudiante toca el micrófono, habla y vuelve a tocar: el texto se agrega a la tablilla y se puede editar antes de enviar.
    * Devuelve null si la voz no está disponible: entonces la tablilla es la de siempre.
    */
-  var ICON_MIC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+  var ICON_MIC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg>';
   var ICON_STOP_SQ = '<svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
   function voiceControls(st, warn) {
     var V = window.ChaskiVoice;
