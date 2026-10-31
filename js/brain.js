@@ -142,7 +142,10 @@
       if (!c || STATES.indexOf(c.state) === -1) return null;
       cards[IDS[i]] = { state: c.state, evidence: c.state === 'ausente' ? '' : String(c.evidence || '').slice(0, 200) };
     }
-    return { cards: cards, restatement: o.restatement.slice(0, 400) };
+    /* Lo que Chaski dice entender debe coincidir con las tablillas que se encienden: si el modelo no dejó ninguna idea
+       enseñada, o no trajo texto, Chaski lo dice con las fichas y no con las palabras del modelo. */
+    var said = o.restatement.trim().slice(0, 400);
+    return { cards: cards, restatement: !said || vague(cards) ? restate(cards) : said };
   }
 
   /**

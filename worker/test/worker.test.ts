@@ -98,6 +98,7 @@ test("si la evidencia no sale del texto del estudiante, no se da crédito", asyn
   assert.equal(j.cards.K1.state, "ausente");
   assert.equal(j.cards.K1.evidence, "");
   assert.equal(j.cards.K2.state, "ausente");
+  assert.equal(j.restatement, "", "no repite lo que las fichas ya no registran");
 });
 
 test("evidenceInText tolera mayúsculas, tildes y pequeñas diferencias", () => {

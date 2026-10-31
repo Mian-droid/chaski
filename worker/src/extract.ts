@@ -126,15 +126,22 @@ export interface Reading {
   source: "modelo";
 }
 
+/**
+ * Deja solo lo que el texto respalda. Si el modelo daba crédito sin base a alguna ficha, su `restatement` puede
+ * decir que Chaski entendió algo que las fichas ya no registran: se devuelve vacío y el juego lo arma con las fichas.
+ */
 export function sanitize(parsed: ExtractionT, text: string): Reading {
   const cards = {} as Cards;
+  let downgraded = false;
   for (const k of ["K1", "K2", "K3"] as const) {
     const c = parsed[k];
     const grounded = c.state !== "ausente" && evidenceInText(c.evidence, text);
+    if (c.state !== "ausente" && !grounded) downgraded = true;
     cards[k] = grounded
       ? { state: c.state, evidence: c.evidence.slice(0, 200) }
       : { state: "ausente", evidence: "" };
   }
-  const restatement = parsed.restatement.trim().slice(0, 400) || "Mmm, todavía no entendí nada. ¿Me lo explicas con otro ejemplo?";
+  const said = parsed.restatement.trim().slice(0, 400);
+  const restatement = downgraded ? "" : said || "Mmm, todavía no entendí nada. ¿Me lo explicas con otro ejemplo?";
   return { cards, restatement, source: "modelo" };
 }

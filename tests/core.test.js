@@ -256,6 +256,11 @@ t('validar la respuesta del servidor: formato estricto', () => {
   assert.strictEqual(v.cards.K3.state, 'mal');
   assert.strictEqual(Brain.validExtraction({ cards: { K1: { state: 'quizás' } }, restatement: '' }), null);
   assert.strictEqual(Brain.validExtraction(null), null);
+  /* Chaski no dice que entendió algo que no encendió ninguna tablilla. */
+  const none = { K1: { state: 'ausente', evidence: '' }, K2: { state: 'ausente', evidence: '' }, K3: { state: 'ausente', evidence: '' } };
+  assert.ok(/todavía no entendí nada/.test(Brain.validExtraction({ cards: none, restatement: 'Entendí que se multiplica.' }).restatement));
+  assert.ok(/todavía no entendí nada/.test(Brain.validExtraction({ cards: none, restatement: '' }).restatement));
+  assert.ok(/^Entendí que/.test(Brain.validExtraction({ cards: { K1: { state: 'bien', evidence: 'x' }, K2: none.K2, K3: none.K3 }, restatement: '' }).restatement));
   assert.strictEqual(Brain.validExtraction({ cards: ok.cards }), null);
 });
 
