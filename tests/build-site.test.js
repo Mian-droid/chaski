@@ -9,7 +9,7 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist');
-const build = (env) => spawnSync(process.execPath, ['scripts/build-site.mjs'], { cwd: root, env: Object.assign({}, process.env, { EXTRACT_URL: '', ENDPOINT: '', CF_PAGES: '', SITE_URL: '' }, env), encoding: 'utf8' });
+const build = (env) => spawnSync(process.execPath, ['scripts/build-site.mjs'], { cwd: root, env: Object.assign({}, process.env, { EXTRACT_URL: '', ENDPOINT: '', CF_PAGES: '', SITE_URL: '', CONTACT_EMAIL: '' }, env), encoding: 'utf8' });
 const read = (...p) => fs.readFileSync(path.join(...p), 'utf8');
 const tasks = [];
 const t = (name, fn) => tasks.push([name, fn]);
@@ -121,6 +121,55 @@ t('las funciones de Pages no viajan dentro de dist/ (Pages las toma de la raíz 
   build({});
   assert.ok(!fs.existsSync(path.join(dist, 'functions')));
   assert.ok(fs.existsSync(path.join(root, 'functions', 'extract.ts')));
+});
+
+const LEGAL = ['privacidad.html', 'terminos.html', 'consentimiento.html', 'acerca.html'];
+
+t('se publican las páginas legales, el robots.txt y el script del correo de contacto', () => {
+  assert.strictEqual(build({}).status, 0);
+  LEGAL.concat(['robots.txt', 'js/legal.js', 'css/legal.css']).forEach((f) => assert.ok(fs.existsSync(path.join(dist, f)), 'debe estar ' + f));
+  assert.match(read(dist, 'robots.txt'), /Disallow: \/panel\.html/);
+});
+
+t('los enlaces entre las páginas legales, el juego y el panel no están rotos', () => {
+  build({});
+  ['index.html', 'panel.html'].concat(LEGAL).forEach((page) => {
+    const html = page === 'index.html' ? read(root, 'js', 'app.js') + read(dist, page) : read(dist, page);
+    (html.match(/(?:href=|href: )["']([a-z]+\.html)["']/g) || []).forEach((m) => {
+      const target = m.match(/([a-z]+\.html)/)[1];
+      assert.ok(fs.existsSync(path.join(dist, target)), page + ' enlaza a ' + target + ', que no existe');
+    });
+  });
+});
+
+t('el juego muestra el aviso de la inteligencia artificial y enlaza a privacidad y términos', () => {
+  const app = read(root, 'js', 'app.js');
+  assert.match(app, /servicio de inteligencia artificial \(Google Gemini\)/);
+  assert.match(app, /pageLink\('privacidad\.html'/);
+  assert.match(app, /pageLink\('terminos\.html'/);
+  assert.match(read(dist, 'panel.html'), /consentimiento\.html/);
+});
+
+t('la política de privacidad dice quién recibe los datos y qué derechos hay', () => {
+  build({});
+  const p = read(dist, 'privacidad.html');
+  ['Cloudflare', 'Google Gemini', 'Google Fonts', 'Ley N.° 29733', 'acceso', 'rectificación', 'cancelación', 'oponerte', 'Autoridad Nacional de Protección de Datos Personales', 'menos de 18 años'].forEach((w) => assert.ok(p.includes(w), 'falta mencionar: ' + w));
+});
+
+t('la autorización para tutores se puede imprimir y no pide datos que se envíen', () => {
+  build({});
+  const c = read(dist, 'consentimiento.html');
+  assert.match(c, /window\.print\(\)/);
+  assert.ok(!/<form|<input|fetch\(/.test(c), 'la hoja es solo para imprimir');
+});
+
+t('CONTACT_EMAIL se escribe en dist/ y no en el repositorio, y se rechazan correos inválidos', () => {
+  const before = read(root, 'js', 'config.js');
+  const r = build({ CONTACT_EMAIL: 'contacto@ejemplo.org' });
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.match(read(dist, 'js', 'config.js'), /CONTACT_EMAIL:\s*"contacto@ejemplo\.org"/);
+  assert.strictEqual(read(root, 'js', 'config.js'), before);
+  ['sin-arroba', 'a@b', 'a b@c.d', 'a"@b.co'].forEach((v) => assert.notStrictEqual(build({ CONTACT_EMAIL: v }).status, 0, v));
 });
 
 let ok = 0;

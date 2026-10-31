@@ -11,6 +11,8 @@
  * EXTRACT_URL puede ser una ruta del mismo sitio ("/extract", la Pages Function de functions/) o una dirección https.
  * En Cloudflare Pages (CF_PAGES=1) y sin EXTRACT_URL, se usa "/extract" solo: la función viene en este repositorio.
  *
+ * CONTACT_EMAIL=correo@ejemplo.org fija el correo de contacto que muestran las páginas de privacidad y términos.
+ *
  * La vista previa al compartir (WhatsApp, redes) pide la imagen con dirección completa. index.html trae la de
  * https://chaski.pages.dev; si el sitio vive en otra, pásala al empaquetar:
  *   SITE_URL=https://juega.ejemplo.org npm run build:site
@@ -26,9 +28,14 @@ const out = path.join(root, "dist");
 const FILES = [
   ["index.html", "index.html"],
   ["panel.html", "panel.html"],
+  ["privacidad.html", "privacidad.html"],
+  ["terminos.html", "terminos.html"],
+  ["consentimiento.html", "consentimiento.html"],
+  ["acerca.html", "acerca.html"],
   ["css", "css"],
   ["js", "js"],
   ["deploy/_headers", "_headers"],
+  ["deploy/robots.txt", "robots.txt"],
   ["brand/favicon.svg", "brand/favicon.svg"],
   ["brand/favicon.ico", "brand/favicon.ico"],
   ["brand/apple-touch-icon.png", "brand/apple-touch-icon.png"],
@@ -80,6 +87,12 @@ if (!extract && onPages) extract = "/extract";
 const endpoint = process.env.ENDPOINT ? samePathOrHttps("ENDPOINT", process.env.ENDPOINT) : "";
 if (extract) config = setConfig(config, "EXTRACT_URL", extract);
 if (endpoint) config = setConfig(config, "ENDPOINT", endpoint);
+/* Correo de contacto de las páginas legales: se fija al empaquetar para no escribirlo en el repositorio. */
+const contact = (process.env.CONTACT_EMAIL || "").trim();
+if (contact) {
+  if (!/^[^\s@"<>]+@[^\s@"<>]+\.[^\s@"<>]+$/.test(contact)) throw new Error(`CONTACT_EMAIL no es un correo válido: ${contact}`);
+  config = setConfig(config, "CONTACT_EMAIL", contact);
+}
 writeFileSync(configPath, config);
 
 /* Dirección del sitio para la vista previa al compartir. */
