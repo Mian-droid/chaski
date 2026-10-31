@@ -262,7 +262,17 @@
     if (time === painted) return;
     painted = time;
     var el = document.getElementById('world');
-    if (el) el.innerHTML = world(time);
+    if (!el) return;
+    /* Si ya había un paisaje, queda encima como capa que se desvanece (css: .world-old) y el nuevo aparece debajo.
+       Los ids del dibujo viejo se renombran: si no, sus degradados tomarían los del nuevo. */
+    var prev = el.firstElementChild, quiet = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var html = prev && !quiet ? prev.outerHTML.replace(/w-(sky|glow|haze|earth|edge|vig)/g, 'wo-$1') : '';
+    el.innerHTML = world(time);
+    if (!html) return;
+    var old = document.createElement('div'); old.className = 'world-old'; old.innerHTML = html;
+    el.appendChild(old);
+    old.addEventListener('animationend', function () { old.remove(); });
+    setTimeout(function () { old.remove(); }, 1500);
   }
 
   /** Elemento de Chaski corriendo. */

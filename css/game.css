@@ -74,6 +74,18 @@ svg.ic { width: 22px; height: 22px; flex: none; }
 .hud, .panel-col > :not(.toast) { animation: rise .38s var(--ease-out) backwards; animation-delay: calc(var(--n, 0) * 55ms + 60ms); }
 .hero-col > .bubble { animation: speak .4s var(--spring) .12s backwards; transform-origin: 50% 100%; }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+/* Chaski llega a la escena: sube y se infla con un rebote suave. Usa translate y scale (no transform) para convivir con el balanceo .bob. */
+.hero-col .chsvg { animation: bob 3s ease-in-out infinite, hello .55s var(--spring) backwards; transform-origin: 50% 100%; }
+@keyframes hello { from { translate: 0 22px; scale: .88; opacity: 0; } }
+/* Al cambiar el momento del día, el paisaje anterior se desvanece encima del nuevo (lo arma scenery.js). */
+.world-old { position: absolute; inset: 0; pointer-events: none; animation: worldout 1s var(--ease-in-out) forwards; }
+@keyframes worldout { to { opacity: 0; } }
+/* Navegar a otra página (panel, información) se desvanece en vez de cortar en seco. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: .18s ease-in both vtout; }
+::view-transition-new(root) { animation: .32s var(--ease-out) both vtin; }
+@keyframes vtout { to { opacity: 0; } }
+@keyframes vtin { from { opacity: 0; } }
 @keyframes speak { from { opacity: 0; transform: scale(.86) translateY(6px); } }
 @keyframes tick { from { opacity: .35; transform: translateY(5px) scale(.9); } }
 @keyframes tie { 0% { scale: .45; } 55% { scale: 1.3; } 100% { scale: 1; } }
@@ -310,9 +322,11 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
   .runner.away { animation: fadeout .5s forwards; }
   @keyframes fadeout { to { opacity: 0; } }
   .w-condor { transform: translate(560px, 260px); }
-  .hud, .panel-col > *, .hero-col > .bubble, .hang .f, .hang .on .tab, .sello b, .parch .ln, .k.tie, .pop, .slot .tick, .step.sel, .shake, .node.cur circle, .arrive, .tbub { animation: none; }
+  .hud, .panel-col > *, .hero-col > .bubble, .hero-col .chsvg, .hang .f, .hang .on .tab, .sello b, .parch .ln, .k.tie, .pop, .slot .tick, .step.sel, .shake, .node.cur circle, .arrive, .tbub { animation: none; }
   .gbtn, .key, .k, .step, .inp, .tablet, .hang .tab, .tablet .mic { transition: none; }
   .toast { transform: translateX(-50%); transition-property: opacity; }
+  .world-old { display: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
 
 /* Cada pantalla debe caber en la ventana sin desplazarse (la rendición final sí puede hacerlo, porque se lee con calma).
