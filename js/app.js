@@ -134,11 +134,17 @@
     var st = { pasted: false };
     st.area = h('textarea', { id: 'resp', maxlength: 400, placeholder: opts.ph, 'aria-label': opts.label });
     var count = h('span', { text: '0 / 400' });
-    st.send = iconBtn(ICON_KNOT, opts.button || 'Enseñarle', 'go', function () { opts.onSend(st.area.value.trim(), st.pasted, st); });
+    var warn = h('p', { class: 'msgerr', role: 'alert' });
+    st.send = iconBtn(ICON_KNOT, opts.button || 'Enseñarle', 'go', function () {
+      var text = st.area.value.trim(), pd = Core.personalData(text);
+      /* Un correo, un teléfono o un documento no se envían a la IA ni se guardan: se pide quitarlos. */
+      if (pd) { warn.textContent = 'Parece que escribiste un ' + pd + '. Bórralo: Chaski no necesita datos personales.'; return; }
+      opts.onSend(text, st.pasted, st);
+    });
     st.send.disabled = true;
     st.area.addEventListener('paste', function () { st.pasted = true; });
-    st.area.addEventListener('input', function () { count.textContent = st.area.value.length + ' / 400'; st.send.disabled = st.area.value.trim().length < (opts.min || 1); });
-    st.el = h('div', { class: 'tablet' }, h('label', { for: 'resp', text: opts.label }), st.area, h('div', { class: 'foot' }, h('span', { text: 'No escribas tu nombre ni datos personales.' }), count));
+    st.area.addEventListener('input', function () { warn.textContent = ''; count.textContent = st.area.value.length + ' / 400'; st.send.disabled = st.area.value.trim().length < (opts.min || 1); });
+    st.el = h('div', { class: 'tablet' }, h('label', { for: 'resp', text: opts.label }), st.area, h('div', { class: 'foot' }, h('span', { text: 'No escribas tu nombre ni datos personales.' }), count), warn);
     return st;
   }
 
@@ -157,7 +163,11 @@
       });
       els.push(k);
     })(i);
-    return { bar: h('div', { class: 'cordbar' }, h('span', { class: 'lbl', text: 'Lo que Chaski sabe' }), els), pop: pop, knot: function (i) { return els[i]; }, fill: function (i) { els[i].classList.add('on'); } };
+    document.addEventListener('keydown', function onKey(e) {
+      if (!document.body.contains(pop)) { document.removeEventListener('keydown', onKey); return; }
+      if (e.key === 'Escape') pop.hidden = true;
+    });
+    return { bar: h('div', { class: 'cordbar' }, h('span', { class: 'lbl', text: 'Lo que Chaski sabe' }), els), pop: pop, close: function () { pop.hidden = true; }, knot: function (i) { return els[i]; }, fill: function (i) { els[i].classList.add('on'); } };
   }
 
   /** El texto escrito vuela de la tablilla al nudo de la cuerda. Sin animación si el usuario pidió menos movimiento. */
@@ -254,8 +264,17 @@
 
   /* ---------- escenas: enseñar ---------- */
   /** Chaski plantea la pregunta en una placa de piedra; el estudiante responde en una tablilla; la lección ata un nudo. */
+  /** Después de la rendición, la lección extra dice en qué se equivocó Chaski (con el nombre de la idea, sin dar la respuesta). */
+  function teachMoreFor() {
+    var focus = S.phase === 'reteach' && S.focus ? S.focus : [];
+    if (!focus.length) return C.teachMore;
+    var names = focus.map(function (k) { return '«' + C.cards[k].short + '»'; }).join(' y ');
+    var asks = focus.map(function (k) { return C.cards[k].ask; }).filter(Boolean).join('; ').toLowerCase();
+    return { k: C.teachMore.k, say: 'Me equivoqué con ' + names + (asks ? ' (' + asks + ')' : '') + '. ¿Cómo me lo explicas para que lo haga bien?',
+      label: C.teachMore.label, ph: 'Explícame con un ejemplo con números…', min: C.teachMore.min, minWords: C.teachMore.minWords, needNumbers: C.teachMore.needNumbers };
+  }
   function sTeach(i) {
-    var prompts = S.more === 'clarify' ? [C.clarify] : S.more ? [C.teachMore] : C.teach, p = prompts[i], t0 = Date.now(), busy = false;
+    var prompts = S.more === 'clarify' ? [C.clarify] : S.more ? [teachMoreFor()] : C.teach, p = prompts[i], t0 = Date.now(), busy = false;
     var cord = cordbar();
     var who = h('div', { class: 'who' }, chaski('listen', 118, 'bob'));
     var box = tablet({ ph: p.ph, label: 'Tu tablilla', min: p.min, onSend: function (text, pasted, st) {
@@ -270,6 +289,7 @@
         setTimeout(function () { if (i + 1 < prompts.length) { S.i = i + 1; save(); render(); } else go('brain'); }, 450);
       });
     } });
+    box.area.addEventListener('input', cord.close); /* la burbuja de una lección ya enseñada no debe tapar el botón mientras se escribe */
     var lesson = S.more === 'clarify' ? 'Chaski no entendió' : S.more ? 'Una lección extra' : 'Lección ' + (i + 1) + ' de ' + prompts.length;
     frame({
       hud: hud(C.topic.title + ' · ' + S.cls),
@@ -282,7 +302,7 @@
   function hangTablets() {
     return [h('div', { class: 'beam', 'aria-hidden': 'true' }), h('div', { class: 'hang', role: 'list' }, Brain.IDS.map(function (k) {
       var on = S.brain[k].state !== 'ausente';
-      return h('div', { class: 'f' + (on ? ' on' : ''), role: 'listitem' }, h('div', { class: 'tab' }, h('span', { class: 'dot' }), C.cards[k].short));
+      return h('div', { class: 'f' + (on ? ' on' : ''), role: 'listitem' }, h('div', { class: 'tab' }, h('span', { class: 'dot' }), h('b', { text: C.cards[k].short }), h('small', { text: C.cards[k].ask || '' })));
     }))];
   }
   /** El cerebro: Chaski piensa en voz alta (nube) y las ideas que cree saber cuelgan encendidas. */
@@ -388,8 +408,10 @@
           h('div', { class: 'row2' },
             iconBtn(ICON_PASS, 'Dejar pasar', 'pass', function () {
               rec.saidError = false; rec.decideMs = Date.now() - t0;
-              var c = document.getElementById('chRun'); c.classList.remove('bob'); c.classList.add('runout'); toast.classList.add('show');
-              setTimeout(finish, 850);
+              /* Chaski echa a correr, de espaldas, hacia el horizonte: se achica y se pierde en el camino sin cruzar la tarea. */
+              var c = document.getElementById('chRun'), r = Scenery.runner('away');
+              r.id = 'chRun'; c.replaceWith(r); toast.classList.add('show');
+              setTimeout(finish, 1150);
             }),
             iconBtn(ICON_STOP, '¡Alto, Chaski!', 'stop', function () { rec.saidError = true; rec.decideMs = Date.now() - t0; lens(); })), toast]
       });
@@ -414,7 +436,7 @@
       var kp = keypad('Tu respuesta', function (v) { submit.disabled = Core.parseNum(v) == null; }, function () { if (!submit.disabled) submit.click(); });
       frame({
         hud: hud('Tambo ' + (i + 1) + ' de 6', h('span', { class: 'pill', text: 'Corrige a Chaski' })),
-        hero: sceneHead('Mmm, está bien. ¿Y cuál es la respuesta correcta?', 'think'),
+        hero: sceneHead('A ver, entonces dime tú: ¿cuál es la respuesta correcta?', 'think'),
         main: [h('div', { class: 'board', text: sol.text }), kp.el, submit]
       });
     }
@@ -465,7 +487,8 @@
   /* ---------- escena: rendición de cuentas ---------- */
   function outcome(e) { return e.hasError ? (e.saidError ? 'hit' : 'miss') : (e.saidError ? 'fa' : 'okc'); }
   var LABEL = { hit: 'Atrapado', miss: 'Se pasó', fa: 'Falsa alarma', okc: 'Chaski acertó' };
-  function question(text) { var parts = text.split(/(?<=[.?])\s+/); return parts[parts.length - 1]; }
+  /** Lo que se muestra de cada problema en la rendición: la pregunta si trae sus datos; si no (p. ej. «¿Cuánto vale x?»), el enunciado completo. */
+  function question(text) { var parts = text.split(/(?<=[.?])\s+/), last = parts[parts.length - 1]; return /\d/.test(last) ? last : text; }
   function sReveal() {
     var exs = Log.mine('ex'), misses = exs.filter(function (e) { return outcome(e) === 'miss'; }).length;
     var sellos = h('div', { class: 'sellos', role: 'list' }, exs.map(function (e, k) { var o = outcome(e); return h('div', { class: 'sello ' + o, role: 'listitem' }, h('b', { text: String(k + 1) }), LABEL[o]); }));
@@ -489,7 +512,9 @@
     var say = misses > 0 ? ['¡Uy! Sonaba muy seguro, ¿no?', 'Hice lo que aprendí de ti. Así también hacen las IA: suenan seguras aunque se equivoquen.']
       : ['¡No me dejaste pasar ni una!', 'Que alguien suene seguro no significa que tenga razón.'];
     var buttons = [];
-    if (!S.reteached) buttons.push(btn('Enseñarle lo que le faltó', 'go', function () { S.reteached = true; S.phase = 'reteach'; startTeach(true); }));
+    var focus = Object.keys(causes).filter(function (k) { return k !== 'S' && C.cards[k]; });
+    var label = focus.length ? 'Enseñarle: ' + focus.map(function (k) { return C.cards[k].short; }).join(' y ') : 'Enseñarle lo que le faltó';
+    if (!S.reteached) buttons.push(btn(label, 'go', function () { S.reteached = true; S.phase = 'reteach'; S.focus = focus; startTeach(true); }));
     buttons.push(btn('Terminar', S.reteached ? 'go' : 'ghost', function () { go('end'); }));
     frame({
       hud: hud('Rendición de cuentas', h('span', { class: 'pill', text: exs.length + ' de ' + exs.length })),

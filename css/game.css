@@ -73,7 +73,17 @@ svg.ic { width: 22px; height: 22px; flex: none; }
 .nod { animation: nod .6s ease-in-out 1; }
 @keyframes nod { 30% { transform: translateY(6px) rotate(-2deg); } 60% { transform: translateY(-3px); } }
 /* Chaski se va hacia la derecha pero sin cruzar por encima del problema: se desvanece dentro de su columna y el contenido queda por delante. */
-.runout { animation: none; transition: transform .8s cubic-bezier(.5, 0, .9, .6), opacity .5s ease-in; transform: translateX(100%); opacity: 0; }
+/* Chaski corre de espaldas hacia el horizonte: piernas y brazos alternan, y se achica hasta perderse. */
+.runner .rl, .runner .ra, .runner .rb { transform-box: fill-box; }
+.runner .rl, .runner .ra { transform-origin: 50% 0; }
+.runner .rl1 { animation: stride .32s ease-in-out infinite alternate; } .runner .rl2 { animation: stride .32s ease-in-out infinite alternate-reverse; }
+.runner .ra1 { animation: swing .32s ease-in-out infinite alternate-reverse; } .runner .ra2 { animation: swing .32s ease-in-out infinite alternate; }
+.runner .rb { animation: hop .16s ease-in-out infinite alternate; }
+@keyframes stride { from { transform: translateY(0) rotate(-8deg); } to { transform: translateY(-16px) rotate(8deg); } }
+@keyframes swing { from { transform: rotate(-20deg); } to { transform: rotate(20deg); } }
+@keyframes hop { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+.runner.away { transform-origin: 50% 100%; animation: away 1.1s cubic-bezier(.35, 0, .75, .7) forwards; }
+@keyframes away { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(34%, -70%) scale(.22); opacity: 0; } }
 .bubble { position: relative; background: #fff; color: var(--ink); border: 3px solid var(--ink); border-radius: 16px; padding: 10px 14px; font-weight: 600; font-size: .98rem; display: grid; gap: 6px; box-shadow: 0 4px 0 var(--shadow); max-width: 340px; }
 .hero-col > .bubble { flex: 1; margin-bottom: 40px; z-index: 2; }
 .hero-col > .bubble::before { content: ""; position: absolute; left: -14px; bottom: 16px; border: 8px solid transparent; border-right-color: var(--ink); border-left: 0; }
@@ -143,7 +153,7 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 .k { position: relative; flex: none; width: 26px; height: 26px; margin: 0 8px; border-radius: 50%; border: 3px dashed #A58A5A; background: var(--cream); padding: 0; cursor: default; }
 .k.on { border: 3px solid var(--ink); background: radial-gradient(circle at 35% 35%, #FF6FA3, var(--magenta)); box-shadow: 0 0 0 3px var(--cream); cursor: pointer; }
 .k.on::after { content: ""; position: absolute; inset: 5px; border: 2px dotted rgba(255, 255, 255, .75); border-radius: 50%; }
-.pop { position: absolute; z-index: 6; left: 0; right: 0; bottom: calc(100% + 10px); background: var(--cream); border: 3px solid var(--ink); border-radius: 14px; padding: 10px 12px; font: 1.1rem/1.25 var(--hand); color: var(--ink); box-shadow: 0 6px 0 var(--shadow); overflow-wrap: anywhere; }
+.pop { pointer-events: none; position: absolute; z-index: 6; left: 0; right: 0; bottom: calc(100% + 10px); background: var(--cream); border: 3px solid var(--ink); border-radius: 14px; padding: 10px 12px; font: 1.1rem/1.25 var(--hand); color: var(--ink); box-shadow: 0 6px 0 var(--shadow); overflow-wrap: anywhere; }
 .pop small { display: block; font: 800 .72rem var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--terra); margin-bottom: 2px; }
 .pop[hidden] { display: none; }
 
@@ -154,7 +164,9 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 .hang { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 6px; }
 .hang .f { position: relative; padding-top: 22px; text-align: center; }
 .hang .f::before { content: ""; position: absolute; left: 50%; top: 0; width: 3px; height: 24px; background: #7A4D26; transform: translateX(-50%); }
-.hang .tab { border-radius: 14px; background: linear-gradient(#D9D2C4, #B9B0A0); border: 3px solid #7C7364; padding: 12px 6px 10px; font: 800 .82rem/1.1 var(--display); color: #5B5446; min-height: 76px; display: grid; place-items: center; gap: 4px; }
+.hang .tab { border-radius: 14px; background: linear-gradient(#D9D2C4, #B9B0A0); border: 3px solid #7C7364; padding: 12px 6px 10px; font: 800 .82rem/1.1 var(--display); color: #5B5446; min-height: 92px; display: grid; place-items: center; gap: 4px; }
+.hang .tab b { font: 800 .9rem/1.1 var(--display); }
+.hang .tab small { display: block; font: 600 .7rem/1.15 system-ui, sans-serif; margin-top: 3px; opacity: .85; }
 .hang .on .tab { background: linear-gradient(#FFE08A, var(--sun)); border-color: var(--terra); color: #4A2E14; box-shadow: 0 0 0 4px rgba(255, 200, 61, .45), 0 0 18px rgba(255, 200, 61, .9); }
 .hang .dot { width: 20px; height: 20px; border-radius: 50%; border: 3px solid #7C7364; background: #CFC8B8; }
 .hang .on .dot { background: var(--magenta); border-color: var(--ink); }
@@ -223,7 +235,67 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 @keyframes sway { from { transform: skewX(-2deg); } to { transform: skewX(2.5deg); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .bob, .nod, .pulse, .step.hot, .think i, .w-cl1, .w-cl2, .w-cl3, .w-condor, .w-sway { animation: none; }
+  .bob, .nod, .pulse, .step.hot, .think i, .w-cl1, .w-cl2, .w-cl3, .w-condor, .w-sway, .runner .rl, .runner .ra, .runner .rb { animation: none; }
+  .runner.away { animation: fadeout .5s forwards; }
+  @keyframes fadeout { to { opacity: 0; } }
   .w-condor { transform: translate(560px, 260px); }
-  .runout, .gbtn { transition: none; }
+  .gbtn { transition: none; }
+}
+
+/* Cada pantalla debe caber en la ventana sin desplazarse (la rendición final sí puede hacerlo, porque se lee con calma).
+   Se compacta según el alto disponible: primero las piezas grandes, luego los espacios y los textos de apoyo. */
+@media (max-height: 900px) {
+  .screen { gap: 8px; padding-top: 8px; padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+  .hero-col .chsvg { width: clamp(72px, 12.5dvh, 108px); }
+  .card { padding: 20px 14px 12px; gap: 8px; }
+  .bubble { padding: 8px 12px; font-size: .94rem; }
+  .gbtn { min-height: 46px; padding: 9px 14px; }
+  .tablet { padding: 12px 10px 8px; }
+  .tablet textarea { height: clamp(80px, 15dvh, 124px); }
+  .plaque { padding: 12px 18px 14px; }
+  .plaque .q { font-size: clamp(1.2rem, 4.6dvh, 1.6rem); }
+  .key { min-height: 46px; font-size: 1.35rem; }
+  .keys { gap: 7px; }
+  .slot { min-height: 54px; font-size: 2rem; padding: 6px 14px; }
+  .logo { font-size: clamp(3rem, 8dvh, 4.4rem); -webkit-text-stroke-width: 8px; }
+  .mapcard { height: min(56dvh, 520px); }
+  label[for="alias"], label[for="cls"] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (max-height: 780px) {
+  .screen { gap: 6px; padding-top: 6px; }
+  .hero-col .chsvg { width: clamp(52px, 10.5dvh, 78px); }
+  .card { padding: 18px 12px 10px; gap: 6px; }
+  .card .title { font-size: 1.1rem; }
+  .bubble { padding: 6px 10px; font-size: .88rem; }
+  .small, .legend, .check { font-size: .78rem; }
+  .footlinks { display: none; }
+  .inp { padding: 7px 10px; }
+  .gbtn { min-height: 42px; font-size: 1rem; padding: 7px 12px; }
+  .pill { padding: 2px 11px; font-size: .84rem; }
+  .tablet textarea { height: clamp(64px, 12dvh, 96px); font-size: 1.2rem; line-height: 28px; }
+  .key { min-height: 40px; font-size: 1.2rem; }
+  .slot { min-height: 46px; font-size: 1.7rem; }
+  .step { padding: 5px 10px; font-size: .92rem; }
+  .quipu { gap: 5px; }
+  .hang .tab { min-height: 56px; padding: 8px 4px 6px; }
+  .hang .tab small { font-size: .66rem; margin-top: 1px; }
+  .thought { padding: 10px 12px; }
+  .logo { font-size: clamp(2.6rem, 7.5dvh, 3.4rem); }
+  .plaque { padding: 8px 14px 10px; }
+  .plaque .q { font-size: clamp(1.05rem, 4.2dvh, 1.3rem); }
+  .plaque .kicker { font-size: .72rem; }
+  .tablet .foot { font-size: .72rem; }
+  .cordbar { padding: 2px 6px; }
+  .board { padding: 6px 12px; font-size: 1rem; }
+  .fig { padding: 5px 8px; }
+  .fig svg { max-height: 21dvh; }
+  .mapcard { height: min(52dvh, 480px); }
+}
+@media (min-width: 880px) {
+  .hang .tab b { font-size: 1.05rem; }
+  .hang .tab small { font-size: .88rem; }
+}
+@media (min-width: 880px) and (max-height: 900px) {
+  .hero-col .chsvg { width: clamp(130px, 34dvh, 250px); }
+  .cols { gap: clamp(16px, 3vw, 40px); }
 }

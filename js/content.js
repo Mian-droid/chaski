@@ -47,13 +47,13 @@
   var proporciones = {
     meta: { id: 'proporciones', title: 'Proporciones', about: 'proporciones', level: 'Secundaria' },
     cards: {
-      K1: { short: 'Multiplicar', title: 'Se multiplica, no se suma',
+      K1: { short: 'Multiplicar', ask: 'Cómo cambian las dos cantidades', title: 'Se multiplica, no se suma',
         text: 'En una proporción directa, las dos cantidades se multiplican (o se dividen) por el mismo número. Sumar la misma cantidad a las dos rompe la proporción. Si 2 cuadernos cuestan 6 soles, 8 cuadernos son 4 veces más, así que cuestan 4 × 6 = 24 soles.',
         belief: { bien: 'cuando una cantidad se multiplica, la otra se multiplica igual', mal: 'a las dos cantidades se les suma lo mismo' } },
-      K2: { short: 'Datos parejos', title: 'Cada dato con su pareja',
+      K2: { short: 'Datos parejos', ask: 'Cómo armar y ordenar los datos', title: 'Cada dato con su pareja',
         text: 'En la regla de tres, los datos que van juntos se escriben en el mismo orden: cuadernos con cuadernos y soles con soles. Si los cruzas, sale un resultado sin sentido. Truco: pregúntate si más cosas deberían costar más. Si 7 lapiceros salen más baratos que 5, algo está mal.',
         belief: { bien: 'los datos que van juntos se escriben en el mismo orden', mal: 'los datos se pueden cruzar al armar la proporción' } },
-      K3: { short: 'Sube y baja', title: 'Si una sube y la otra baja, es inversa',
+      K3: { short: 'Sube y baja', ask: 'Qué pasa si una sube y la otra baja', title: 'Si una sube y la otra baja, es inversa',
         text: 'Con más obreros se tarda menos. En la proporción inversa se mantiene el producto: obreros × días. Si 4 obreros tardan 6 días, el trabajo total es 24, y 8 obreros tardan 24 ÷ 8 = 3 días.',
         belief: { bien: 'si una cantidad sube, la otra baja y el producto se mantiene', mal: 'si una cantidad sube, la otra también sube' } }
     },
@@ -116,13 +116,13 @@
   var porcentajes = {
     meta: { id: 'porcentajes', title: 'Porcentajes', about: 'porcentajes', level: 'Secundaria' },
     cards: {
-      K1: { short: 'Porcentaje', title: 'El porcentaje es una parte del total',
+      K1: { short: 'Porcentaje', ask: 'Qué significa el %', title: 'El porcentaje es una parte del total',
         text: 'El 100% es el total. Para hallar el p% de una cantidad se multiplica por p/100. El 20% de 150 es 150 × 20/100 = 30. Si sale una parte mayor que el total o un número que no tiene sentido, hay que revisar.',
         belief: { bien: 'para hallar un porcentaje de una cantidad la multiplico por el porcentaje entre 100', mal: 'para hallar un porcentaje divido la cantidad entre el porcentaje' } },
-      K2: { short: 'Descuento', title: 'Descuento y aumento: primero el porcentaje',
+      K2: { short: 'Descuento', ask: 'Cómo calcular un descuento o aumento', title: 'Descuento y aumento: primero el porcentaje',
         text: 'El descuento o el aumento es un porcentaje de la cantidad, no un número de soles. Con 20% de descuento sobre 150 soles, el descuento es 30 soles y se paga 150 − 30 = 120. En un aumento, ese valor se suma.',
         belief: { bien: 'en un descuento calculo el porcentaje de la cantidad y se lo resto, y en un aumento se lo sumo', mal: 'en un descuento le resto al precio el número del porcentaje' } },
-      K3: { short: 'El total', title: 'Si te dan la parte, busca el total',
+      K3: { short: 'El total', ask: 'Cómo hallar el total si te dan una parte', title: 'Si te dan la parte, busca el total',
         text: 'Si el 20% de algo es 30, el 1% es 30 ÷ 20 y el total (el 100%) es 100 veces eso: 150. No se calcula el porcentaje de la parte que te dan.',
         belief: { bien: 'si conozco el porcentaje y cuánto es, hallo el total dividiendo entre el porcentaje y multiplicando por 100', mal: 'para hallar el total calculo el porcentaje de lo que me dan' } }
     },
@@ -183,13 +183,13 @@
   var ecuaciones = {
     meta: { id: 'ecuaciones', title: 'Ecuaciones de primer grado', about: 'ecuaciones', level: 'Secundaria' },
     cards: {
-      K1: { short: 'Cambiar de signo', title: 'Lo que suma pasa restando',
+      K1: { short: 'Cambiar de signo', ask: 'Qué pasa al cambiar un término de lado', title: 'Lo que suma pasa restando',
         text: 'Cuando un término pasa al otro lado de la igualdad, cambia de signo: lo que suma pasa restando y lo que resta pasa sumando. En x + 8 = 20, el 8 pasa restando: x = 20 − 8 = 12.',
         belief: { bien: 'cuando un número pasa al otro lado de la igualdad, cambia de signo', mal: 'los números pasan al otro lado sin cambiar de signo' } },
-      K2: { short: 'Paréntesis', title: 'El paréntesis se reparte',
+      K2: { short: 'Paréntesis', ask: 'Cómo se resuelve un paréntesis', title: 'El paréntesis se reparte',
         text: 'Un número que multiplica a un paréntesis multiplica a todos los términos de adentro. 2(x + 3) = 2x + 6, no 2x + 3.',
         belief: { bien: 'el número que multiplica un paréntesis multiplica a todos los términos de adentro', mal: 'el número que multiplica un paréntesis solo multiplica al primer término' } },
-      K3: { short: 'Orden', title: 'Primero suma o resta, después divide',
+      K3: { short: 'Orden', ask: 'En qué orden se hacen las operaciones', title: 'Primero suma o resta, después divide',
         text: 'Para despejar la x, primero se pasan los números que suman o restan y al final se divide entre el número que acompaña a la x. En 3x + 6 = 21: 3x = 15 y luego x = 5.',
         belief: { bien: 'primero paso lo que suma o resta y al final divido entre el número de la x', mal: 'divido entre el número de la x solo algunos de los términos' } }
     },
