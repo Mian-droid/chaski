@@ -173,4 +173,16 @@ tr.det td { background: #FFFAEA; white-space: normal; padding: 12px 16px 14px; }
 .w-cl1, .w-cl2, .w-cl3 { animation: drift 40s ease-in-out infinite alternate; } @keyframes drift { from { transform: translateX(-26px); } to { transform: translateX(34px); } }
 .w-condor { display: none; }
 .w-sway { animation: sway 3.4s ease-in-out infinite alternate; transform-origin: 50% 100%; transform-box: fill-box; } @keyframes sway { from { transform: skewX(-2deg); } to { transform: skewX(2.5deg); } }
-@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+/* Cabecera: la etiqueta y el nombre bajan en cadena y Chaski llega con un rebote (translate y scale, para no pisar el balanceo). */
+.hero .brand > * { animation: drop .45s var(--ease-out) backwards; } .hero .brand > .logo { animation-delay: .08s; }
+.hero .chsvg { animation: bob 3s ease-in-out infinite, hello .55s var(--spring) .15s backwards; transform-origin: 50% 100%; }
+@keyframes drop { from { opacity: 0; transform: translateY(-10px); } }
+@keyframes hello { from { translate: 0 22px; scale: .88; opacity: 0; } }
+tbody tr.row td { transition: background-color .15s; }
+/* Navegar a otra página se desvanece en vez de cortar en seco. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: .18s ease-in both vtout; }
+::view-transition-new(root) { animation: .32s var(--ease-out) both vtin; }
+@keyframes vtout { to { opacity: 0; } }
+@keyframes vtin { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }
