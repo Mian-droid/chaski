@@ -12,7 +12,7 @@
 
   var Core = window.ChaskiCore, C = window.ChaskiContent, CFG = window.CHASKI_CONFIG || {}, Scenery = window.ChaskiScenery;
   var $ = function (id) { return document.getElementById(id); };
-  var events = [], source = '', sortKey = null, sortDir = 1;
+  var events = [], source = '', sortKey = null, sortDir = 1, lastId = 0, timer = null, topicChecked = false;
 
   function put(el, c) {
     if (c == null || c === false) return;
@@ -37,6 +37,8 @@
   }
   function topic() { return $('tema').value; }
   function cls() { return $('cls').value.trim().toUpperCase(); }
+  /** Sala elegida para filtrar lo que se ve. Es solo una etiqueta: vacía significa todas. */
+  function room() { return $('room').value; }
 
   /* ---------- Encabezado con el paisaje del juego ---------- */
 
@@ -59,12 +61,12 @@
     $('bTest').href = link;
     $('bWa').href = 'https://wa.me/?text=' + encodeURIComponent('Juega Chaski: ' + link);
     $('chipT').textContent = C.topic ? C.topic.title : topic();
-    $('chipC').textContent = cls() || 'Todas';
   }
 
   C.list.forEach(function (t) { $('tema').appendChild(h('option', { value: t.id, text: t.title })); });
   $('tema').addEventListener('change', function () { C.use(topic()); sortKey = null; refreshLink(); render(); });
-  $('cls').addEventListener('input', function () { refreshLink(); render(); });
+  $('cls').addEventListener('input', refreshLink);
+  $('room').addEventListener('change', render);
   $('bCopy').addEventListener('click', function () {
     var input = $('link');
     function fallback() { input.select(); $('linkNote').textContent = 'Copia el enlace con Ctrl+C.'; }
@@ -81,7 +83,27 @@
     events.forEach(function (e) { seen[key(e)] = true; });
     list.forEach(function (e) { if (!seen[key(e)]) { seen[key(e)] = true; events.push(e); } });
     source = from;
+    // La primera vez, si el tema elegido no tiene partidas pero otro sí, se muestra el de la partida más reciente.
+    if (!topicChecked && events.length) {
+      topicChecked = true;
+      if (!events.some(function (e) { return (e.topic || 'proporciones') === topic(); })) {
+        var latest = events.reduce(function (m, e) { return (e.ts || 0) > (m.ts || 0) ? e : m; }, events[0]), t = latest.topic || 'proporciones';
+        if (C.list.some(function (x) { return x.id === t; })) { $('tema').value = t; sortKey = null; }
+      }
+    }
     render();
+  }
+  /** Salas que aparecen en los datos, para filtrar. Se conserva la elegida. */
+  function fillRooms() {
+    var sel = $('room'), cur = sel.value, seen = {}, rooms = [];
+    events.forEach(function (e) { var c = String(e.cls || '').toUpperCase(); if (c && !seen[c]) { seen[c] = true; rooms.push(c); } });
+    rooms.sort();
+    var sig = rooms.join('|');
+    if (sel.dataset.sig === sig) return;
+    sel.dataset.sig = sig; sel.textContent = '';
+    sel.appendChild(h('option', { value: '', text: 'Todas las salas' }));
+    rooms.forEach(function (c) { sel.appendChild(h('option', { value: c, text: c })); });
+    sel.value = rooms.indexOf(cur) >= 0 ? cur : '';
   }
 
   /* El guardado puede ser la base de datos del propio sitio ("/events") o un Apps Script que escribe en una hoja. */
@@ -96,27 +118,47 @@
     $('keyLbl').textContent = 'Clave del panel';
   }
   /** Llama al guardado con la clave del panel. La base del sitio la recibe en una cabecera; el Apps Script, en la dirección. */
-  function storeCall(method) {
-    var key = $('key').value.trim(), q = '?cls=' + encodeURIComponent(cls());
-    if (SAME) return fetch(CFG.ENDPOINT + q, { method: method, headers: { 'X-Panel-Key': key } }).then(function (r) { return r.json(); });
-    return fetch(CFG.ENDPOINT + q + '&key=' + encodeURIComponent(key)).then(function (r) { return r.json(); });
+  function storeCall(method, query) {
+    var key = $('key').value.trim();
+    if (SAME) return fetch(CFG.ENDPOINT + query, { method: method, headers: { 'X-Panel-Key': key } }).then(function (r) { return r.json(); });
+    return fetch(CFG.ENDPOINT + query + '&key=' + encodeURIComponent(key)).then(function (r) { return r.json(); });
   }
-  $('bSheet').addEventListener('click', function () {
-    if (!cls()) return say('Escribe el código de clase.');
-    say('Cargando…');
-    storeCall('GET')
-      .then(function (d) { if (d.error) return say('Respondió ' + STORE + ': ' + d.error); merge(d.events || [], STORE); say(''); })
-      .catch(function () { say('No se pudo leer ' + STORE + '. Revisa la dirección y la clave.'); });
-  });
+  function remember(k) { try { sessionStorage.setItem('chaski.panelkey', k); } catch (e) { /* sin almacenamiento: se escribe de nuevo */ } }
+  /** Trae lo nuevo de la base, de todas las salas, y lo suma a lo que ya se muestra. Con el Apps Script se pide una clase. */
+  function pull(manual) {
+    if (!SAME && !cls()) return say('Escribe el código de clase.');
+    if (manual) say('Cargando…');
+    return storeCall('GET', SAME ? '?since=' + lastId : '?cls=' + encodeURIComponent(cls()))
+      .then(function (d) {
+        if (d.error) { stopAuto(); return say('Respondió ' + STORE + ': ' + d.error); }
+        remember($('key').value.trim());
+        if (SAME) lastId = d.last || lastId;
+        if (manual || (d.events && d.events.length)) merge(d.events || [], STORE);
+        if (manual) say('');
+        if (SAME && d.more) return pull(false);
+        if (SAME) startAuto();
+      })
+      .catch(function () { if (manual) say('No se pudo leer ' + STORE + '. Revisa la dirección y la clave.'); });
+  }
+  function startAuto() {
+    if (timer) return;
+    timer = setInterval(function () { if ($('auto').checked && document.visibilityState === 'visible') pull(false); }, 15000);
+  }
+  function stopAuto() { clearInterval(timer); timer = null; }
+  /* Al volver a la pestaña, se trae lo que llegó mientras estaba oculta. */
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && timer && $('auto').checked) pull(false); });
+  $('bSheet').addEventListener('click', function () { pull(true); });
+  $('auto').addEventListener('change', function () { if ($('auto').checked && lastId) pull(false); else render(); });
   $('bWipe').addEventListener('click', function () {
-    if (!cls()) return say('Escribe el código de clase que quieres borrar.');
-    if (!window.confirm('Se borrarán del servidor todos los datos de la clase ' + cls() + '. No se puede deshacer. ¿Continuar?')) return;
+    if (!room()) return say('Elige arriba, en «Sala», la sala que quieres borrar.');
+    if (!window.confirm('Se borrarán del servidor todos los datos de la sala ' + room() + '. No se puede deshacer. ¿Continuar?')) return;
+    var wiped = room();
     say('Borrando…');
-    storeCall('DELETE')
+    storeCall('DELETE', '?cls=' + encodeURIComponent(wiped))
       .then(function (d) {
         if (d.error) return say('Respondió ' + STORE + ': ' + d.error);
-        events = events.filter(function (e) { return String(e.cls).toUpperCase() !== cls(); });
-        render(); say('Se borraron los datos de la clase ' + cls() + ' del servidor.');
+        events = events.filter(function (e) { return String(e.cls).toUpperCase() !== wiped; });
+        $('room').value = ''; render(); say('Se borraron los datos de la sala ' + wiped + ' del servidor.');
       })
       .catch(function () { say('No se pudo borrar. Revisa la clave y la conexión.'); });
   });
@@ -134,7 +176,7 @@
     };
     r.readAsText(f);
   });
-  $('bClear').addEventListener('click', function () { events = []; source = ''; say(''); render(); });
+  $('bClear').addEventListener('click', function () { events = []; source = ''; lastId = 0; topicChecked = false; stopAuto(); say(''); render(); });
 
   /* ---------- Resumen ---------- */
 
@@ -153,6 +195,35 @@
     ['Dependencia', null, function (s) { return s.m.dependence; }],
     ['Ideas bien', null, function (s) { return s.m.cardsBien; }]
   ];
+
+  /** Eventos de la partida más reciente de un estudiante. */
+  function latestSession(s) {
+    var by = {};
+    events.forEach(function (e) {
+      if (e.alias === s.alias && String(e.cls).toUpperCase() === s.cls && (e.topic || 'proporciones') === s.topic) (by[e.sid] = by[e.sid] || []).push(e);
+    });
+    var best = null;
+    Object.keys(by).forEach(function (sid) {
+      var last = Math.max.apply(null, by[sid].map(function (e) { return e.ts || 0; }));
+      if (!best || last > best.last) best = { last: last, evs: by[sid] };
+    });
+    return best;
+  }
+  function ago(ts) {
+    var min = Math.floor((Date.now() - ts) / 60000);
+    return min < 1 ? 'ahora' : min < 60 ? 'hace ' + min + ' min' : min < 1440 ? 'hace ' + Math.floor(min / 60) + ' h' : 'hace ' + Math.floor(min / 1440) + ' d';
+  }
+  /** Dónde va el estudiante y cuándo hizo algo por última vez, según los eventos que llegaron. */
+  function progressOf(s) {
+    var ses = latestSession(s);
+    if (!ses) return null;
+    var n = {};
+    ses.evs.forEach(function (e) { n[e.type] = (n[e.type] || 0) + 1; });
+    var done = (n.probe || 0) >= 4;
+    var where = done ? 'Llegó a la rendición' : n.probe ? 'Preguntas: ' + n.probe + ' de 4' : n.ex >= 6 ? 'Va a las preguntas' : n.ex ? n.ex + ' de 6 problemas' : n.brain ? 'Chaski leyó su explicación' : n.teach ? 'Enseñando' : 'Entró';
+    var asked = ses.evs.some(function (e) { return e.type === 'brain' && e.clarify; });
+    return { where: where + (asked ? ' · Chaski repreguntó' : ''), when: ago(ses.last), live: !done && Date.now() - ses.last < 5 * 60000 };
+  }
 
   /** Textos que escribió un estudiante (lecciones y pregunta libre), con las señales de originalidad. */
   function textsOf(s) {
@@ -220,7 +291,12 @@
     list.forEach(function (s, idx) {
       var m = s.m, band = depBand(m.dependence), texts = textsOf(s), cells = [];
       COLS.forEach(function (c, i) {
-        if (i === 0) cells.push(h('td', { class: 'who', 'data-l': c[0], text: c[1](s) }));
+        if (i === 0) {
+          var pr = progressOf(s);
+          cells.push(h('td', { class: 'who', 'data-l': c[0] }, s.alias, h('span', { class: 'sub' },
+            pr && pr.live ? h('i', { class: 'live', title: 'Jugando ahora' }) : null,
+            'Sala ' + s.cls + (pr ? ' · ' + pr.where + ' · ' + pr.when : ''))));
+        }
         else if (c[1]) cells.push(h('td', { 'data-l': c[0], text: c[1](s) }));
       });
       cells.splice(7, 0, h('td', { 'data-l': 'Dependencia' }, band ? h('span', { class: 'dep ' + band[0] }, h('i'), String(Core.round(m.dependence, 2)).replace('.', ',') + ' · ' + band[1]) : '·'));
@@ -242,7 +318,7 @@
   function renderTexts() {
     var box = $('texts'); box.textContent = '';
     events.filter(function (e) {
-      return (e.type === 'teach' || (e.type === 'probe' && e.kind === 'free')) && e.text && (e.topic || 'proporciones') === topic() && (!cls() || String(e.cls).toUpperCase() === cls());
+      return (e.type === 'teach' || (e.type === 'probe' && e.kind === 'free')) && e.text && (e.topic || 'proporciones') === topic() && (!room() || String(e.cls).toUpperCase() === room());
     }).slice(-60).forEach(function (e) {
       box.appendChild(h('div', { class: 'say' }, h('span', { class: 'who', text: e.alias + ' · ' + (e.k || e.type) }), h('div', { class: 'quote', text: e.text }), flagChips(flagsOf(e))));
     });
@@ -252,25 +328,30 @@
   function render() {
     C.use(topic());
     refreshLink();
-    var students = Core.groupStudents(events, cls() || null, topic());
+    fillRooms();
+    var students = Core.groupStudents(events, room() || null, topic());
     var has = students.length > 0;
     $('results').hidden = !has; $('empty').hidden = has;
     $('status').hidden = $('bClear').hidden = !events.length;
-    if (events.length) $('statusText').textContent = events.length + ' eventos cargados de ' + source + (has ? ' · ' + students.length + ' estudiantes en este tema y clase' : ' · ninguno es de este tema y clase');
+    $('autoRow').hidden = !(SAME && events.length);
+    var where = room() ? ' y sala' : '';
+    if (events.length) $('statusText').textContent = events.length + ' eventos de ' + source + (has ? ' · ' + students.length + ' estudiantes en este tema' + where : ' · ninguno es de este tema' + where) + (timer && $('auto').checked ? ' · se actualiza solo' : '');
     if (!has) return;
     renderKpis(students); renderIdeas(students); renderTable(students); renderTexts();
   }
 
   $('bCsv').addEventListener('click', function () {
     var rows = [['apodo', 'clase', 'tema', 'detecto', 'errores', 'falsas_alarmas', 'controles', 'corrigio', 'seguimiento_ok', 'seguimiento_n', 'textos_debiles', 'textos', 'pegados', 'dependencia', 'ideas_bien']];
-    Core.groupStudents(events, cls() || null, topic()).forEach(function (s) {
+    Core.groupStudents(events, room() || null, topic()).forEach(function (s) {
       var m = s.m;
       rows.push([s.alias, s.cls, s.topic, m.hits, m.nErr, m.falseAlarms, m.nCtl, m.corrected, m.probesOk, m.probesN, m.weakTexts, m.nTexts, m.pasted, m.dependence, m.cardsBien]);
     });
     var csv = rows.map(function (r) { return r.map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
-    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' })); a.download = 'chaski-' + topic() + '.csv';
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' })); a.download = 'chaski-' + topic() + (room() ? '-' + room() : '') + '.csv';
     document.body.appendChild(a); a.click(); a.remove();
   });
 
+  try { var saved = sessionStorage.getItem('chaski.panelkey'); if (saved) $('key').value = saved; } catch (e) { /* sin almacenamiento */ }
   render();
+  if (SAME && $('key').value) pull(true); /* con la clave recordada, los resultados se cargan al abrir */
 })();

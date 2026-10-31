@@ -38,11 +38,11 @@
     <section class="panel" aria-labelledby="h-enlace">
       <h2 id="h-enlace"><span class="num">1</span>Comparte el juego</h2>
       <label class="field" for="tema"><span>Tema</span><select class="inp" id="tema"></select></label>
-      <label class="field" for="cls"><span>Código de clase</span><input class="inp" id="cls" type="text" placeholder="Ej. 3A2026" maxlength="10" autocomplete="off"></label>
+      <label class="field" for="cls"><span>Código de clase (opcional)</span><input class="inp" id="cls" type="text" placeholder="Ej. 3A2026" maxlength="10" autocomplete="off"></label>
       <div class="field"><label for="link"><span>Enlace para tus estudiantes</span></label>
         <div class="linkrow"><input class="inp" id="link" type="text" readonly><button class="btn primary" type="button" id="bCopy"><svg><use href="#i-link"/></svg>Copiar</button></div></div>
       <div class="share"><a class="btn wa" id="bWa" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>WhatsApp</a><a class="btn" id="bTest" target="_blank" rel="noopener">Probar el juego</a></div>
-      <p class="help" id="linkNote">Los estudiantes abren el enlace y juegan con ese tema. El código de clase ya va escrito.</p>
+      <p class="help" id="linkNote">Los estudiantes abren el enlace y juegan con ese tema. La sala es solo una etiqueta para separar grupos en el panel: no hace falta crearla, y se puede dejar vacía.</p>
       <p class="help">Antes de jugar con menores, entrega la <a href="consentimiento.html" target="_blank" rel="noopener">autorización para madres, padres y tutores</a>.</p>
     </section>
 
@@ -55,16 +55,17 @@
       </div>
       <label class="field" for="key" id="keybox" hidden><span id="keyLbl">Clave del panel (la del Apps Script)</span><input class="inp" id="key" type="password" autocomplete="off"></label>
       <p class="status" id="status" role="status" hidden><i></i><span id="statusText"></span></p>
+      <label class="autorow" id="autoRow" for="auto" hidden><input type="checkbox" id="auto" checked> Actualizar solo cada 15 segundos</label>
       <p class="msg" id="msg" role="status"></p>
       <button class="link" id="bClear" type="button" hidden>Quitar los datos cargados</button>
-      <button class="link danger" id="bWipe" type="button" hidden>Borrar del servidor los datos de esta clase</button>
+      <button class="link danger" id="bWipe" type="button" hidden>Borrar del servidor los datos de la sala elegida</button>
     </section>
   </aside>
 
   <main class="main">
     <div class="bar">
       <h2>Resultados</h2>
-      <div class="chips"><span class="chip"><b>Tema</b> <span id="chipT"></span></span><span class="chip"><b>Clase</b> <span id="chipC"></span></span></div>
+      <div class="chips"><span class="chip"><b>Tema</b> <span id="chipT"></span></span><label class="chip roomsel" for="room"><b>Sala</b><select id="room"><option value="">Todas las salas</option></select></label></div>
     </div>
     <p class="notice"><svg><use href="#i-info"/></svg><span>Datos de un piloto exploratorio. Las cifras son señales para conversar con la clase, no una evaluación ni una prueba de efecto.</span></p>
 
