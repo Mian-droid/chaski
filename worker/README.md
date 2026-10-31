@@ -45,6 +45,10 @@ Una ficha solo queda `bien` o `mal` si su `evidence` aparece en el texto del est
 
 El juego ignora cualquier error y lee con reglas de palabras.
 
+## Dictado por voz
+
+`POST /transcribe` con el audio en el cuerpo (`Content-Type: audio/webm`, `audio/mp4`, etc., hasta 2 MB). Responde `{"text": "..."}` (vacío si no se oyó voz) con Whisper (`@cf/openai/whisper-large-v3-turbo`) en español. Pide el enlace `[ai] binding = "AI"`. Códigos: 413 audio grande, 415 no es audio, 429 tope de uso (`RATE_LIMIT_TRANSCRIBE`, `DAILY_TRANSCRIBE`), 501 sin enlace `AI`, 502 falla de Whisper. El audio no se guarda.
+
 ## Configuración
 
 | Variable | Dónde | Qué hace |

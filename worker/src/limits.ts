@@ -15,12 +15,16 @@ export interface LimitsEnv {
   RATE_LIMIT_EVENTS?: string;
   /** Lecturas con el modelo por día, en total. */
   DAILY_MODEL_CALLS?: string;
+  /** Dictados por voz por IP cada 10 minutos. */
+  RATE_LIMIT_TRANSCRIBE?: string;
+  /** Dictados por voz por día, en total. El plan gratis de Workers AI da unos 200 minutos de audio al día. */
+  DAILY_TRANSCRIBE?: string;
 }
-export type Scope = "extract" | "events";
+export type Scope = "extract" | "events" | "transcribe";
 export type Verdict = { ok: true } | { ok: false; error: string; retryAfter: number };
 
 const WINDOW = 600;
-const DEFAULTS = { extract: 150, events: 1200, daily: 3000 };
+const DEFAULTS = { extract: 150, events: 1200, daily: 3000, transcribe: 40, dailyTranscribe: 400 };
 
 function num(v: string | undefined, fallback: number): number {
   const n = Number(v);
@@ -44,7 +48,9 @@ export async function checkLimits(env: LimitsEnv, req: Request, scope: Scope, no
   try {
     const sec = Math.floor(now / 1000);
     const bucket = Math.floor(sec / WINDOW);
-    const limit = scope === "extract" ? num(env.RATE_LIMIT_EXTRACT, DEFAULTS.extract) : num(env.RATE_LIMIT_EVENTS, DEFAULTS.events);
+    const limit = scope === "extract" ? num(env.RATE_LIMIT_EXTRACT, DEFAULTS.extract)
+      : scope === "transcribe" ? num(env.RATE_LIMIT_TRANSCRIBE, DEFAULTS.transcribe)
+      : num(env.RATE_LIMIT_EVENTS, DEFAULTS.events);
     const ip = req.headers.get("CF-Connecting-IP") ?? "sin-ip";
     const n = await bump(env.DB, `ip:${scope}:${await fingerprint(ip)}:${bucket}`, (bucket + 2) * WINDOW);
     // De vez en cuando, se borran los contadores que ya caducaron.
@@ -54,6 +60,11 @@ export async function checkLimits(env: LimitsEnv, req: Request, scope: Scope, no
       const day = new Date(now).toISOString().slice(0, 10);
       const total = await bump(env.DB, `day:${day}`, sec + 2 * 86400);
       if (total > num(env.DAILY_MODEL_CALLS, DEFAULTS.daily)) return { ok: false, error: "se alcanzó el tope diario de lecturas con el modelo", retryAfter: 3600 };
+    }
+    if (scope === "transcribe") {
+      const day = new Date(now).toISOString().slice(0, 10);
+      const total = await bump(env.DB, `day:voz:${day}`, sec + 2 * 86400);
+      if (total > num(env.DAILY_TRANSCRIBE, DEFAULTS.dailyTranscribe)) return { ok: false, error: "se alcanzó el tope diario de dictados por voz", retryAfter: 3600 };
     }
     return { ok: true };
   } catch (e) {

@@ -6,8 +6,9 @@ import { corsHeaders, json } from "./http.ts";
 import { checkLimits, type LimitsEnv } from "./limits.ts";
 import { isTopic } from "./topics.ts";
 import { redact } from "./pii.ts";
+import { handleTranscribe, type TranscribeEnv } from "./transcribe.ts";
 
-export interface Env extends LimitsEnv {
+export interface Env extends LimitsEnv, TranscribeEnv {
   GEMINI_API_KEY?: string;
   MODEL?: string;
   ALLOWED_ORIGINS?: string;
@@ -33,6 +34,10 @@ export async function handle(req: Request, env: Env, deps: { fetch?: Fetcher } =
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
 
   const url = new URL(req.url);
+  if (req.method === "POST" && url.pathname === "/transcribe") {
+    if (!h["Access-Control-Allow-Origin"]) return json({ error: "origen no permitido" }, 403, h);
+    return handleTranscribe(req, env, h);
+  }
   if (req.method !== "POST" || url.pathname !== "/extract") return json({ error: "no existe" }, 404, h);
   if (!h["Access-Control-Allow-Origin"]) return json({ error: "origen no permitido" }, 403, h);
 

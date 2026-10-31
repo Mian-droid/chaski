@@ -10,3 +10,8 @@ ALLOWED_ORIGINS = "*"
 
 # La clave NO va aquí. Se guarda como secreto:
 #   npx wrangler secret put GEMINI_API_KEY
+
+# Dictado por voz (/transcribe): Whisper en Workers AI. No necesita clave; el plan gratis da 10 000 Neurons al día
+# (unos 200 minutos de audio) para toda la cuenta.
+[ai]
+binding = "AI"
