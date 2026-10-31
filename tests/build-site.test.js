@@ -17,7 +17,7 @@ const t = (name, fn) => tasks.push([name, fn]);
 t('publica el juego, el panel y las cabeceras, y deja fuera pruebas, documentos y servidor', () => {
   const r = build({});
   assert.strictEqual(r.status, 0, r.stderr);
-  ['index.html', 'panel.html', '_headers', 'css/game.css', 'css/panel.css', 'js/app.js', 'js/brain.js', 'js/content.js', 'js/core.js', 'js/panel.js', 'js/config.js']
+  ['index.html', 'panel.html', '_headers', 'css/game.css', 'css/panel.css', 'js/app.js', 'js/brain.js', 'js/content.js', 'js/core.js', 'js/scenery.js', 'js/panel.js', 'js/config.js']
     .forEach((f) => assert.ok(fs.existsSync(path.join(dist, f)), 'debe estar ' + f));
   ['tests', 'worker', 'docs', 'mockup', 'apps-script', 'scripts', 'README.md', 'package.json', '.git']
     .forEach((f) => assert.ok(!fs.existsSync(path.join(dist, f)), 'no debe estar ' + f));
