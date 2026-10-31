@@ -26,7 +26,8 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 | `js/content.js` | Un paquete por tema: fichas, problemas con su solución correcta y su error típico, preguntas de seguimiento, reglas de palabras. `use(id)` activa un tema. | nada |
 | `js/core.js` | Funciones puras: leer números, señal de originalidad, métricas por sesión, agrupación por estudiante. | nada |
 | `js/brain.js` | Cerebro (fichas), solución por fichas, lectura de la explicación (servidor o reglas). | content, core |
-| `js/app.js` | Interfaz del juego: escenas, estado, registro de eventos. | content, core, brain |
+| `js/scenery.js` | Dibujo: fondo por capas en tres momentos del día (amanecer, día, atardecer), Chaski con cinco estados de ánimo y la choza del tambo. Solo SVG, sin lógica de juego. | nada |
+| `js/app.js` | Interfaz del juego: escenas, estado, registro de eventos. | content, core, brain, scenery |
 | `js/panel.js` | Panel docente: elegir tema y enlace, cargar datos, resumen. | content, core |
 | `js/config.js` | Direcciones y opciones editables. | nada |
 | `worker/` | Servidor intermedio: valida, arma el prompt por tema, llama al modelo, sanea la respuesta. | SDK de Anthropic, zod |
@@ -51,6 +52,15 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 **Sin exámenes ni día 2.** Por decisión del equipo (30 de octubre de 2026) se quitó el examen de Chaski, el examen sin Chaski y el día 2. Consecuencia: no se mide retención ni aprendizaje, solo cómo enseñan y revisan los estudiantes.
 
 **Servidor con lista cerrada de temas.** El tema llega desde la página, por eso el servidor solo acepta los de `worker/src/topics.ts` y nunca arma el prompt con texto del cliente. Una prueba verifica que esa lista coincida con la del juego.
+
+## Interfaz
+
+- **Dirección visual:** textil andino de día. Paneles de tela con borde tejido, colores de tejidos andinos, paisaje de andenes con nieve, ciudadela, río, cóndor, llamas y pasto que se mueve.
+- **Enseñar no es un chat.** Cada pregunta de Chaski va en una placa de piedra; el estudiante responde en una tablilla de arcilla; al enviar, el texto vuela y ata un nudo en la cuerda «Lo que Chaski sabe». El estado guarda las lecciones (`lessons`), no una conversación. Mientras el texto vuela, el campo queda bloqueado.
+- **Momento del día por escena:** amanecer al entrar (bienvenida e introducción), día para jugar y atardecer en la rendición y el cierre. Se define en `SCENE_TIME` de `app.js`.
+- **Pantallas anchas:** el paisaje es una columna del ancho de un celular, centrada. El juego está pensado para el celular.
+- **Menos movimiento:** con la preferencia del sistema de reducir movimiento se apagan las animaciones del fondo y el vuelo del texto.
+- Las maquetas que dieron origen al diseño están en `mockup/`.
 
 ## Flujo de escenas
 

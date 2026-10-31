@@ -5,11 +5,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 ## [Sin publicar]
 
 ### Agregado
+- `js/scenery.js`: el dibujo (fondo, personaje y choza) separado de la lógica del juego.
 - `npm run build:site`: arma `dist/` solo con el juego, el panel y las cabeceras, y escribe las direcciones (`EXTRACT_URL`, `ENDPOINT`) ahí y no en el repositorio.
 - Cabeceras para Cloudflare Pages (`deploy/_headers`) y guía de despliegue en `docs/despliegue.md`.
 - Pruebas del empaquetado (5).
 
 ### Cambiado
+- **Nueva dirección visual: textil andino de día.** Paneles de tela, paisaje por capas en tres momentos del día, y un Chaski con más carácter.
+- **Enseñar ya no es un chat.** Pregunta en una placa de piedra, respuesta en una tablilla de arcilla, y cada lección ata un nudo en la cuerda de Chaski (se puede releer tocándolo). El cerebro pasa a ser una nube de pensamiento y tres tablillas colgadas.
 - Las páginas no mandan el referente (`no-referrer`): el enlace lleva el código de clase y no debe viajar a Google Fonts.
 
 ## [0.2.0] - 2026-10-30

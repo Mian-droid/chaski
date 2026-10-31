@@ -18,7 +18,7 @@ El grado exacto en que se enseña cada tema lo debe confirmar un docente. Para a
 
 ## Cómo se juega
 
-1. **Enseñar.** El estudiante le explica el tema a Chaski en un chat. Después puede agregar más.
+1. **Enseñar.** Chaski plantea la pregunta en una placa de piedra y el estudiante responde en una tablilla de arcilla. No es un chat: al enviar, el texto vuela y ata un nudo en la cuerda de Chaski. Tocar un nudo muestra lo que se enseñó. Después puede agregar más lecciones.
 2. **El cerebro.** Chaski cuenta lo que entendió. Un modelo de lenguaje lee la explicación y rellena tres fichas (una por idea): bien, mal o ausente, con una cita del estudiante como evidencia.
 3. **El camino.** Chaski resuelve 6 problemas, uno por tambo del Camino Inca, usando solo sus fichas. Con la ficha bien acierta. Si falta o está mal, comete el error típico de ese tema. Cuando todo está bien enseñado, igual comete un descuido de cálculo, para que haya algo que revisar.
 4. **Revisar.** El estudiante elige «Dejar pasar» o «¡Alto, Chaski!». Si lo detiene, toca el nudo del quipu donde está el error y teclea la respuesta correcta. El juego no dice si acertó hasta el final de la ronda.
@@ -85,7 +85,7 @@ Como los errores salen de lo enseñado, cada estudiante tiene una mezcla distint
 ```
 index.html, panel.html     Juego y panel docente
 css/                       game.css (juego) y panel.css (panel)
-js/                        content, core, brain, app, panel, config
+js/                        content, core, brain, scenery (dibujo), app, panel, config
 tests/                     Pruebas del núcleo (sin dependencias)
 worker/                    Servidor intermedio (Cloudflare Worker, TypeScript)
 apps-script/               Guardado de eventos en una hoja de Google
@@ -104,4 +104,6 @@ Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 - **No hay limitador de uso** en el servidor. Restringe `ALLOWED_ORIGINS` a la dirección de tu juego.
 - **La señal de originalidad es heurística** y puede equivocarse con textos cortos o vocabulario muy común.
 - **No se validó con estudiantes reales** ni con un docente.
-- **No hay sonido** y las animaciones son mínimas.
+- **El fondo pesa más** que un cielo plano: varias capas de dibujo vectorial y animaciones suaves. No se midió en celulares de gama baja. Si va lento, se puede apagar la animación sin perder el paisaje.
+- **Los dibujos son vectoriales hechos en código**, no ilustraciones profesionales.
+- **No hay sonido.**

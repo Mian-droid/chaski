@@ -33,7 +33,8 @@ Probar aquí significa pruebas con datos simulados y un jugador simulado. Ningú
 | RF-E01 | Entrar con un apodo (2 a 16 caracteres) y un código de clase (3 a 10), sin pedir nombre ni datos personales. | Probado |
 | RF-E02 | Exigir marcar que está con un adulto responsable y que no escribirá datos personales. | Probado |
 | RF-E03 | Jugar el tema que eligió el docente, indicado en el enlace (`?tema=`), y recibir el código de clase ya escrito (`?clase=`). Sin tema, usar proporciones. | Probado |
-| RF-E04 | Enseñarle a Chaski en un chat de texto: 2 mensajes guiados y hasta 3 intervenciones extra. Cada mensaje admite hasta 400 caracteres. | Probado |
+| RF-E04 | Enseñarle a Chaski respondiendo preguntas en una tablilla de texto, sin historial de chat: 2 lecciones guiadas y hasta 3 intervenciones extra. Cada texto admite hasta 400 caracteres. | Probado |
+| RF-E04b | Ver una cuerda de nudos con una lección por nudo, y poder tocar un nudo para releer lo que se enseñó. | Probado |
 | RF-E05 | Leer lo que explicó y rellenar tres fichas (una por idea del tema) como bien, mal o ausente, con una cita del texto como evidencia. | Probado con reglas de palabras y con un modelo simulado. Modelo real: pendiente |
 | RF-E06 | Mostrar qué entendió Chaski sin nombrar las ideas que no se enseñaron, y qué fichas tienen algo cargado. | Probado |
 | RF-E07 | Si la lectura por modelo falla o tarda más de 12 segundos, leer con reglas de palabras del tema, sin interrumpir el juego. | Probado |
@@ -111,7 +112,9 @@ Probar aquí significa pruebas con datos simulados y un jugador simulado. Ningú
 | RNF-12 | Pruebas automáticas del núcleo (36), del empaquetado del sitio (5) y del servidor (14). | Probado: las 55 pasan |
 | RNF-14 | Empaquetar el servidor como Cloudflare Worker y arrancarlo en el runtime de Workers. | Probado en local (workerd) con una clave falsa. Sin desplegar |
 | RNF-15 | Publicar solo el juego y el panel, sin pruebas, documentos ni servidor. | Probado (`npm run build:site`) |
-| RNF-13 | La tipografía del juego se carga de Google Fonts. Sin conexión, usa una fuente del sistema. | Implementado |
+| RNF-13 | La tipografía del juego (Baloo 2 y Patrick Hand) se carga de Google Fonts. Sin conexión, usa una fuente del sistema. | Implementado |
+| RNF-16 | El fondo animado y el vuelo del texto respetan la preferencia de reducir movimiento. | Implementado. Sin probar con la preferencia activada |
+| RNF-17 | El fondo por capas funciona con fluidez en celulares de gama baja. | Pendiente: no se midió |
 
 ---
 
