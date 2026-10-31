@@ -92,11 +92,17 @@
   var ICON_KNOT = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h8M12 12c0-4 3-6 6-6s3 4 0 6-6 0-6 0 3 2 6 0 3-6 0-6"/></svg>';
   function iconBtn(icon, text, cls, fn) { var b = h('button', { type: 'button', class: 'gbtn ' + cls, onclick: fn }); b.innerHTML = icon; b.appendChild(document.createTextNode(text)); return b; }
 
-  /** Dibuja una escena: pinta el fondo del momento del día y reemplaza el contenido. */
-  function frame() {
+  /**
+   * Dibuja una escena: pinta el fondo del momento del día y reemplaza el contenido.
+   * `spec.hud` es el encabezado; `spec.hero`, lo que va junto a Chaski (columna izquierda en pantallas anchas);
+   * `spec.main`, la tarea; `spec.mode` ajusta el reparto: 'solo' (una columna) o 'tall' (contenido largo).
+   */
+  function frame(spec) {
     Scenery.paint(SCENE_TIME[S && S.scene ? S.scene : 'welcome'] || 'dia');
-    var kids = Array.prototype.slice.call(arguments);
-    root.replaceChildren(h('div', { class: 'screen' }, kids));
+    var cols = h('div', { class: 'cols' + (spec.mode ? ' ' + spec.mode : '') },
+      spec.hero ? h('div', { class: 'hero-col' }, spec.hero) : null,
+      h('div', { class: 'panel-col' }, spec.main));
+    root.replaceChildren(h('div', { class: 'screen' }, spec.hud || null, cols));
     window.scrollTo(0, 0);
   }
   function knots(n) {
@@ -203,18 +209,20 @@
     }
     var resume = prev && prev.scene && prev.scene !== 'end' && prev.topic
       ? btn('Continuar donde me quedé (' + prev.alias + ')', 'ghost', function () { S = prev; S.lessons = S.lessons || []; C.use(S.topic); render(); }) : null;
-    frame(
-      h('div', { class: 'brandrow' }, h('span', { class: 'tag', text: 'Hoy le enseñas: ' + C.topic.title }), h('h1', { class: 'logo', text: 'Chaski' })),
-      h('div', { class: 'center', style: 'height:168px;align-items:flex-end' }, chaski('happy', 120, 'bob')),
-      h('div', { class: 'card' },
-        h('p', { class: 'small', text: 'Un mensajero que solo sabe lo que tú le enseñes. ¿Lo enseñas bien?' }),
-        h('label', { for: 'alias', text: 'Tu apodo' }), alias,
-        h('label', { for: 'cls', text: 'Código de la clase' }), cls,
-        h('label', { class: 'check', for: 'ok' }, ok, h('span', { text: 'Estoy con un adulto responsable y no escribiré mi nombre ni datos personales.' })),
-        msg,
-        btn('Enseñarle a Chaski', 'go', function () { if (read()) render(); }),
-        resume),
-      h('p', { class: 'legend', text: 'Piloto exploratorio: no es una evaluación con nota.' }));
+    frame({
+      hero: [chaski('happy', 120, 'bob')],
+      main: [
+        h('div', { class: 'brandrow' }, h('span', { class: 'tag', text: 'Hoy le enseñas: ' + C.topic.title }), h('h1', { class: 'logo', text: 'Chaski' })),
+        h('div', { class: 'card' },
+          h('p', { class: 'small', text: 'Un mensajero que solo sabe lo que tú le enseñes. ¿Lo enseñas bien?' }),
+          h('label', { for: 'alias', text: 'Tu apodo' }), alias,
+          h('label', { for: 'cls', text: 'Código de la clase' }), cls,
+          h('label', { class: 'check', for: 'ok' }, ok, h('span', { text: 'Estoy con un adulto responsable y no escribiré mi nombre ni datos personales.' })),
+          msg,
+          btn('Enseñarle a Chaski', 'go', function () { if (read()) render(); }),
+          resume),
+        h('p', { class: 'legend', text: 'Piloto exploratorio: no es una evaluación con nota.' })]
+    });
   }
 
   function startTeach(more) {
@@ -223,8 +231,7 @@
   }
   function sIntro() {
     var lines = C.lines.intro.concat([ANNOUNCE ? C.lines.mission : C.lines.missionHidden]);
-    frame(h('div', { class: 'spacer' }), h('div', { class: 'hero' }, chaski('confident', 124, 'bob'), h('div', { class: 'bubble tail' }, bubbles(lines))),
-      btn('¡Vamos!', 'go', function () { startTeach(false); }));
+    frame({ hero: [chaski('confident', 124, 'bob')], main: [h('div', { class: 'card' }, bubbles(lines)), btn('¡Vamos!', 'go', function () { startTeach(false); })] });
   }
 
   /* ---------- escenas: enseñar ---------- */
@@ -245,10 +252,13 @@
         setTimeout(function () { if (i + 1 < prompts.length) { S.i = i + 1; save(); render(); } else go('brain'); }, 450);
       });
     } });
-    frame(cord.bar, cord.pop,
-      h('div', { class: 'plaque' }, h('div', { class: 'kicker', text: S.more ? 'Una lección extra' : 'Lección ' + (i + 1) + ' de ' + prompts.length }), h('p', { class: 'q', text: p.say })),
-      h('div', { class: 'stageT' }, who, h('div', { class: 'hint', text: HINT[p.k] || '' })),
-      box.el, box.send);
+    var lesson = S.more ? 'Una lección extra' : 'Lección ' + (i + 1) + ' de ' + prompts.length;
+    frame({
+      hud: hud(C.topic.title + ' · ' + S.cls),
+      hero: [who, h('div', { class: 'hint', text: HINT[p.k] || '' })],
+      main: [h('div', { class: 'plaque' }, h('div', { class: 'kicker', text: lesson }), h('p', { class: 'q', text: p.say })),
+        box.el, box.send, h('div', { class: 'cordwrap' }, cord.pop, cord.bar)]
+    });
   }
 
   function hangTablets() {
@@ -266,18 +276,22 @@
       if (reteach) buttons.unshift(btn('Terminar', 'go', function () { go('end'); }));
       else buttons.unshift(btn('¡Listo, a resolver!', 'go', function () { S.plan = Brain.planRound(S.brain); go('map', 0); }));
       var learning = Brain.IDS.some(function (k) { return S.brain[k].state !== 'ausente'; });
-      frame(hud('El cerebro de Chaski', h('span', { class: 'pill', text: learning ? 'Está aprendiendo' : 'Vacío' })),
-        h('div', { class: 'center' }, chaski('think', 108, 'bob')),
-        h('div', { class: 'thought' }, h('span', { class: 'kicker', text: 'Esto es lo que entendí' }), res.restatement),
-        hangTablets(),
-        h('p', { class: 'legend', text: 'Una tablilla encendida significa que Chaski cree saber algo. No dice si lo sabe bien.' }),
-        h('div', { class: 'spacer' }), h('div', { class: 'stack' }, buttons));
+      frame({
+        hud: hud('El cerebro de Chaski', h('span', { class: 'pill', text: learning ? 'Está aprendiendo' : 'Vacío' })),
+        hero: [chaski('think', 108, 'bob')],
+        main: [h('div', { class: 'thought' }, h('span', { class: 'kicker', text: 'Esto es lo que entendí' }), res.restatement),
+          hangTablets(),
+          h('p', { class: 'legend', text: 'Una tablilla encendida significa que Chaski cree saber algo. No dice si lo sabe bien.' }),
+          h('div', { class: 'stack' }, buttons)]
+      });
     }
     if (!S.pending.length) { drawBrain({ restatement: S.lastRestatement || Brain.restate(S.brain) }); return; }
-    frame(hud('El cerebro de Chaski', h('span', { class: 'pill', text: 'Leyendo…' })),
-      h('div', { class: 'center' }, chaski('think', 108, 'bob')),
-      h('div', { class: 'thought' }, h('span', { class: 'kicker', text: 'Un momento' }), 'Déjame pensar en lo que me enseñaste…'),
-      h('div', { class: 'think', role: 'status', 'aria-label': 'Chaski está pensando' }, h('i'), h('i'), h('i')));
+    frame({
+      hud: hud('El cerebro de Chaski', h('span', { class: 'pill', text: 'Leyendo…' })),
+      hero: [chaski('think', 108, 'bob')],
+      main: [h('div', { class: 'thought' }, h('span', { class: 'kicker', text: 'Un momento' }), 'Déjame pensar en lo que me enseñaste…'),
+        h('div', { class: 'think', role: 'status', 'aria-label': 'Chaski está pensando' }, h('i'), h('i'), h('i'))]
+    });
     var text = S.pending.join('\n');
     Brain.extract(text, { url: CFG.EXTRACT_URL, topic: S.topic }).then(function (res) {
       if (!S || S.scene !== 'brain') return;
@@ -294,20 +308,20 @@
     var nodes = NODES.map(function (n, k) {
       var done = k < i, cur = k === i;
       if (cur) return '<g class="node"><circle class="pulse" cx="' + n[0] + '" cy="' + n[1] + '" r="24" fill="#C2185B" opacity=".6"/><circle cx="' + n[0] + '" cy="' + n[1] + '" r="27" fill="#fff" stroke="#C2185B" stroke-width="5"/><text x="' + n[0] + '" y="' + (n[1] + 8) + '">' + (k + 1) + '</text></g>';
-      return '<g class="node' + (done ? '' : ' lock') + '"><circle cx="' + n[0] + '" cy="' + n[1] + '" r="21" fill="' + (done ? '#FFC83D' : '#E7DCC4') + '" stroke="' + (done ? '#3B2A8C' : '#8E8165') + '" stroke-width="4"/><text x="' + n[0] + '" y="' + (n[1] + 7) + '">' + (k + 1) + '</text></g>';
+      return '<g class="node' + (done ? '' : ' lock') + '"><circle cx="' + n[0] + '" cy="' + n[1] + '" r="21" fill="' + (done ? '#FFC83D' : '#E7DCC4') + '" stroke="' + (done ? '#3A2412' : '#8E8165') + '" stroke-width="4"/><text x="' + n[0] + '" y="' + (n[1] + 7) + '">' + (k + 1) + '</text></g>';
     }).join('');
     var cur = NODES[i], left = cur[0] > 195, cx = left ? cur[0] - 98 : cur[0] + 14, cy = cur[1] - 114;
     var bx = left ? cur[0] - 190 : cur[0] + 62, by = cy + 8;
-    var wrap = h('div', { class: 'mapArea' });
+    var wrap = h('div', { class: 'mapcard' });
     wrap.innerHTML = '<svg viewBox="0 0 390 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Camino con seis tambos, vas en el ' + (i + 1) + '">' +
       '<path d="' + PATH + '" fill="none" stroke="#7A4D26" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>' +
       '<path d="' + PATH + '" fill="none" stroke="#F1DDAE" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>' +
       '<path d="' + PATH + '" fill="none" stroke="#C9A66B" stroke-width="3" stroke-dasharray="3 12" stroke-linecap="round"/>' +
-      '<g transform="translate(205 82)"><rect x="-1.5" y="-36" width="3.5" height="36" fill="#2B1B3D"/><path d="M2 -36 L28 -28 L2 -19Z" fill="#C2185B" stroke="#2B1B3D" stroke-width="2"/><text y="24" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="16" fill="#2B1B3D" stroke="#FFF3D6" stroke-width="4" paint-order="stroke">Cusco</text></g>' +
+      '<g transform="translate(205 82)"><rect x="-1.5" y="-36" width="3.5" height="36" fill="#3A2412"/><path d="M2 -36 L28 -28 L2 -19Z" fill="#C2185B" stroke="#3A2412" stroke-width="2"/><text y="24" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="16" fill="#3A2412" stroke="#FFF3D6" stroke-width="4" paint-order="stroke">Cusco</text></g>' +
       nodes +
       '<g class="bob"><svg class="chsvg" x="' + cx + '" y="' + cy + '" width="82" height="117" viewBox="0 0 140 200"><use href="#ch-confident"/></svg></g>' +
-      '<g transform="translate(' + Math.max(8, Math.min(282, bx)) + ' ' + by + ')"><rect width="100" height="30" rx="15" fill="#fff" stroke="#3B2A8C" stroke-width="3"/><text x="50" y="21" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="14" fill="#3B2A8C">¡Tambo ' + (i + 1) + '!</text></g></svg>';
-    frame(hud('Tambo ' + (i + 1) + ' de 6', msgPill(i)), wrap, btn('Seguir el camino', 'go', function () { go('ex', i); }));
+      '<g transform="translate(' + Math.max(8, Math.min(282, bx)) + ' ' + by + ')"><rect width="100" height="30" rx="15" fill="#fff" stroke="#3A2412" stroke-width="3"/><text x="50" y="21" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="14" fill="#3A2412">¡Tambo ' + (i + 1) + '!</text></g></svg>';
+    frame({ hud: hud('Tambo ' + (i + 1) + ' de 6', msgPill(i)), mode: 'solo', main: [wrap, btn('Seguir el camino', 'go', function () { go('ex', i); })] });
   }
 
   function sEx(i) {
@@ -317,11 +331,10 @@
       rec.ms = Date.now() - t0; Log.push('ex', rec);
       if (i + 1 < n) go('map', i + 1); else go('probe', 0);
     }
-    function sceneHead(say, mood, height) {
+    /** Lo que va junto a Chaski: él, la choza del tambo y lo que dice. */
+    function sceneHead(say, mood) {
       var c = chaski(mood, 104, 'bob'); c.id = 'chRun';
-      var scene = h('div', { class: 'scene' }, h('div', { class: 'sign', text: say }), h('div', { class: 'chwrap' }, c), hutSVG());
-      if (height) scene.style.height = height + 'px';
-      return scene;
+      return [h('div', { class: 'duo' }, c, hutSVG()), h('div', { class: 'bubble', text: say })];
     }
     function steps(asButtons, onPick) {
       return h('div', { class: 'quipu' }, sol.steps.map(function (s, k) {
@@ -331,24 +344,30 @@
     }
     function decide() {
       var toast = h('div', { class: 'toast', role: 'status', text: 'Anotado. Chaski sigue su camino' });
-      frame(hud('Tambo ' + (i + 1) + ' de 6', msgPill(i)), sceneHead(C.lines.confident[i % C.lines.confident.length], 'confident'),
-        h('div', { class: 'board', text: sol.text }), steps(false), h('div', { class: 'spacer' }),
-        h('div', { class: 'row2' },
-          iconBtn(ICON_PASS, 'Dejar pasar', 'pass', function () {
-            rec.saidError = false; rec.decideMs = Date.now() - t0;
-            var c = document.getElementById('chRun'); c.classList.remove('bob'); c.classList.add('runout'); toast.classList.add('show');
-            setTimeout(finish, 850);
-          }),
-          iconBtn(ICON_STOP, '¡Alto, Chaski!', 'stop', function () { rec.saidError = true; rec.decideMs = Date.now() - t0; lens(); })), toast);
+      frame({
+        hud: hud('Tambo ' + (i + 1) + ' de 6', msgPill(i)),
+        hero: sceneHead(C.lines.confident[i % C.lines.confident.length], 'confident'),
+        main: [h('div', { class: 'board', text: sol.text }), steps(false),
+          h('div', { class: 'row2' },
+            iconBtn(ICON_PASS, 'Dejar pasar', 'pass', function () {
+              rec.saidError = false; rec.decideMs = Date.now() - t0;
+              var c = document.getElementById('chRun'); c.classList.remove('bob'); c.classList.add('runout'); toast.classList.add('show');
+              setTimeout(finish, 850);
+            }),
+            iconBtn(ICON_STOP, '¡Alto, Chaski!', 'stop', function () { rec.saidError = true; rec.decideMs = Date.now() - t0; lens(); })), toast]
+      });
     }
     function lens() {
-      frame(hud('Tambo ' + (i + 1) + ' de 6', h('span', { class: 'pill', text: 'Lupa' })), sceneHead('¿Yo? ¿Equivocarme? A ver, ¿dónde?', 'oops'),
-        h('div', { class: 'board', text: 'Toca el nudo donde se equivocó' }),
-        steps(true, function (k, el) {
-          rec.step = k; rec.stepOk = sol.errStep === k; el.classList.remove('hot'); el.classList.add('sel');
-          setTimeout(fix, 400);
-        }), h('div', { class: 'spacer' }),
-        btn('No sé en cuál', 'ghost', function () { rec.step = -1; rec.stepOk = false; fix(); }));
+      frame({
+        hud: hud('Tambo ' + (i + 1) + ' de 6', h('span', { class: 'pill', text: 'Lupa' })),
+        hero: sceneHead('¿Yo? ¿Equivocarme? A ver, ¿dónde?', 'oops'),
+        main: [h('div', { class: 'board', text: 'Toca el nudo donde se equivocó' }),
+          steps(true, function (k, el) {
+            rec.step = k; rec.stepOk = sol.errStep === k; el.classList.remove('hot'); el.classList.add('sel');
+            setTimeout(fix, 400);
+          }),
+          btn('No sé en cuál', 'ghost', function () { rec.step = -1; rec.stepOk = false; fix(); })]
+      });
     }
     function fix() {
       var submit = btn('Corregir a Chaski', 'go', function () {
@@ -356,9 +375,11 @@
       });
       submit.disabled = true;
       var kp = keypad('Tu respuesta', function (v) { submit.disabled = Core.parseNum(v) == null; }, function () { if (!submit.disabled) submit.click(); });
-      frame(hud('Tambo ' + (i + 1) + ' de 6', h('span', { class: 'pill', text: 'Corrige a Chaski' })),
-        sceneHead('Mmm, está bien. ¿Y cuál es la respuesta correcta?', 'think', 170),
-        h('div', { class: 'board', text: sol.text }), kp.el, submit);
+      frame({
+        hud: hud('Tambo ' + (i + 1) + ' de 6', h('span', { class: 'pill', text: 'Corrige a Chaski' })),
+        hero: sceneHead('Mmm, está bien. ¿Y cuál es la respuesta correcta?', 'think'),
+        main: [h('div', { class: 'board', text: sol.text }), kp.el, submit]
+      });
     }
     decide();
   }
@@ -366,7 +387,7 @@
   function sProbe(i) {
     var p = C.probes[i], t0 = Date.now(), say = C.lines.probeSay[i];
     var head = hud('Preguntas de Chaski', h('span', { class: 'pill', text: (i + 1) + ' de ' + C.probes.length }));
-    var hero = h('div', { class: 'hero' }, chaski('think', 100, 'bob'), h('div', { class: 'bubble tail' }, h('p', { text: say })));
+    var hero = [chaski('think', 100, 'bob'), h('div', { class: 'bubble' }, h('p', { text: say }))];
     if (p.kind === 'num') {
       var submit = btn('Responder', 'go', function () {
         var v = Core.parseNum(kp.get());
@@ -375,7 +396,7 @@
       });
       submit.disabled = true;
       var kp = keypad('Tu respuesta', function (v) { submit.disabled = Core.parseNum(v) == null; }, function () { if (!submit.disabled) submit.click(); });
-      frame(head, hero, h('div', { class: 'board', text: p.q }), kp.el, submit);
+      frame({ hud: head, hero: hero, main: [h('div', { class: 'board', text: p.q }), kp.el, submit] });
     } else {
       var box = tablet({ ph: 'Cuéntalo a tu manera…', label: 'Tu ejemplo', min: 12, button: 'Enviar', onSend: function (text, pasted) {
         var prior = Log.mine('teach').map(function (e) { return e.text; });
@@ -383,7 +404,7 @@
         Log.push('probe', { k: p.k, kind: 'free', text: text, pasted: pasted, ms: Date.now() - t0, orig: orig });
         go('reveal');
       } });
-      frame(head, hero, h('div', { class: 'board', text: p.q }), h('div', { class: 'spacer' }), box.el, box.send);
+      frame({ hud: head, hero: hero, main: [h('div', { class: 'board', text: p.q }), box.el, box.send] });
     }
   }
 
@@ -416,9 +437,12 @@
     var buttons = [];
     if (!S.reteached) buttons.push(btn('Enseñarle lo que le faltó', 'go', function () { S.reteached = true; S.phase = 'reteach'; startTeach(true); }));
     buttons.push(btn('Terminar', S.reteached ? 'go' : 'ghost', function () { go('end'); }));
-    frame(hud('Rendición de cuentas', h('span', { class: 'pill', text: exs.length + ' de ' + exs.length })),
-      h('div', { class: 'hero' }, chaski(misses > 0 ? 'oops' : 'happy', 90, 'bob'), h('div', { class: 'bubble tail' }, bubbles(say))),
-      sellos, parch, why.length ? h('p', { class: 'legend', text: 'Por qué pasó' }) : null, why, h('div', { class: 'stack' }, buttons));
+    frame({
+      hud: hud('Rendición de cuentas', h('span', { class: 'pill', text: exs.length + ' de ' + exs.length })),
+      mode: 'tall',
+      hero: [chaski(misses > 0 ? 'oops' : 'happy', 90, 'bob'), h('div', { class: 'bubble' }, bubbles(say))],
+      main: [sellos, parch, why.length ? h('p', { class: 'legend', text: 'Por qué pasó' }) : null, why, h('div', { class: 'stack' }, buttons)]
+    });
   }
 
   /* ---------- escena: cierre ---------- */
@@ -430,15 +454,17 @@
     var ideas = Brain.IDS.map(function (k) {
       return h('div', { class: 'rulecard' }, h('strong', { text: C.cards[k].title }), h('span', { text: CARD_STATE[S.brain[k].state] }));
     });
-    frame(h('div', { class: 'hero' }, chaski('happy', 96, 'bob'), h('div', { class: 'bubble tail' }, bubbles(['¡Gracias por enseñarme!', 'Aprendí bien ' + Brain.good(S.brain) + ' de 3 ideas contigo.']))),
-      h('div', { class: 'card' }, h('p', { class: 'kicker', text: 'Tu resumen · ' + C.topic.title }),
-        h('div', { class: 'stats' }, [stat('Errores que atrapaste', m.hits + ' / ' + m.nErr), stat('Ideas bien enseñadas', Brain.good(S.brain) + ' / 3')]), ideas),
-      h('div', { class: 'stack' },
-        btn('Guardar mis resultados (archivo)', 'ghost', function () {
-          var a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify({ events: Log.mine() }, null, 2)], { type: 'application/json' })), download: 'chaski-' + S.alias + '.json' });
-          document.body.appendChild(a); a.click(); a.remove();
-        }),
-        btn('Salir', 'ghost', function () { S = null; store(KS, null); render(); })));
+    frame({
+      hero: [chaski('happy', 96, 'bob'), h('div', { class: 'bubble' }, bubbles(['¡Gracias por enseñarme!', 'Aprendí bien ' + Brain.good(S.brain) + ' de 3 ideas contigo.']))],
+      main: [h('div', { class: 'card' }, h('p', { class: 'kicker', text: 'Tu resumen · ' + C.topic.title }),
+          h('div', { class: 'stats' }, [stat('Errores que atrapaste', m.hits + ' / ' + m.nErr), stat('Ideas bien enseñadas', Brain.good(S.brain) + ' / 3')]), ideas),
+        h('div', { class: 'stack' },
+          btn('Guardar mis resultados (archivo)', 'ghost', function () {
+            var a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify({ events: Log.mine() }, null, 2)], { type: 'application/json' })), download: 'chaski-' + S.alias + '.json' });
+            document.body.appendChild(a); a.click(); a.remove();
+          }),
+          btn('Salir', 'ghost', function () { S = null; store(KS, null); render(); }))]
+    });
   }
 
   /* ---------- arranque ---------- */
