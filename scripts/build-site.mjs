@@ -4,7 +4,8 @@
  *
  * Las direcciones se pueden fijar al empaquetar, sin escribirlas en el repositorio:
  *   EXTRACT_URL=https://chaski-lector.tu-cuenta.workers.dev/extract npm run build:site
- *   ENDPOINT=https://script.google.com/macros/s/.../exec            npm run build:site
+ *   ENDPOINT=/events                                                npm run build:site   (base de datos del propio sitio)
+ *   ENDPOINT=https://script.google.com/macros/s/.../exec            npm run build:site   (hoja de Google)
  *
  * Sin EXTRACT_URL, Chaski lee la explicación con reglas de palabras en vez del modelo.
  * EXTRACT_URL puede ser una ruta del mismo sitio ("/extract", la Pages Function de functions/) o una dirección https.
@@ -46,9 +47,9 @@ function httpsUrl(name, value) {
 }
 
 /** Dirección del servidor de lectura: una ruta del mismo sitio ("/extract") o una dirección https. */
-function extractUrl(value) {
+function samePathOrHttps(name, value) {
   if (/^\/[A-Za-z0-9_\-\/]*$/.test(value) && !value.startsWith("//")) return value;
-  return httpsUrl("EXTRACT_URL", value);
+  return httpsUrl(name, value);
 }
 
 /** Reemplaza el valor de una clave de js/config.js. Falla si no la encuentra, para no publicar sin darse cuenta. */
@@ -73,10 +74,10 @@ for (const [from, to] of FILES) {
 
 const configPath = path.join(out, "js", "config.js");
 let config = readFileSync(configPath, "utf8");
-let extract = process.env.EXTRACT_URL ? extractUrl(process.env.EXTRACT_URL) : "";
+let extract = process.env.EXTRACT_URL ? samePathOrHttps("EXTRACT_URL", process.env.EXTRACT_URL) : "";
 const onPages = process.env.CF_PAGES === "1";
 if (!extract && onPages) extract = "/extract";
-const endpoint = process.env.ENDPOINT ? httpsUrl("ENDPOINT", process.env.ENDPOINT) : "";
+const endpoint = process.env.ENDPOINT ? samePathOrHttps("ENDPOINT", process.env.ENDPOINT) : "";
 if (extract) config = setConfig(config, "EXTRACT_URL", extract);
 if (endpoint) config = setConfig(config, "ENDPOINT", endpoint);
 writeFileSync(configPath, config);
@@ -92,4 +93,4 @@ console.log(`dist/ listo: ${countFiles(out)} archivos.`);
 const viaPages = onPages && !process.env.EXTRACT_URL ? " (Cloudflare Pages Function)" : "";
 console.log(extract ? `  Lectura con el modelo: ${extract}${viaPages}` : "  Sin EXTRACT_URL: Chaski leerá con reglas de palabras, no con el modelo.");
 console.log(`  Vista previa al compartir: ${site}/brand/og-image.jpg`);
-console.log(endpoint ? `  Hoja de Google: ${endpoint}` : "  Sin ENDPOINT: los datos quedan en el dispositivo de cada estudiante.");
+console.log(endpoint ? `  Guardado de datos: ${endpoint}` : "  Sin ENDPOINT: los datos quedan en el dispositivo de cada estudiante.");

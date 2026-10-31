@@ -62,14 +62,20 @@
       this.events.push(ev); this.save();
     },
     mine: function (type) { return this.events.filter(function (e) { return e.sid === S.sid && (!type || e.type === type); }); },
+    /** Envía los eventos que faltan por enviar, de a 100. Con la base de datos del propio sitio (ENDPOINT "/events") se comprueba la respuesta. */
     flush: function () {
       var self = this;
-      if (!CFG.ENDPOINT) return;
-      var batch = this.events.slice(this.sent), upto = this.events.length;
+      if (!CFG.ENDPOINT || self.busy) return;
+      var batch = self.events.slice(self.sent, self.sent + 100);
       if (!batch.length) return;
-      fetch(CFG.ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ events: batch }) })
-        .then(function () { self.sent = upto; self.save(); })
-        .catch(function () { /* se reintenta en el siguiente envío */ });
+      var same = CFG.ENDPOINT.charAt(0) === '/';
+      var opts = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ events: batch }) };
+      if (!same) opts.mode = 'no-cors';
+      self.busy = true;
+      fetch(CFG.ENDPOINT, opts).then(function (r) {
+        if (same && r.status >= 500) throw new Error('servidor no disponible'); /* los 4xx no se arreglan reintentando */
+        self.sent += batch.length; self.save(); self.busy = false; self.flush();
+      }).catch(function () { self.busy = false; /* se reintenta en el siguiente envío */ });
     }
   };
 

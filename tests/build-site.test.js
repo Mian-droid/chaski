@@ -40,6 +40,14 @@ t('EXTRACT_URL y ENDPOINT se escriben en dist/ y no en el repositorio', () => {
   assert.strictEqual(read(root, 'js', 'config.js'), before, 'js/config.js del repositorio no debe cambiar');
 });
 
+t('ENDPOINT acepta la base de datos del propio sitio (/events) y rechaza rutas raras', () => {
+  const r = build({ ENDPOINT: '/events' });
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.match(read(dist, 'js', 'config.js'), /ENDPOINT:\s*"\/events"/);
+  assert.match(r.stdout, /Guardado de datos: \/events/);
+  ['//otro.example/x', '/con espacio', '/../x', 'events'].forEach((v) => assert.notStrictEqual(build({ ENDPOINT: v }).status, 0, v));
+});
+
 t('rechaza direcciones que no sean https o no sean direcciones', () => {
   const http = build({ EXTRACT_URL: 'http://inseguro.example/extract' });
   assert.notStrictEqual(http.status, 0);
