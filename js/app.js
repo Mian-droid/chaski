@@ -101,8 +101,8 @@
 
   /* ---------- piezas de pantalla ---------- */
   var ICON_PASS = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6l6 6-6 6M13 6l6 6-6 6"/></svg>';
-  var ICON_STOP = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.3l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/></svg>';
-  var ICON_TEACH = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L3 10.4l6.8 2.8L12.6 21z"/><path d="M21 3L9.8 13.2"/></svg>';
+  var ICON_STOP = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.3l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/></svg>';
+  var ICON_TEACH = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L3 10.4l6.8 2.8L12.6 21z"/><path d="M21 3L9.8 13.2"/></svg>';
   function iconBtn(icon, text, cls, fn) { var b = h('button', { type: 'button', class: 'gbtn ' + cls, onclick: fn }); b.innerHTML = icon; b.appendChild(document.createTextNode(text)); return b; }
 
   /**
@@ -115,8 +115,17 @@
     var cols = h('div', { class: 'cols' + (spec.mode ? ' ' + spec.mode : '') },
       spec.hero ? h('div', { class: 'hero-col' }, spec.hero) : null,
       h('div', { class: 'panel-col' }, spec.main));
+    /* Posición de cada pieza, para que entren una tras otra (ver «Entrada de cada escena» en game.css). */
+    Array.prototype.forEach.call(cols.querySelectorAll('.panel-col > *'), function (el, k) { el.style.setProperty('--n', k); });
     root.replaceChildren(h('div', { class: 'screen' }, spec.hud || null, cols));
     window.scrollTo(0, 0);
+  }
+  /** Muestra un aviso de error y sacude un poco el panel donde ocurrió, para que se note aunque el texto sea chico. */
+  function problem(msgEl, text) {
+    msgEl.textContent = text;
+    var box = msgEl.closest('.card, .tablet');
+    if (!box) return;
+    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
   }
   function knots(n) {
     var k = []; for (var i = 0; i < 6; i++) k.push(h('i', { class: i < n ? 'on' : '' }));
@@ -147,13 +156,16 @@
     st.send = iconBtn(ICON_TEACH, opts.button || 'Enseñarle', 'go', function () {
       var text = st.area.value.trim(), pd = Core.personalData(text);
       /* Un correo, un teléfono o un documento no se envían a la IA ni se guardan: se pide quitarlos. */
-      if (pd) { warn.textContent = 'Parece que escribiste un ' + pd + '. Bórralo: Chaski no necesita datos personales.'; return; }
+      if (pd) { problem(warn, 'Parece que escribiste un ' + pd + '. Bórralo: Chaski no necesita datos personales.'); return; }
       opts.onSend(text, st.pasted, st);
       if (st.lock) st.lock(); /* ya se envió: el micrófono se suelta y no graba mientras el texto vuela */
     });
     st.send.disabled = true;
     st.area.addEventListener('paste', function () { st.pasted = true; });
-    st.area.addEventListener('input', function () { warn.textContent = ''; count.textContent = st.area.value.length + ' / 400'; st.refreshSend(); });
+    st.area.addEventListener('input', function () {
+      warn.textContent = ''; count.textContent = st.area.value.length + ' / 400'; st.refreshSend();
+      count.className = st.area.value.length >= 360 ? 'near' : ''; /* avisa cuando quedan pocas letras */
+    });
     var voiceRow = voiceControls(st, warn);
     st.el = h('div', { class: 'tablet' }, h('label', { for: 'resp', text: opts.label }), st.area, voiceRow, h('div', { class: 'foot' }, h('span', { text: 'No escribas tu nombre ni datos personales.' }), count), warn);
     return st;
@@ -225,7 +237,7 @@
       if (!document.body.contains(pop)) { document.removeEventListener('keydown', onKey); return; }
       if (e.key === 'Escape') pop.hidden = true;
     });
-    return { bar: h('div', { class: 'cordbar' }, h('span', { class: 'lbl', text: 'Lo que Chaski sabe' }), els), pop: pop, close: function () { pop.hidden = true; }, knot: function (i) { return els[i]; }, fill: function (i) { els[i].classList.add('on'); } };
+    return { bar: h('div', { class: 'cordbar' }, h('span', { class: 'lbl', text: 'Lo que Chaski sabe' }), els), pop: pop, close: function () { pop.hidden = true; }, knot: function (i) { return els[i]; }, fill: function (i) { els[i].classList.add('on', 'tie'); } };
   }
 
   /** El texto escrito vuela de la tablilla al nudo de la cuerda. Sin animación si el usuario pidió menos movimiento. */
@@ -250,7 +262,11 @@
   /* Teclado de piedra. Acepta también el teclado físico. */
   function keypad(label, onChange, onEnter) {
     var val = '', span = h('span', { text: '·' });
-    function set(v) { val = v; span.textContent = val || '·'; onChange(val); }
+    function set(v) {
+      var changed = v !== val;
+      val = v; span.textContent = val || '·'; onChange(val);
+      if (changed) { span.classList.remove('tick'); void span.offsetWidth; span.classList.add('tick'); } /* el número recién escrito "cae" en su sitio */
+    }
     function press(k) {
       if (k === '⌫') set(val.slice(0, -1));
       else if (val.length < 7 && !(k === ',' && (!val || val.indexOf(',') !== -1))) set(val + k);
@@ -284,10 +300,10 @@
     var prev = store(KS);
     function read() {
       var a = alias.value.trim(), c = cls.value.trim().toUpperCase();
-      if (a.length < 2) { msg.textContent = 'Escribe un apodo de al menos 2 letras.'; return false; }
-      if (c && c.length < 3) { msg.textContent = 'El código de la clase tiene 3 letras o números como mínimo. Si no lo tienes, déjalo vacío.'; return false; }
+      if (a.length < 2) { problem(msg, 'Escribe un apodo de al menos 2 letras.'); alias.focus(); return false; }
+      if (c && c.length < 3) { problem(msg, 'El código de la clase tiene 3 letras o números como mínimo. Si no lo tienes, déjalo vacío.'); cls.focus(); return false; }
       c = c || 'GENERAL'; /* la sala es solo una etiqueta para agrupar en el panel */
-      if (!ok.checked) { msg.textContent = 'Marca la casilla para continuar.'; return false; }
+      if (!ok.checked) { problem(msg, 'Marca la casilla para continuar.'); ok.focus(); return false; }
       S = newState(a, c, C.topic.id);
       S.voz = urlParam('voz') !== '0'; /* el dictado sale siempre; el docente lo apaga con ?voz=0 y el estudiante decide si lo usa */
       save(); Log.push('start', { version: CFG.VERSION, model: !!CFG.EXTRACT_URL, voz: S.voz ? undefined : false });
@@ -366,9 +382,9 @@
 
   function lc(s) { s = s || ''; return s.charAt(0).toLowerCase() + s.slice(1); }
   function hangTablets() {
-    return [h('div', { class: 'beam', 'aria-hidden': 'true' }), h('div', { class: 'hang', role: 'list' }, Brain.IDS.map(function (k) {
+    return [h('div', { class: 'beam', 'aria-hidden': 'true' }), h('div', { class: 'hang', role: 'list' }, Brain.IDS.map(function (k, n) {
       var on = S.brain[k].state !== 'ausente';
-      return h('div', { class: 'f' + (on ? ' on' : ''), role: 'listitem' }, h('div', { class: 'tab' }, h('span', { class: 'dot' }), h('b', { text: C.cards[k].short }),
+      return h('div', { class: 'f' + (on ? ' on' : ''), role: 'listitem', style: '--n:' + n }, h('div', { class: 'tab' }, h('span', { class: 'dot' }), h('b', { text: C.cards[k].short }),
         h('small', { text: on ? C.cards[k].ask : 'Explícale ' + lc(C.cards[k].ask) }), h('em', { text: on ? 'Ya explicado' : 'Sin explicar' })));
     }))];
   }
@@ -420,11 +436,15 @@
   function sMap(i) {
     var nodes = NODES.map(function (n, k) {
       var done = k < i, cur = k === i;
-      if (cur) return '<g class="node"><circle class="pulse" cx="' + n[0] + '" cy="' + n[1] + '" r="24" fill="#C2185B" opacity=".6"/><circle cx="' + n[0] + '" cy="' + n[1] + '" r="27" fill="#fff" stroke="#C2185B" stroke-width="5"/><text x="' + n[0] + '" y="' + (n[1] + 8) + '">' + (k + 1) + '</text></g>';
+      if (cur) return '<g class="node cur"><circle class="pulse" cx="' + n[0] + '" cy="' + n[1] + '" r="24" fill="#C2185B" opacity=".6"/><circle cx="' + n[0] + '" cy="' + n[1] + '" r="27" fill="#fff" stroke="#C2185B" stroke-width="5"/><text x="' + n[0] + '" y="' + (n[1] + 8) + '">' + (k + 1) + '</text></g>';
       return '<g class="node' + (done ? '' : ' lock') + '"><circle cx="' + n[0] + '" cy="' + n[1] + '" r="21" fill="' + (done ? '#FFC83D' : '#E7DCC4') + '" stroke="' + (done ? '#3A2412' : '#8E8165') + '" stroke-width="4"/><text x="' + n[0] + '" y="' + (n[1] + 7) + '">' + (k + 1) + '</text></g>';
     }).join('');
-    var cur = NODES[i], left = cur[0] > 195, cx = left ? cur[0] - 98 : cur[0] + 14, cy = cur[1] - 114;
+    /* Dónde se para Chaski junto a un tambo: al lado que deja libre el camino. */
+    function stand(n) { return [n[0] > 195 ? n[0] - 98 : n[0] + 14, n[1] - 114]; }
+    var cur = NODES[i], left = cur[0] > 195, cx = stand(cur)[0], cy = stand(cur)[1];
     var bx = left ? cur[0] - 190 : cur[0] + 62, by = cy + 8;
+    /* Desde el tambo anterior camina hasta este (orientación: se ve de dónde viene). */
+    var from = i > 0 ? stand(NODES[i - 1]) : null, walk = from ? ' style="--dx:' + (from[0] - cx) + 'px;--dy:' + (from[1] - cy) + 'px"' : '';
     var wrap = h('div', { class: 'mapcard' });
     wrap.innerHTML = '<svg viewBox="0 0 390 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Camino con seis tambos, vas en el ' + (i + 1) + '">' +
       '<path d="' + PATH + '" fill="none" stroke="#7A4D26" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>' +
@@ -432,8 +452,8 @@
       '<path d="' + PATH + '" fill="none" stroke="#C9A66B" stroke-width="3" stroke-dasharray="3 12" stroke-linecap="round"/>' +
       '<g transform="translate(205 82)"><rect x="-1.5" y="-36" width="3.5" height="36" fill="#3A2412"/><path d="M2 -36 L28 -28 L2 -19Z" fill="#C2185B" stroke="#3A2412" stroke-width="2"/><text y="24" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="16" fill="#3A2412" stroke="#FFF3D6" stroke-width="4" paint-order="stroke">Cusco</text></g>' +
       nodes +
-      '<g class="bob"><svg class="chsvg" x="' + cx + '" y="' + cy + '" width="82" height="117" viewBox="0 0 140 200"><use href="#ch-confident"/></svg></g>' +
-      '<g transform="translate(' + Math.max(8, Math.min(282, bx)) + ' ' + by + ')"><rect width="100" height="30" rx="15" fill="#fff" stroke="#3A2412" stroke-width="3"/><text x="50" y="21" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="14" fill="#3A2412">¡Tambo ' + (i + 1) + '!</text></g></svg>';
+      '<g class="arrive"' + walk + '><g class="bob"><svg class="chsvg" x="' + cx + '" y="' + cy + '" width="82" height="117" viewBox="0 0 140 200"><use href="#ch-confident"/></svg></g></g>' +
+      '<g transform="translate(' + Math.max(8, Math.min(282, bx)) + ' ' + by + ')"><g class="tbub"><rect width="100" height="30" rx="15" fill="#fff" stroke="#3A2412" stroke-width="3"/><text x="50" y="21" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="14" fill="#3A2412">¡Tambo ' + (i + 1) + '!</text></g></g></svg>';
     frame({ hud: hud('Tambo ' + (i + 1) + ' de 6', msgPill(i)), mode: 'solo', main: [wrap, btn('Seguir el camino', 'go', function () { go('ex', i); })] });
   }
 
@@ -552,12 +572,12 @@
   function question(text) { var parts = text.split(/(?<=[.?])\s+/), last = parts[parts.length - 1]; return /\d/.test(last) ? last : text; }
   function sReveal() {
     var exs = Log.mine('ex'), misses = exs.filter(function (e) { return outcome(e) === 'miss'; }).length;
-    var sellos = h('div', { class: 'sellos', role: 'list' }, exs.map(function (e, k) { var o = outcome(e); return h('div', { class: 'sello ' + o, role: 'listitem' }, h('b', { text: String(k + 1) }), LABEL[o]); }));
+    var sellos = h('div', { class: 'sellos', role: 'list' }, exs.map(function (e, k) { var o = outcome(e); return h('div', { class: 'sello ' + o, role: 'listitem' }, h('b', { text: String(k + 1), style: '--n:' + k }), LABEL[o]); }));
     var anyBad = false;
-    var lines = exs.map(function (e) {
+    var lines = exs.map(function (e, n) {
       var sol = C.problems[e.ex], delivered = !e.hasError ? sol.answer : (e.saidError && e.correctionOk ? sol.answer : e.said), good = Core.numEq(delivered, sol.answer);
       if (!good) anyBad = true;
-      return h('div', { class: 'ln ' + (good ? 'ok' : 'bad') }, h('span', { text: question(sol.text) }), h('em', { text: fmt(delivered) }));
+      return h('div', { class: 'ln ' + (good ? 'ok' : 'bad'), style: '--n:' + n }, h('span', { text: question(sol.text) }), h('em', { text: fmt(delivered) }));
     });
     var parch = h('div', { class: 'parch' }, h('h3', { text: 'El mensaje que llegó al Cusco' }), lines,
       anyBad ? h('p', { class: 'note', text: 'Lo marcado en rojo llegó con error porque no se corrigió a tiempo.' }) : h('p', { class: 'note', style: 'color:#0E7A4A', text: 'Todo llegó bien.' }));
