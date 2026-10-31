@@ -31,10 +31,9 @@
 <div class="bubble">¿Me enseñas?</div>
 <svg class="chaski" viewBox="0 0 140 200"><use href="#ch-happy"/></svg>
 <script src="../js/scenery.js"></script>
-<script src="../mockup/paisaje.js"></script>
 <script>
-  document.getElementById('defs').innerHTML = ChaskiScenery.symbol('happy').replace(/#2B1B3D/gi, '#3A2412').replace(/#3B2A8C/gi, '#0B5A69');
-  document.getElementById('land').innerHTML = Paisaje.world('dia', { viewBox: '0 170 1200 630', par: 'xMidYMax slice' });
+  document.getElementById('defs').innerHTML = ChaskiScenery.symbol('happy');
+  document.getElementById('land').innerHTML = ChaskiScenery.world('dia', { viewBox: '0 170 1200 630', par: 'xMidYMax slice' });
 </script>
 </body>
 </html>

@@ -6,8 +6,9 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "serve": "python -m http.server 5190",
-    "test": "npm run test:core && npm run test:site && npm run test:worker",
+    "test": "npm run test:core && npm run test:scenery && npm run test:site && npm run test:worker",
     "test:core": "node tests/core.test.js",
+    "test:scenery": "node tests/scenery.test.js",
     "test:site": "node tests/build-site.test.js",
     "test:worker": "npm --prefix worker test",
     "build:site": "node scripts/build-site.mjs",
