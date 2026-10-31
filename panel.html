@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chaski · Panel docente</title>
+<link rel="stylesheet" href="css/panel.css">
+</head>
+<body>
+<main class="wrap panel" id="app">
+  <h1>Panel docente</h1>
+  <p class="small">Datos de un piloto exploratorio. Las cifras son señales para conversar con la clase, no una evaluación ni una prueba de efecto.</p>
+
+  <section class="card" aria-labelledby="h-enlace">
+    <h2 id="h-enlace">1. Elige el tema y comparte el enlace</h2>
+    <div class="tools">
+      <label for="tema">Tema<select id="tema"></select></label>
+      <label for="cls">Código de clase<input id="cls" type="text" placeholder="Ej. 3A2026" maxlength="10" autocomplete="off"></label>
+    </div>
+    <div class="tools">
+      <label for="link" style="flex:1;min-width:260px">Enlace para tus estudiantes<input id="link" type="text" readonly></label>
+      <button class="btn primary" type="button" id="bCopy">Copiar enlace</button>
+    </div>
+    <p class="small" id="linkNote">Los estudiantes abren este enlace y juegan con ese tema. El código de clase queda ya escrito.</p>
+  </section>
+
+  <section class="card" aria-labelledby="h-datos">
+    <h2 id="h-datos">2. Ver los resultados</h2>
+    <p class="small">Se muestran los resultados del tema y la clase de arriba.</p>
+    <div class="tools">
+      <label for="key" id="keybox">Clave del panel<input id="key" type="text" placeholder="La del Apps Script" autocomplete="off"></label>
+      <button class="btn primary" type="button" id="bSheet">Cargar de la hoja</button>
+      <button class="btn" type="button" id="bLocal">Cargar de este dispositivo</button>
+      <label class="btn" for="file" style="cursor:pointer">Cargar archivo<input id="file" type="file" accept="application/json,.json" hidden></label>
+    </div>
+    <p class="msg" id="msg" role="status"></p>
+  </section>
+
+  <section class="card" id="summary" hidden aria-labelledby="h-clase">
+    <h2 id="h-clase">La clase</h2>
+    <div class="stats" id="stats"></div>
+    <h2>Ideas que Chaski no aprendió</h2>
+    <p class="small">Porcentaje de estudiantes que dejó pasar el error de cada idea. Es lo primero que conviene retomar en clase.</p>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <section class="card" id="tableCard" hidden aria-labelledby="h-est">
+    <div class="tools" style="justify-content:space-between"><h2 id="h-est">Estudiantes</h2><button class="btn" type="button" id="bCsv">Descargar CSV</button></div>
+    <div class="scroll"><table id="tbl"></table></div>
+    <p class="small">Dependencia: de 0 a 1, más alto = más dependencia (errores que se le pasaron, preguntas de seguimiento falladas y explicaciones que no parecen propias). Es un índice exploratorio sin validar. Ideas bien: cuántas de las 3 ideas quedaron bien enseñadas según lo que leyó el modelo o las reglas.</p>
+  </section>
+
+  <section class="card" id="textsCard" hidden aria-labelledby="h-textos">
+    <h2 id="h-textos">Explicaciones de los estudiantes</h2>
+    <p class="small">Léelas tú: la señal automática de originalidad puede equivocarse.</p>
+    <div class="stack" id="texts"></div>
+  </section>
+</main>
+<script src="js/config.js"></script>
+<script src="js/content.js"></script>
+<script src="js/core.js"></script>
+<script src="js/panel.js"></script>
+</body>
+</html>
