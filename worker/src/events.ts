@@ -1,7 +1,9 @@
 /* Guardado de los eventos del juego en una base de datos (Cloudflare D1).
    POST   /events  { events: [...] }          -> guarda los eventos de una partida. Lo envía el juego.
-   GET    /events?cls=CLASE  + X-Panel-Key    -> devuelve { events: [...] } de esa clase. Lo lee el panel docente.
-   DELETE /events?cls=CLASE  + X-Panel-Key    -> borra los eventos de esa clase.
+   GET    /events  + X-Panel-Key              -> devuelve { events: [...], last } de todas las salas. Lo lee el panel docente.
+          ?cls=SALA                              solo de esa sala (la sala es una etiqueta, no una cuenta).
+          ?since=N                               solo los guardados después de la fila N (`last` de la respuesta anterior).
+   DELETE /events?cls=SALA  + X-Panel-Key      -> borra los eventos de esa sala.
    Lo que pide el panel (leer y borrar) exige la clave PANEL_KEY; guardar no, porque lo hace el juego de cada estudiante. */
 import type { Db } from "./db.ts";
 import { corsHeaders, json } from "./http.ts";
@@ -81,16 +83,25 @@ export async function handleEvents(req: Request, env: EventsEnv): Promise<Respon
     if (!env.PANEL_KEY) return json({ error: "no está definida la clave del panel (PANEL_KEY)" }, 503, h);
     if (!sameKey(req.headers.get("X-Panel-Key") ?? "", env.PANEL_KEY)) return json({ error: "clave incorrecta" }, 401, h);
     const cls = (url.searchParams.get("cls") ?? "").trim().toUpperCase();
-    if (cls.length < 3 || cls.length > 10) return json({ error: "indica el código de clase" }, 400, h);
+    if (cls && (cls.length < 3 || cls.length > 10)) return json({ error: "el código de sala debe tener entre 3 y 10 caracteres" }, 400, h);
 
     if (req.method === "GET") {
-      const res = await db.prepare(`SELECT data FROM events WHERE cls = ? ORDER BY ts ASC LIMIT ${MAX_ROWS}`).bind(cls).all();
+      // Se lee por número de fila: el panel pide solo lo nuevo y la base lee pocas filas aunque el panel se actualice seguido.
+      const since = Math.max(0, Math.floor(Number(url.searchParams.get("since"))) || 0);
+      const res = cls
+        ? await db.prepare(`SELECT id, data FROM events WHERE cls = ? AND id > ? ORDER BY id ASC LIMIT ${MAX_ROWS}`).bind(cls, since).all()
+        : await db.prepare(`SELECT id, data FROM events WHERE id > ? ORDER BY id ASC LIMIT ${MAX_ROWS}`).bind(since).all();
       const events: unknown[] = [];
+      let last = since;
       for (const r of res.results ?? []) {
-        try { events.push(JSON.parse((r as { data: string }).data)); } catch { /* fila dañada: se omite */ }
+        const row = r as { id: number; data: string };
+        last = Math.max(last, Number(row.id) || 0);
+        try { events.push(JSON.parse(row.data)); } catch { /* fila dañada: se omite */ }
       }
-      return json({ events }, 200, h);
+      return json({ events, last, more: (res.results?.length ?? 0) >= MAX_ROWS }, 200, h);
     }
+
+    if (!cls) return json({ error: "indica la sala que quieres borrar" }, 400, h);
 
     const done = (await db.prepare("DELETE FROM events WHERE cls = ?").bind(cls).run()) as { meta?: { changes?: number } };
     return json({ ok: true, deleted: done?.meta?.changes ?? null }, 200, h);

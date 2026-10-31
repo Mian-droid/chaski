@@ -20,7 +20,7 @@ export type Scope = "extract" | "events";
 export type Verdict = { ok: true } | { ok: false; error: string; retryAfter: number };
 
 const WINDOW = 600;
-const DEFAULTS = { extract: 150, events: 400, daily: 3000 };
+const DEFAULTS = { extract: 150, events: 1200, daily: 3000 };
 
 function num(v: string | undefined, fallback: number): number {
   const n = Number(v);

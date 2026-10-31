@@ -3,6 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { handleEvents, INSERT, type Db } from "../src/events.ts";
+import { sqliteDb } from "./sqlite.ts";
 import { onRequest } from "../../functions/events.ts";
 
 const KEY = "clave-del-panel-de-prueba";
@@ -10,6 +11,7 @@ const KEY = "clave-del-panel-de-prueba";
 /** Base simulada: entiende solo las tres sentencias que usa el servidor. */
 function fakeDb() {
   const rows: Record<string, any>[] = [];
+  let nextId = 1;
   const calls: string[] = [];
   const stmt = (sql: string, args: unknown[] = []) => ({
     bind: (...v: unknown[]) => stmt(sql, v),
@@ -18,7 +20,7 @@ function fakeDb() {
       calls.push(sql);
       if (sql.startsWith("INSERT OR IGNORE")) {
         const [eid, ts, cls, alias, topic, sid, type, data] = args as any[];
-        if (!rows.some((r) => r.eid === eid)) rows.push({ eid, ts, cls, alias, topic, sid, type, data });
+        if (!rows.some((r) => r.eid === eid)) rows.push({ id: nextId++, eid, ts, cls, alias, topic, sid, type, data });
         return { meta: { changes: 1 } };
       }
       if (sql.startsWith("DELETE FROM events WHERE cls")) {
@@ -31,8 +33,10 @@ function fakeDb() {
     all: async () => {
       if (sql.includes("INTO rate")) return { results: [{ n: 1 }] }; // los contadores de límite no son parte de lo que se prueba aquí
       calls.push(sql);
-      assert.match(sql, /^SELECT data FROM events WHERE cls = \?/);
-      return { results: rows.filter((r) => r.cls === args[0]).sort((a, b) => a.ts - b.ts).map((r) => ({ data: r.data })) };
+      assert.match(sql, /^SELECT id, data FROM events WHERE /);
+      const byClass = sql.includes("cls = ?");
+      const since = Number(byClass ? args[1] : args[0]);
+      return { results: rows.filter((r) => (!byClass || r.cls === args[0]) && r.id > since).sort((a, b) => a.id - b.id).map((r) => ({ id: r.id, data: r.data })) };
     },
   });
   const db: Db = {
@@ -178,4 +182,37 @@ test("db/schema.sql se ejecuta en SQLite aunque se pegue en una sola línea, y e
   assert.equal((mem.prepare("SELECT COUNT(*) AS n FROM events").get() as any).n, 1);
   const plan = mem.prepare("EXPLAIN QUERY PLAN SELECT data FROM events WHERE cls = ? ORDER BY ts").all("3A2026").map((r: any) => r.detail).join(" ");
   assert.match(plan, /events_by_class/, "la lectura por clase usa el índice");
+});
+
+test("el panel lee todas las salas o una sola, y después pide solo lo nuevo", async () => {
+  const { db } = sqliteDb();
+  const e = env(db);
+  await handleEvents(post([ev(), ev({ type: "ex", ex: "p1", k: undefined, ts: 1760000001000 })]), e);
+  await handleEvents(post([ev({ cls: "4b2026", sid: "zzz999", alias: "Wayra" })]), e);
+  const get = async (q: string): Promise<any> => (await handleEvents(new Request(`https://chaski.example/events${q}`, { headers: { "X-Panel-Key": KEY } }), e)).json();
+
+  const all = await get("");
+  assert.equal(all.events.length, 3, "sin sala trae todas");
+  assert.equal(all.last, 3);
+  assert.equal(all.more, false);
+  assert.deepEqual([...new Set(all.events.map((x: any) => x.cls))].sort(), ["3A2026", "4B2026"]);
+  assert.equal((await get("?cls=4b2026")).events.length, 1, "con sala trae solo esa");
+
+  await handleEvents(post([ev({ ts: 1760000009000, type: "probe", k: "K1" })]), e);
+  const fresh = await get("?since=3");
+  assert.equal(fresh.events.length, 1, "pide solo lo guardado después");
+  assert.equal(fresh.last, 4);
+  const none = await get("?since=4");
+  assert.deepEqual([none.events.length, none.last], [0, 4], "sin novedades devuelve vacío y conserva el último número");
+  for (const bad of ["?since=abc", "?since=-5", "?since="]) assert.equal((await get(bad)).events.length, 4, bad + " cuenta como 0");
+});
+
+test("borrar exige indicar la sala, y una sala inválida se rechaza al leer", async () => {
+  const { db } = sqliteDb();
+  const e = env(db);
+  await handleEvents(post([ev()]), e);
+  const del = await handleEvents(new Request("https://chaski.example/events", { method: "DELETE", headers: { "X-Panel-Key": KEY } }), e);
+  assert.equal(del.status, 400, "no se borra todo por descuido");
+  assert.equal((await handleEvents(panel("GET", "AB"), e)).status, 400);
+  assert.equal((await (await handleEvents(panel("GET", "3A2026"), e)).json() as any).events.length, 1, "no se borró nada");
 });
