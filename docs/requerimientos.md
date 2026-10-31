@@ -142,7 +142,7 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 - Cuentas de usuario e inicio de sesión.
 - Más de tres temas, o que el docente cree temas desde la interfaz.
 - Respuestas libres de Chaski o chat abierto con el modelo.
-- Conversación por voz con Chaski (voz de respuesta o chat de voz) y sonido. Solo se implementa el dictado, a pedido de dos estudiantes de las pruebas con usuarios que dijeron que explicar con texto es complicado.
+- Conversación por voz con Chaski (voz de respuesta o chat de voz) y sonido. Solo se implementa el dictado, a partir de las pruebas con usuarios, donde se señaló que explicar con texto es complicado.
 - Explicación gráfica (propuesta, no implementada): permitir explicar con un esquema armado con piezas del tema, además del texto, porque explicar solo con texto es lento y causa malentendidos. Requisitos que debe cumplir al implementarse: se convierte a texto estructurado de forma determinista, no envía imágenes de menores, y mantiene que el estudiante produce antes de recibir ayuda. Ver [docs/problema-y-evidencia.md](problema-y-evidencia.md#7-validación).
 - Versión por WhatsApp.
 - Escalas de medición validadas: el índice de dependencia es exploratorio.

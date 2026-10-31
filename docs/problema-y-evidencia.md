@@ -117,11 +117,11 @@ Nada de esto está validado. Es el plan que queremos poner a prueba.
 
 ## 7. Validación
 
-**Estado:** una docente y dos estudiantes de secundaria probaron el piloto. Es una prueba muy pequeña: falta probar con una clase completa. El registro de las pruebas está en la carpeta de evidencias del DSC Hack (Drive, «G - LLM»), no en este repositorio.
+**Estado:** una docente y un estudiante de secundaria probaron el piloto. Es una prueba muy pequeña: falta probar con una clase completa. El registro de las pruebas está en la carpeta de evidencias del DSC Hack (Drive, «G - LLM»), no en este repositorio.
 
 **Qué mide el piloto hoy:** detección de errores, falsas alarmas, ideas bien enseñadas, originalidad de lo escrito y respuestas a preguntas nuevas (ver [Métricas](../README.md#métricas-del-piloto)). **No mide aprendizaje ni retención:** el 30 de octubre el equipo quitó el examen sin Chaski y el día 2.
 
-**Hallazgo de uso: explicar solo con texto es una barrera.** Dos estudiantes que probaron el piloto señalaron que explicar únicamente con texto es complicado: toma más tiempo y puede generar malentendidos entre el estudiante y la IA. Una sugerencia fue permitir también una explicación gráfica de lo que se quiere enseñar. Por eso se agregó el **dictado por voz**; la explicación gráfica sigue propuesta. Son observaciones informales de dos casos, sin medición; las tomamos como hipótesis por probar, no como resultado.
+**Hallazgo de uso: explicar solo con texto es una barrera.** En las pruebas con usuarios se señaló que explicar únicamente con texto es complicado: toma más tiempo y puede generar malentendidos entre el estudiante y la IA. Una sugerencia fue permitir también una explicación gráfica de lo que se quiere enseñar. Por eso se agregó el **dictado por voz**; la explicación gráfica sigue propuesta. Son observaciones informales de dos casos, sin medición; las tomamos como hipótesis por probar, no como resultado.
 
 - **Por qué importa.** Si el estudiante no logra decir lo que sabe, Chaski lee una idea distinta o ninguna, y el error que se le atribuye no es del concepto sino del medio. Eso ensucia la métrica de «ideas bien enseñadas». El riesgo es mayor en matemática (proporciones, porcentajes, ecuaciones), donde muchos estudiantes piensan en esquemas antes que en frases, y con estudiantes que escriben poco o con dificultad.
 - **Propuesta.** Agregar, junto a la tablilla de texto, un modo de explicar con un esquema. Dos variantes por comparar:

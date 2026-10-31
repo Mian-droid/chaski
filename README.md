@@ -26,7 +26,7 @@ Nació para la Grieta 02, «Aprender sin pensar», del DSC Hack 2026. Es un **pi
 
 **Qué se mide.** Si el estudiante atrapa los errores, cuántas falsas alarmas da, qué ideas enseñó bien, si repite lo anterior en vez de usar palabras propias y cómo responde a preguntas nuevas (ver [Métricas del piloto](#métricas-del-piloto)). El docente lo ve en un panel por clase.
 
-> **Evidencia de uso:** **una docente y dos estudiantes de secundaria probaron el piloto**; el registro está en la carpeta de evidencias del DSC Hack (Drive, «G - LLM»). Es una prueba muy pequeña: **todavía no se probó con una clase completa**. Lo que se comprobó con pruebas automáticas está en [Funcionalidades implementadas](#funcionalidades-implementadas).
+> **Evidencia de uso:** **una docente y un estudiante de secundaria probaron el piloto**; el registro está en la carpeta de evidencias del DSC Hack (Drive, «G - LLM»). Es una prueba muy pequeña: **todavía no se probó con una clase completa**. Lo que se comprobó con pruebas automáticas está en [Funcionalidades implementadas](#funcionalidades-implementadas).
 
 ## Evidencia y por qué crece
 
@@ -107,7 +107,7 @@ Si el modelo de lenguaje no responde (sin conexión, sin cuota o tarda más de 1
 | Tope de uso por IP y tope diario en el servidor | Pruebas del servidor |
 | Dictado por voz (Whisper en Workers AI): el texto cae en la tablilla y se edita antes de enviar; el docente puede apagarlo con `voz=0` en el enlace | Pruebas del servidor y del núcleo; falta probar en celulares reales |
 
-**Limitaciones actuales:** solo lo probaron una docente y dos estudiantes; falta probarlo con una clase completa y en celulares reales de gama baja. No se mide aprendizaje ni retención (ver [Alcance y límites](#alcance-y-límites)). La interfaz no tiene pruebas automáticas. Detalle por requerimiento en [docs/requerimientos.md](docs/requerimientos.md).
+**Limitaciones actuales:** solo lo probaron una docente y un estudiante; falta probarlo con una clase completa y en celulares reales de gama baja. No se mide aprendizaje ni retención (ver [Alcance y límites](#alcance-y-límites)). La interfaz no tiene pruebas automáticas. Detalle por requerimiento en [docs/requerimientos.md](docs/requerimientos.md).
 
 ## Arquitectura y tecnologías
 
@@ -225,7 +225,7 @@ Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 - **La señal de originalidad es heurística** y puede equivocarse con textos cortos o vocabulario muy común.
 - **El índice de dependencia es exploratorio**, sin una escala validada.
 - **Los topes de uso dependen de la base de datos.** Por IP y por día, solo se aplican con D1 enlazada; si la base falla, no se limita nada para no dejar sin juego a la clase. Además se restringe el origen (`ALLOWED_ORIGINS`).
-- **Se explica con texto o dictado, no con dibujos.** Dos estudiantes que probaron el piloto señalaron que explicar solo con texto es complicado: es lento y puede causar malentendidos con la IA. Por eso se agregó el dictado por voz, que todavía no se volvió a probar con usuarios. La explicación gráfica está propuesta en la [hoja de ruta](docs/problema-y-evidencia.md#8-hoja-de-ruta), no implementada.
-- **Validación con usuarios mínima.** Lo probaron una docente y dos estudiantes (evidencia en el Drive del DSC Hack, «G - LLM»). No hay pruebas con una clase completa ni en celulares reales.
+- **Se explica con texto o dictado, no con dibujos.** En las pruebas con usuarios se señaló que explicar solo con texto es complicado: es lento y puede causar malentendidos con la IA. Por eso se agregó el dictado por voz, que todavía no se volvió a probar con usuarios. La explicación gráfica está propuesta en la [hoja de ruta](docs/problema-y-evidencia.md#8-hoja-de-ruta), no implementada.
+- **Validación con usuarios mínima.** Lo probaron una docente y un estudiante (evidencia en el Drive del DSC Hack, «G - LLM»). No hay pruebas con una clase completa ni en celulares reales.
 - **El modelo envía el texto del estudiante a un servicio externo** (Gemini). Con menores, ver [Datos y privacidad](#datos-y-privacidad).
 - **Los dibujos son vectoriales hechos en código**, no ilustraciones profesionales, y el juego no tiene sonido.
