@@ -1,0 +1,12 @@
+/* Configuración de Chaski. Se puede editar sin tocar el resto del código. */
+window.CHASKI_CONFIG = {
+  /* Dirección del servidor intermedio que lee la explicación con el modelo (ver worker/).
+     Ejemplo: "https://chaski-lector.tu-cuenta.workers.dev/extract". Vacío = lee con reglas de palabras. */
+  EXTRACT_URL: "",
+  /* URL del Apps Script que guarda los datos en una hoja de Google (ver README). Vacío = solo en el dispositivo. */
+  ENDPOINT: "",
+  /* true: Chaski avisa que se equivocará si lo enseñas mal (se juega a revisarlo).
+     false: no lo avisa y mide cuánto confía el estudiante a ciegas. */
+  ANNOUNCE_ERRORS: true,
+  VERSION: "0.2"
+};
