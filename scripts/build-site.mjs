@@ -4,6 +4,7 @@
  *
  * Las direcciones se pueden fijar al empaquetar, sin escribirlas en el repositorio:
  *   EXTRACT_URL=https://chaski-lector.tu-cuenta.workers.dev/extract npm run build:site
+ *   TRANSCRIBE_URL=/transcribe                                      npm run build:site   (dictado por voz; en Pages ya es /transcribe)
  *   ENDPOINT=/events                                                npm run build:site   (base de datos del propio sitio)
  *   ENDPOINT=https://script.google.com/macros/s/.../exec            npm run build:site   (hoja de Google)
  *
@@ -85,6 +86,10 @@ let config = readFileSync(configPath, "utf8");
 let extract = process.env.EXTRACT_URL ? samePathOrHttps("EXTRACT_URL", process.env.EXTRACT_URL) : "";
 const onPages = process.env.CF_PAGES === "1";
 if (!extract && onPages) extract = "/extract";
+/* Dictado por voz: igual que EXTRACT_URL. En Cloudflare Pages se usa "/transcribe" (la función viene en este repositorio). */
+let transcribe = process.env.TRANSCRIBE_URL ? samePathOrHttps("TRANSCRIBE_URL", process.env.TRANSCRIBE_URL) : "";
+if (!transcribe && onPages) transcribe = "/transcribe";
+if (transcribe) config = setConfig(config, "TRANSCRIBE_URL", transcribe);
 const endpoint = process.env.ENDPOINT ? samePathOrHttps("ENDPOINT", process.env.ENDPOINT) : "";
 if (extract) config = setConfig(config, "EXTRACT_URL", extract);
 if (endpoint) config = setConfig(config, "ENDPOINT", endpoint);
@@ -106,5 +111,6 @@ if (site !== DEFAULT_SITE) {
 console.log(`dist/ listo: ${countFiles(out)} archivos.`);
 const viaPages = onPages && !process.env.EXTRACT_URL ? " (Cloudflare Pages Function)" : "";
 console.log(extract ? `  Lectura con el modelo: ${extract}${viaPages}` : "  Sin EXTRACT_URL: Chaski leerá con reglas de palabras, no con el modelo.");
+console.log(transcribe ? `  Dictado por voz: ${transcribe}` : "  Sin TRANSCRIBE_URL: no hay dictado por voz.");
 console.log(`  Vista previa al compartir: ${site}/brand/og-image.jpg`);
 console.log(endpoint ? `  Guardado de datos: ${endpoint}` : "  Sin ENDPOINT: los datos quedan en el dispositivo de cada estudiante.");

@@ -9,7 +9,7 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist');
-const build = (env) => spawnSync(process.execPath, ['scripts/build-site.mjs'], { cwd: root, env: Object.assign({}, process.env, { EXTRACT_URL: '', ENDPOINT: '', CF_PAGES: '', SITE_URL: '', CONTACT_EMAIL: '' }, env), encoding: 'utf8' });
+const build = (env) => spawnSync(process.execPath, ['scripts/build-site.mjs'], { cwd: root, env: Object.assign({}, process.env, { EXTRACT_URL: '', TRANSCRIBE_URL: '', ENDPOINT: '', CF_PAGES: '', SITE_URL: '', CONTACT_EMAIL: '' }, env), encoding: 'utf8' });
 const read = (...p) => fs.readFileSync(path.join(...p), 'utf8');
 const tasks = [];
 const t = (name, fn) => tasks.push([name, fn]);
@@ -38,6 +38,22 @@ t('EXTRACT_URL y ENDPOINT se escriben en dist/ y no en el repositorio', () => {
   assert.match(cfg, /EXTRACT_URL:\s*"https:\/\/chaski-lector\.ejemplo\.workers\.dev\/extract"/);
   assert.match(cfg, /ENDPOINT:\s*"https:\/\/script\.google\.com\/macros\/s\/ABC\/exec"/);
   assert.strictEqual(read(root, 'js', 'config.js'), before, 'js/config.js del repositorio no debe cambiar');
+});
+
+t('el dictado por voz: sin TRANSCRIBE_URL no hay voz; en Pages es /transcribe; el micrófono se permite solo en el propio sitio', () => {
+  const none = build({});
+  assert.match(read(dist, 'js', 'config.js'), /TRANSCRIBE_URL:\s*""/);
+  assert.match(none.stdout, /no hay dictado por voz/);
+  const pages = build({ CF_PAGES: '1' });
+  assert.strictEqual(pages.status, 0, pages.stderr);
+  assert.match(read(dist, 'js', 'config.js'), /TRANSCRIBE_URL:\s*"\/transcribe"/);
+  const own = build({ TRANSCRIBE_URL: 'https://chaski-lector.ejemplo.workers.dev/transcribe' });
+  assert.match(read(dist, 'js', 'config.js'), /TRANSCRIBE_URL:\s*"https:\/\/chaski-lector\.ejemplo\.workers\.dev\/transcribe"/);
+  assert.ok(fs.existsSync(path.join(dist, 'js', 'voice.js')), 'js/voice.js se publica');
+  assert.match(read(dist, '_headers'), /microphone=\(self\)/, 'sin esto el navegador bloquea el micrófono');
+  assert.ok(!/camera=\(self\)|geolocation=\(self\)/.test(read(dist, '_headers')), 'cámara y ubicación siguen bloqueadas');
+  assert.strictEqual(build({ TRANSCRIBE_URL: 'http://inseguro.example/transcribe' }).status !== 0, true, 'http se rechaza');
+  assert.match(read(root, 'js', 'config.js'), /TRANSCRIBE_URL:\s*""/, 'js/config.js del repositorio no cambia');
 });
 
 t('ENDPOINT acepta la base de datos del propio sitio (/events) y rechaza rutas raras', () => {
