@@ -117,8 +117,11 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RD-02 | Recordar al estudiante, en cada campo de texto libre, que no escriba datos personales. |
 | RD-03 | Dejar claro, en el juego, que es un piloto exploratorio y no una evaluación con nota ni una prueba de efecto. |
 | RD-04 | No enviar a terceros la dirección con el código de clase (referente hacia Google Fonts). |
+| RD-05 | Avisar en el juego, antes de empezar, que lo escrito lo lee un servicio de inteligencia artificial, y enlazar a la política de privacidad y a los términos. |
+| RD-06 | Publicar una política de privacidad (qué datos, para qué, con quién, cuánto tiempo, derechos y contacto), unos términos de uso y una autorización imprimible para madres, padres y tutores. |
+| RD-07 | Excluir del buscador el panel docente y las rutas de datos (`robots.txt`). |
 
-El permiso de los tutores y el tiempo de conservación de los datos corresponden a la institución o al docente que aplique el piloto. Cuando se usa el modelo, el texto del estudiante se envía al servicio de Gemini; ver [despliegue.md](despliegue.md#privacidad-y-datos).
+El permiso de los tutores y el tiempo de conservación de los datos corresponden a la institución o al docente que aplique el piloto; la autorización imprimible y el borrado por clase desde el panel facilitan ambos. Cuando se usa el modelo, el texto del estudiante se envía al servicio de Gemini; ver [despliegue.md](despliegue.md#privacidad-y-datos).
 
 ---
 
@@ -141,7 +144,7 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 |---|---|---|
 | Contenido de los tres temas con cuentas verificadas de forma independiente, cerebro, lectura con reglas y con servidor simulado, originalidad y métricas | `tests/core.test.js` | 36 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
-| Empaquetado del sitio: qué se publica, direcciones, referente, favicon y vista previa al compartir | `tests/build-site.test.js` | 12 |
+| Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 18 |
 | Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, borrado, topes de uso) | `worker/test/*.test.ts` | 37 |
 
 `npm test` las corre todas.

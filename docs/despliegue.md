@@ -34,6 +34,7 @@ En el proyecto: *Settings → Variables and Secrets*.
 | Secreto | `GEMINI_API_KEY` | tu clave | La usa la función para llamar a Gemini. Nunca va en el código ni en la página. |
 | Texto | `NODE_VERSION` | `22` | El empaquetado pide Node 22 o superior. |
 | Texto | `ALLOWED_ORIGINS` | `https://chaski.pages.dev` | Páginas que pueden llamar a `/extract`. Sin esto acepta cualquiera. |
+| Texto | `CONTACT_EMAIL` | correo | Correo de contacto que muestran la política de privacidad y los términos. Sin él, remiten al docente o a la institución que aplica el piloto. |
 | Texto | `MODEL` | opcional | Por defecto `gemini-3.5-flash-lite`. `gemini-3.8-flash` lee mejor pero tarda más. |
 | Texto | `SITE_URL` | opcional | Solo si tu sitio no es `chaski.pages.dev`: dirección de la imagen al compartir por WhatsApp. |
 | Texto | `ENDPOINT` | opcional | Dirección del Apps Script para guardar datos de varios dispositivos. |

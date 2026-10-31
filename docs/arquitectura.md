@@ -28,6 +28,7 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 | `js/brain.js` | Cerebro (fichas), solución por fichas, lectura de la explicación (servidor o reglas). | content, core |
 | `js/scenery.js` | Dibujo: paisaje panorámico en tres momentos del día (amanecer, día, atardecer), Chaski con cinco estados de ánimo y la choza del tambo. Solo SVG, sin lógica de juego. | nada |
 | `js/app.js` | Interfaz del juego: escenas, estado, registro de eventos. | content, core, brain, scenery |
+| `privacidad.html`, `terminos.html`, `consentimiento.html`, `acerca.html` | Páginas informativas y legales, estáticas, con `css/legal.css`. `js/legal.js` muestra el correo de contacto si está configurado. | config |
 | `js/panel.js` | Panel docente: elegir tema y enlace, cargar datos, cifras, ideas por retomar y tabla de estudiantes. | content, core, scenery |
 | `js/config.js` | Direcciones y opciones editables. | nada |
 | `functions/events.ts` | Pages Function que responde en `/events`: guarda, lee y borra los eventos en la base D1 enlazada como `DB`. Usa `handleEvents()` de `worker/src/events.ts`. | worker/ |
@@ -115,6 +116,7 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 |---|---|---|
 | Contenido de los tres temas (cuentas verificadas de forma independiente), cerebro, lectura con reglas y con servidor simulado, originalidad, métricas | `tests/core.test.js` | 36 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
+| Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 18 |
 | Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/*.test.ts` | 37 |
 
 No hay pruebas automáticas de la interfaz.

@@ -42,10 +42,10 @@ Sin servidor intermedio configurado, Chaski lee la explicación con reglas de pa
 ## Pruebas
 
 ```bash
-npm test                  # núcleo (36), dibujo (6), empaquetado del sitio (12) y servidor (37)
+npm test                  # núcleo (36), dibujo (6), empaquetado del sitio (18) y servidor (37)
 npm run test:core         # solo el núcleo
 npm run test:scenery      # solo el dibujo (6)
-npm run test:site         # solo el empaquetado del sitio (12)
+npm run test:site         # solo el empaquetado del sitio (18)
 npm run test:worker       # solo el servidor (37)
 ```
 
@@ -60,6 +60,8 @@ Guía paso a paso para Cloudflare: [docs/despliegue.md](docs/despliegue.md).
 **Guardar datos de varios dispositivos (opcional):** la base de datos D1 del propio proyecto de Pages, en [functions/events.ts](functions/events.ts), con el esquema en [db/schema.sql](db/schema.sql). Pasos en [docs/despliegue.md](docs/despliegue.md#5-guardar-los-datos-de-los-estudiantes-opcional). Sin esto, los datos quedan en el navegador de cada estudiante y el panel los lee de ese dispositivo o de un archivo JSON. También se puede usar un Apps Script que escribe en una hoja de Google ([apps-script/](apps-script/README.md)).
 
 ## Datos y privacidad
+
+El detalle para estudiantes y familias está en la [política de privacidad](privacidad.html) y los [términos de uso](terminos.html) del sitio. Para jugar con menores hay una [autorización imprimible para madres, padres y tutores](consentimiento.html). El correo de contacto que muestran esas páginas se fija al empaquetar con `CONTACT_EMAIL`.
 
 - Solo se piden un **apodo** y un **código de clase**. No se piden nombre ni datos personales.
 - Los textos que escribe el estudiante se guardan (en su dispositivo y, si se configura, en la base de datos o en la hoja). Cada campo recuerda no escribir datos personales. El docente puede borrar de la base los datos de su clase desde el panel.
@@ -83,6 +85,8 @@ Como los errores salen de lo enseñado, cada estudiante tiene una mezcla distint
 
 ```
 index.html, panel.html     Juego y panel docente
+privacidad.html, terminos.html, consentimiento.html, acerca.html
+                           Política de privacidad, términos de uso, autorización imprimible para tutores y acerca de
 css/                       game.css (juego) y panel.css (panel)
 js/                        content, core, brain, scenery (paisaje y personaje), app, panel, config
 tests/                     Pruebas del núcleo (sin dependencias)

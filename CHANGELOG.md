@@ -5,6 +5,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 ## [Sin publicar]
 
 ### Agregado
+- **Páginas legales:** política de privacidad, términos de uso, autorización imprimible para madres, padres y tutores, y «Acerca de Chaski» (qué hace la IA y qué no, límites y créditos). El juego avisa en la bienvenida que lo escrito lo lee un servicio de IA y enlaza a ellas; el panel enlaza a la autorización. `CONTACT_EMAIL` fija el correo de contacto al empaquetar. `robots.txt` excluye el panel y las rutas de datos. Pruebas del empaquetado: 18.
 - **Límites de uso contra bots:** tope por IP cada 10 minutos para las lecturas con el modelo y los envíos de partidas, y tope diario de lecturas con el modelo. La IP se guarda solo como una huella que caduca. Tabla `rate` en `db/schema.sql`. Pruebas del servidor: 37.
 - **Base de datos para los resultados** (Cloudflare D1): ruta `/events` en el mismo proyecto de Pages para guardar los eventos de las partidas, y leerlos y borrarlos desde el panel con una clave. Esquema en `db/schema.sql`. El juego envía en lotes de hasta 100 y reintenta si el servidor no responde.
 - El panel docente carga los resultados de la base de datos y permite borrar los datos de una clase.
