@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Chaski · Propuesta visual B</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Patrick+Hand&display=swap">
+<style>
+/* Propuesta B: textil andino de día. Tokens de color y tipografía. */
+:root {
+  --sky1: #4FC1E6; --sky2: #BEEAF2; --sun: #FFC83D;
+  --cream: #FFF3D6; --cream2: #F6E2B3; --ink: #2B1B3D; --indigo: #3B2A8C;
+  --magenta: #C2185B; --turq: #0F7C8F; --ochre: #E39A2D; --terra: #B5602A; --green: #6FAE4B;
+  --stone: #CFC3A8; --stone-d: #8E8165; --clay: #E2B07A; --clay-d: #8C5A2E;
+  --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --hand: "Patrick Hand", "Segoe Print", "Comic Sans MS", cursive;
+  --zig: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='12' viewBox='0 0 28 12'><rect width='28' height='12' fill='%233B2A8C'/><path d='M0 12 L7 2 L14 12 L21 2 L28 12' fill='none' stroke='%23FFC83D' stroke-width='3'/><path d='M0 6 L7 -4 L14 6 L21 -4 L28 6' fill='none' stroke='%23C2185B' stroke-width='2'/></svg>");
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #1B1430; color: var(--cream); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; min-height: 100vh;
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
+button, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+
+/* marco de demostración */
+.box { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: start; }
+.notes { display: grid; gap: 14px; max-width: 540px; }
+.notes h1 { font: 800 1.9rem/1.1 var(--display); margin: 0; }
+.notes h2 { font: 800 1.05rem var(--display); margin: 0; color: var(--sun); }
+.notes ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 6px; color: #D9D0EE; }
+.notes strong { color: #fff; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; max-width: 390px; }
+.chip { background: #2A2050; border: 1px solid #4B3C86; border-radius: 99px; padding: 5px 12px; font-size: .82rem; color: #CFC6EA; }
+.chip[aria-pressed="true"] { background: var(--sun); border-color: var(--sun); color: #2B1B3D; font-weight: 700; }
+
+.phone { position: relative; width: min(390px, 100%); height: min(812px, calc(100vh - 90px)); min-height: 660px; border-radius: 34px; overflow: hidden;
+  border: 8px solid #0E0A1E; box-shadow: 0 20px 60px rgba(0,0,0,.55); background: var(--sky2); color: var(--ink); }
+.world { position: absolute; inset: 0; } .world svg { width: 100%; height: 100%; display: block; }
+.screen { position: absolute; inset: 0; display: none; flex-direction: column; padding: 14px 14px 16px; gap: 10px; overflow-y: auto; }
+.screen.on { display: flex; }
+.spacer { flex: 1; }
+
+/* HUD */
+.hud { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 8px; background: var(--cream); border: 3px solid var(--indigo); border-radius: 99px; padding: 3px 12px; font: 800 .9rem var(--display); color: var(--indigo); white-space: nowrap; box-shadow: 0 3px 0 rgba(43,27,61,.3); }
+
+/* paneles de tela */
+.panel { background: var(--cream); color: var(--ink); border: 3px solid var(--indigo); border-radius: 18px; padding: 16px 14px 14px; position: relative; display: grid; gap: 10px; box-shadow: 0 5px 0 rgba(43,27,61,.35); }
+.panel::before { content: ""; position: absolute; left: 10px; right: 10px; top: -3px; height: 12px; background: var(--zig) repeat-x; border-radius: 0 0 8px 8px; }
+.panel > :first-child { margin-top: 6px; }
+.kicker { font: 800 .74rem var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--terra); }
+h2.t { margin: 0; font: 800 1.25rem/1.15 var(--display); color: var(--indigo); }
+.small { font-size: .85rem; color: #5B4A6E; }
+
+/* botones */
+.btn { border: 0; border-radius: 16px; padding: 12px 14px; font: 800 1.08rem var(--display); min-height: 52px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 5px 0 rgba(43,27,61,.45); transition: transform .06s, box-shadow .06s; }
+.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(43,27,61,.45); }
+.btn.primary { background: var(--magenta); color: #fff; }
+.btn.alt { background: var(--turq); color: #fff; }
+.btn.ghost { background: var(--cream); color: var(--indigo); border: 3px solid var(--indigo); }
+.btn:disabled { opacity: .5; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+svg.ic { width: 22px; height: 22px; flex: none; }
+
+/* Chaski */
+.chsvg { display: block; overflow: visible; }
+.bob { animation: bob 3s ease-in-out infinite; } @keyframes bob { 50% { transform: translateY(-5px); } }
+.nod { animation: nod .6s ease-in-out 1; } @keyframes nod { 30% { transform: translateY(6px) rotate(-2deg); } 60% { transform: translateY(-3px); } }
+.runout { animation: none; transition: transform .8s cubic-bezier(.5,0,.9,.6); transform: translateX(160%); }
+
+/* bienvenida */
+.logo { font: 800 3.6rem/1 var(--display); color: var(--cream); -webkit-text-stroke: 9px var(--indigo); paint-order: stroke fill; text-shadow: 0 6px 0 rgba(43,27,61,.35); letter-spacing: .01em; margin: 0; }
+.tag { align-self: flex-start; background: var(--magenta); color: #fff; font: 800 .8rem var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 3px 12px; border-radius: 99px; border: 3px solid var(--indigo); }
+.field { display: grid; gap: 4px; font-weight: 700; font-size: .92rem; }
+.field span { color: var(--indigo); }
+.inp { background: #fff; border: 3px solid var(--indigo); border-radius: 14px; padding: 10px 12px; font-size: 1.05rem; color: var(--ink); }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: .88rem; color: #5B4A6E; }
+.check i { flex: none; width: 22px; height: 22px; border: 3px solid var(--indigo); border-radius: 6px; background: #fff; }
+
+/* enseñar: cuerda de nudos, placa y tablilla */
+.cordbar { display: flex; align-items: center; position: relative; padding: 4px 6px; background: var(--cream); border: 3px solid var(--indigo); border-radius: 99px; box-shadow: 0 3px 0 rgba(43,27,61,.3); }
+.cordbar::before { content: ""; position: absolute; left: 14px; right: 14px; top: 50%; height: 4px; background: linear-gradient(#C9A66B, #8C6A3B); border-radius: 3px; transform: translateY(-50%); }
+.cordbar .lbl { position: relative; font: 800 .78rem var(--display); color: var(--indigo); padding: 0 8px 0 6px; background: var(--cream); }
+.k { position: relative; width: 26px; height: 26px; margin: 0 7px; border-radius: 50%; border: 3px dashed #A58A5A; background: var(--cream); padding: 0; }
+.k.on { border: 3px solid var(--indigo); background: radial-gradient(circle at 35% 35%, #FF6FA3, var(--magenta)); box-shadow: 0 0 0 3px var(--cream); }
+.k.on::after { content: ""; position: absolute; inset: 5px; border: 2px dotted rgba(255,255,255,.75); border-radius: 50%; }
+.pop { position: absolute; z-index: 6; left: 14px; right: 14px; top: 62px; background: var(--cream); border: 3px solid var(--indigo); border-radius: 14px; padding: 10px 12px; font: 1.1rem/1.25 var(--hand); color: var(--ink); box-shadow: 0 6px 0 rgba(43,27,61,.35); }
+.pop small { display: block; font: 800 .72rem var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--terra); margin-bottom: 2px; }
+.pop[hidden] { display: none; }
+
+.plaque { position: relative; background: linear-gradient(#E6DBC3, var(--stone)); border: 4px solid var(--stone-d); border-radius: 16px; padding: 14px 18px 14px; box-shadow: inset 0 0 0 3px rgba(255,255,255,.35), 0 6px 0 rgba(43,27,61,.35); color: #3A3020; text-align: center; }
+.plaque::before, .plaque::after { content: ""; position: absolute; top: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--stone-d); box-shadow: inset 1px 1px 0 rgba(255,255,255,.4); }
+.plaque::before { left: 9px; } .plaque::after { right: 9px; }
+.plaque .kicker { color: var(--magenta); }
+.plaque .q { font: 800 1.28rem/1.18 var(--display); margin: 2px 0 0; color: #2F2616; text-wrap: balance; }
+
+.stageT { position: relative; flex: none; height: 168px; display: flex; align-items: flex-end; }
+.stageT .who { position: absolute; left: 4px; bottom: 0; }
+.stageT .hint { position: absolute; right: 4px; bottom: 6px; width: 150px; font: 1.1rem/1.15 var(--hand); color: #3A2B12; background: rgba(255,243,214,.88); border: 2px dashed var(--terra); border-radius: 12px; padding: 6px 9px; }
+.tablet { position: relative; background: linear-gradient(#EBC196, var(--clay)); border: 4px solid var(--clay-d); border-radius: 22px; padding: 10px; box-shadow: inset 0 0 0 3px rgba(255,255,255,.25), 0 6px 0 rgba(43,27,61,.35); }
+.tablet label { position: absolute; top: -13px; left: 16px; background: var(--indigo); color: var(--cream); font: 800 .74rem var(--display); letter-spacing: .09em; text-transform: uppercase; padding: 2px 10px; border-radius: 99px; }
+.tablet textarea { width: 100%; height: 128px; resize: none; border: 0; outline: none; background: repeating-linear-gradient(transparent 0 31px, rgba(110,70,30,.28) 31px 32px); font: 1.4rem/32px var(--hand); color: #4A2E14; padding: 2px 6px; }
+.tablet textarea::placeholder { color: rgba(74,46,20,.55); }
+.tablet .foot { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; color: #5A3A17; padding: 2px 4px 0; }
+.fly { position: fixed; z-index: 50; max-width: 170px; background: var(--cream); border: 3px solid var(--indigo); border-radius: 10px; padding: 4px 8px; font: 1rem/1.1 var(--hand); color: var(--ink); pointer-events: none; transform-origin: center; }
+
+/* cerebro */
+.thought { position: relative; background: #fff; border: 3px solid var(--indigo); border-radius: 26px; padding: 14px 16px; font-weight: 600; color: var(--ink); box-shadow: 0 5px 0 rgba(43,27,61,.35); }
+.thought .kicker { display: block; margin-bottom: 4px; }
+.thought::before, .thought::after { content: ""; position: absolute; border: 3px solid var(--indigo); border-radius: 50%; background: #fff; }
+.thought::before { width: 18px; height: 18px; left: 44px; bottom: -26px; } .thought::after { width: 10px; height: 10px; left: 36px; bottom: -42px; }
+.beam { position: relative; height: 16px; border-radius: 8px; background: linear-gradient(#A8713C, #7A4D26); border: 3px solid #4A2E14; margin: 0 6px; }
+.hang { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 6px; }
+.hang .f { position: relative; padding-top: 22px; text-align: center; }
+.hang .f::before { content: ""; position: absolute; left: 50%; top: 0; width: 3px; height: 24px; background: #7A4D26; transform: translateX(-50%); }
+.hang .tab { position: relative; border-radius: 14px; background: linear-gradient(#D9D2C4, #B9B0A0); border: 3px solid #7C7364; padding: 12px 6px 10px; font: 800 .82rem/1.1 var(--display); color: #5B5446; min-height: 76px; display: grid; place-items: center; gap: 4px; }
+.hang .on .tab { background: linear-gradient(#FFE08A, var(--sun)); border-color: var(--terra); color: #4A2E14; box-shadow: 0 0 0 4px rgba(255,200,61,.45), 0 0 18px rgba(255,200,61,.9); }
+.hang .dot { width: 20px; height: 20px; border-radius: 50%; border: 3px solid #7C7364; background: #CFC8B8; }
+.hang .on .dot { background: var(--magenta); border-color: var(--indigo); }
+
+/* camino */
+.mapArea { flex: 1; min-height: 0; display: flex; } .mapArea svg { width: 100%; height: 100%; }
+.node text { font: 800 20px var(--display); fill: var(--ink); text-anchor: middle; }
+.pulse { animation: pulse 1.6s ease-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes pulse { 0% { transform: scale(.8); opacity: .9; } 100% { transform: scale(1.7); opacity: 0; } }
+
+/* revisar */
+.scene { position: relative; height: 200px; flex: none; }
+.scene .chwrap { position: absolute; left: 0; bottom: 0; } .scene .hut { position: absolute; right: 0; bottom: 0; }
+.sign { position: absolute; left: 100px; top: 4px; right: 96px; background: #fff; border: 3px solid var(--indigo); border-radius: 14px; padding: 7px 11px; font: 700 .95rem/1.2 system-ui; color: var(--ink); box-shadow: 0 4px 0 rgba(43,27,61,.3); }
+.sign::after { content: ""; position: absolute; left: -14px; bottom: 14px; border: 8px solid transparent; border-right-color: var(--indigo); border-left: 0; }
+.board { background: linear-gradient(#A8713C, #7A4D26); border: 4px solid #4A2E14; border-radius: 12px; padding: 10px 14px; color: var(--cream); font: 800 1.08rem/1.25 var(--display); box-shadow: 0 5px 0 rgba(43,27,61,.35); }
+.quipu { position: relative; display: grid; gap: 8px; padding-left: 36px; }
+.quipu::before { content: ""; position: absolute; left: 13px; top: -6px; bottom: -6px; width: 5px; border-radius: 3px; background: linear-gradient(#C9A66B, #8C6A3B); }
+.step { position: relative; background: var(--cream); border: 3px solid var(--indigo); border-radius: 14px; padding: 8px 12px; font-weight: 600; color: var(--ink); text-align: left; width: 100%; box-shadow: 0 3px 0 rgba(43,27,61,.3); }
+.step::before { content: attr(data-n); position: absolute; left: -35px; top: 50%; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: var(--sun); border: 3px solid var(--indigo); font: 800 .85rem var(--display); display: grid; place-items: center; color: var(--ink); }
+.step.hot { border-color: var(--magenta); animation: glow 1.4s ease-in-out infinite; }
+.step.sel { background: var(--sun); }
+@keyframes glow { 50% { box-shadow: 0 0 0 5px rgba(194,24,91,.3); } }
+.toast { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(20px); background: var(--indigo); color: var(--cream); font: 800 .95rem var(--display); padding: 8px 16px; border-radius: 99px; opacity: 0; transition: .25s; pointer-events: none; z-index: 5; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%); }
+
+/* rendición */
+.sellos { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; background: var(--cream); border: 3px solid var(--indigo); border-radius: 16px; padding: 10px 6px 8px; box-shadow: 0 5px 0 rgba(43,27,61,.35); }
+.legend { margin: 0; background: var(--cream); border: 3px solid var(--indigo); border-radius: 12px; padding: 6px 10px; text-align: center; font-size: .82rem; font-weight: 700; color: var(--indigo); box-shadow: 0 3px 0 rgba(43,27,61,.3); }
+.sello { display: grid; gap: 4px; justify-items: center; font-size: .66rem; font-weight: 800; text-align: center; line-height: 1.1; color: var(--indigo); }
+.sello b { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font: 800 1.1rem var(--display); color: var(--ink); border: 4px solid var(--indigo); box-shadow: 0 3px 0 rgba(43,27,61,.3), inset 0 0 0 3px var(--cream); }
+.sello.hit b { background: #5BD08A; } .sello.miss b { background: #FF8A6B; } .sello.fa b { background: #7FD3F0; } .sello.okc b { background: var(--cream2); }
+.parch { background: #F4E6C2; color: #3B2A14; border-radius: 6px; padding: 12px 14px; display: grid; gap: 7px; box-shadow: 0 4px 0 rgba(43,27,61,.35); border: 2px solid #CDB27A; }
+.parch h3 { margin: 0; font: 800 1rem var(--display); color: var(--indigo); }
+.parch .ln { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dashed rgba(59,42,20,.4); padding-bottom: 5px; font-weight: 600; font-size: .93rem; }
+.parch .ln em { font-style: normal; font-weight: 800; white-space: nowrap; }
+.parch .ok em { color: #0E7A4A; } .parch .bad { background: rgba(255,107,74,.22); border-radius: 4px; padding: 3px 5px; } .parch .bad em { color: #B3260A; }
+.parch .note { font-size: .8rem; font-weight: 700; color: #B3260A; }
+.rulecard { background: var(--cream); border: 3px solid var(--indigo); border-left: 10px solid var(--magenta); border-radius: 12px; padding: 9px 12px; font-size: .9rem; color: var(--ink); display: grid; gap: 3px; }
+.rulecard strong { color: var(--magenta); }
+
+/* fondo animado */
+.w-cl1 { animation: drift1 38s ease-in-out infinite alternate; } .w-cl2 { animation: drift1 52s ease-in-out infinite alternate-reverse; } .w-cl3 { animation: drift1 70s ease-in-out infinite alternate; }
+@keyframes drift1 { from { transform: translateX(-26px); } to { transform: translateX(34px); } }
+.w-condor { animation: glide 16s ease-in-out infinite alternate; transform-box: fill-box; }
+@keyframes glide { from { transform: translate(60px, 190px) rotate(-4deg) scale(.9); } to { transform: translate(250px, 150px) rotate(5deg) scale(1.1); } }
+.w-sway { animation: sway 3.4s ease-in-out infinite alternate; transform-origin: 50% 100%; transform-box: fill-box; }
+@keyframes sway { from { transform: skewX(-2deg); } to { transform: skewX(2.5deg); } }
+.bgrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 10px; max-width: 390px; font-size: .8rem; color: #CFC6EA; }
+@media (prefers-reduced-motion: reduce) { .bob, .nod, .pulse, .step.hot, .w-cl1, .w-cl2, .w-cl3, .w-condor, .w-sway { animation: none; } .w-condor { transform: translate(150px, 170px); } .runout { transition: none; } }
+@media (max-width: 860px) { .box { grid-template-columns: 1fr; } .notes { order: 2; max-width: none; } }
+@media (max-width: 520px) {
+  body { padding: 0; height: 100vh; height: 100dvh; overflow: hidden; }
+  .box { display: flex; flex-direction: column; height: 100%; gap: 0; max-width: none; }
+  .stagewrap { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .chips { padding: 8px 10px; max-width: none; margin: 0; background: #1B1430; flex: none; }
+  .phone { width: 100%; border: 0; border-radius: 0; flex: 1; height: auto; min-height: 0; box-shadow: none; }
+  .notes { display: none; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs"></defs></svg>
+
+<div class="box">
+  <aside class="notes">
+    <h1>Chaski, propuesta visual B</h1>
+    <p style="margin:0;color:#D9D0EE">Misma jugabilidad, otra cara. Toca los botones del teléfono o salta entre pantallas con las etiquetas. En «Enseñar» puedes escribir de verdad.</p>
+    <h2>Qué cambia</h2>
+    <ul>
+      <li><strong>De noche a día, de azul a textil.</strong> Un paisaje de andenes con sol y nieve en vez de un cielo oscuro. Los paneles son telas con borde tejido, los colores salen de los tejidos andinos (magenta, turquesa, ocre, índigo).</li>
+      <li><strong>Enseñar ya no es un chat.</strong> Chaski plantea la pregunta en una <em>placa de piedra</em>. El estudiante responde en una <em>tablilla de arcilla</em>, con letra de mano y renglones. Al enviar, el texto vuela y <em>ata un nudo</em> en la cuerda de Chaski. No queda ningún historial de burbujas.</li>
+      <li><strong>Lo que Chaski sabe se ve y se puede releer.</strong> Cada nudo es una lección: tócalo para ver lo que enseñaste.</li>
+      <li><strong>El cerebro es una nube de pensamiento</strong> y tres tablillas colgadas de una viga. Las que Chaski cree saber se encienden.</li>
+      <li><strong>Un fondo con profundidad.</strong> Cinco capas de montañas con bruma y nieve, una ciudadela de piedra sobre andenes, un río, un cóndor que planea, llamas, árboles y pasto que se mueve. Cada pantalla tiene su hora: amanecer al entrar, día para jugar, atardecer en la rendición de cuentas. Puedes forzar cualquiera con «Fondo».</li>
+      <li><strong>Chaski con más carácter:</strong> contorno de dibujo, poncho tejido, chullo con orejeras y su chuspa.</li>
+    </ul>
+    <h2>Para decidir</h2>
+    <ul>
+      <li><strong>Modo claro, siempre.</strong> Se lee bien al sol y en pantallas baratas de colegio, pero cambia el ambiente nocturno de la versión A.</li>
+      <li><strong>Letra de mano en la tablilla</strong> (Patrick Hand, de Google Fonts). Da calidez, pero cuesta un poco más de leer que una letra normal. Se puede cambiar.</li>
+      <li><strong>El fondo pesa más.</strong> Son varias capas de dibujo vectorial y animaciones suaves. En un celular barato puede ir más lento; habría que medirlo, y se puede apagar la animación sin perder el paisaje.</li>
+      <li><strong>Esto es una maqueta.</strong> Sin sonido, y las animaciones son mínimas.</li>
+    </ul>
+  </aside>
+
+  <div class="stagewrap">
+    <nav class="chips" aria-label="Pantallas del mockup" id="chips"></nav>
+    <div class="bgrow"><span>Fondo:</span><span id="bgchips" style="display:contents"></span></div>
+    <div class="phone" id="phone">
+      <div class="world" id="world" aria-hidden="true"></div>
+
+      <!-- 1. BIENVENIDA -->
+      <section class="screen" id="s-welcome" aria-label="Bienvenida">
+        <div style="display:grid;gap:6px;justify-items:start;margin-top:4px"><span class="tag">Hoy le enseñas: Porcentajes</span><h1 class="logo">Chaski</h1></div>
+        <div style="display:flex;justify-content:center;height:170px;align-items:flex-end"><svg class="chsvg bob" width="130" height="185" viewBox="0 0 140 200"><use href="#ch-happy"/></svg></div>
+        <div class="panel">
+          <p class="small" style="margin-top:6px">Un mensajero que solo sabe lo que tú le enseñes. ¿Lo enseñas bien?</p>
+          <label class="field"><span>Tu apodo</span><input class="inp" placeholder="Un apodo, no tu nombre"></label>
+          <label class="field"><span>Código de la clase</span><input class="inp" value="3A2026"></label>
+          <div class="check"><i></i><span>Estoy con un adulto responsable y no escribiré mi nombre ni datos personales.</span></div>
+          <button class="btn primary" type="button" data-go="teach">Enseñarle a Chaski</button>
+        </div>
+      </section>
+
+      <!-- 2. ENSEÑAR (sin chat) -->
+      <section class="screen" id="s-teach" aria-label="Enseñarle a Chaski">
+        <div class="cordbar" id="cordbar"><span class="lbl">Lo que Chaski sabe</span><button class="k" type="button" aria-label="Lección 1"></button><button class="k" type="button" aria-label="Lección 2"></button><button class="k" type="button" aria-label="Lección extra" style="opacity:.55"></button></div>
+        <div class="pop" id="pop" hidden><small id="popK"></small><span id="popT"></span></div>
+        <div class="plaque"><div class="kicker" id="lessonK">Lección 1 de 2</div><p class="q" id="lessonQ">Yo no sé qué es un porcentaje. Explícame con tus palabras.</p></div>
+        <div class="stageT"><div class="who" id="chTeach"><svg class="chsvg bob" width="118" height="168" viewBox="0 0 140 200"><use href="#ch-listen"/></svg></div><div class="hint" id="hint">Escríbelo como se lo explicarías a un amigo.</div></div>
+        <div class="tablet"><label for="ta">Tu tablilla</label><textarea id="ta" maxlength="400" placeholder="Escribe aquí…" aria-label="Tu explicación"></textarea><div class="foot"><span>No escribas tu nombre ni datos personales.</span><span id="cnt">0 / 400</span></div></div>
+        <button class="btn primary" type="button" id="send" disabled><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h8M12 12c0-4 3-6 6-6s3 4 0 6-6 0-6 0 3 2 6 0 3-6 0-6"/></svg>Enseñarle</button>
+      </section>
+
+      <!-- 3. CEREBRO -->
+      <section class="screen" id="s-brain" aria-label="El cerebro de Chaski">
+        <div class="hud"><span class="pill">El cerebro de Chaski</span><span class="pill">Está aprendiendo</span></div>
+        <div style="display:flex;justify-content:center;height:150px;align-items:flex-end"><svg class="chsvg bob" width="108" height="154" viewBox="0 0 140 200"><use href="#ch-think"/></svg></div>
+        <div class="thought"><span class="kicker">Esto es lo que entendí</span>Para hallar un porcentaje de una cantidad la multiplico por el porcentaje entre 100; y en un descuento calculo el porcentaje y se lo resto al precio. De lo demás todavía no sé nada.</div>
+        <div style="height:34px"></div>
+        <div class="beam" aria-hidden="true"></div>
+        <div class="hang" role="list">
+          <div class="f on" role="listitem"><div class="tab"><span class="dot"></span>Porcentaje</div></div>
+          <div class="f on" role="listitem"><div class="tab"><span class="dot"></span>Descuento</div></div>
+          <div class="f" role="listitem"><div class="tab"><span class="dot"></span>El total</div></div>
+        </div>
+        <p class="legend">Una tablilla encendida significa que Chaski cree saber algo. No dice si lo sabe bien.</p>
+        <div class="spacer"></div>
+        <div style="display:grid;gap:10px"><button class="btn primary" type="button" data-go="map">¡Listo, a resolver!</button><button class="btn ghost" type="button" data-go="teach">Quiero explicarle algo más</button></div>
+      </section>
+
+      <!-- 4. CAMINO -->
+      <section class="screen" id="s-map" aria-label="Mapa del camino">
+        <div class="hud"><span class="pill">Tambo 4 de 6</span><span class="pill">Mensaje al Cusco</span></div>
+        <div class="mapArea">
+          <svg viewBox="0 0 390 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Camino con seis tambos">
+            <path d="M95 505 C190 505 190 445 255 445 C320 445 170 375 120 375 C70 375 220 305 265 305 C310 305 170 235 125 235 C80 235 210 160 250 160 C285 160 235 105 205 82" fill="none" stroke="#7A4D26" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>
+            <path d="M95 505 C190 505 190 445 255 445 C320 445 170 375 120 375 C70 375 220 305 265 305 C310 305 170 235 125 235 C80 235 210 160 250 160 C285 160 235 105 205 82" fill="none" stroke="#F1DDAE" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M95 505 C190 505 190 445 255 445 C320 445 170 375 120 375 C70 375 220 305 265 305 C310 305 170 235 125 235 C80 235 210 160 250 160 C285 160 235 105 205 82" fill="none" stroke="#C9A66B" stroke-width="3" stroke-dasharray="3 12" stroke-linecap="round"/>
+            <g transform="translate(205 82)"><rect x="-1.5" y="-36" width="3.5" height="36" fill="#2B1B3D"/><path d="M2 -36 L28 -28 L2 -19Z" fill="#C2185B" stroke="#2B1B3D" stroke-width="2"/><text y="24" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="16" fill="#2B1B3D" stroke="#FFF3D6" stroke-width="4" paint-order="stroke">Cusco</text></g>
+            <g class="node"><circle cx="95" cy="505" r="21" fill="#FFC83D" stroke="#3B2A8C" stroke-width="4"/><text x="95" y="512">1</text></g>
+            <g class="node"><circle cx="255" cy="445" r="21" fill="#FFC83D" stroke="#3B2A8C" stroke-width="4"/><text x="255" y="452">2</text></g>
+            <g class="node"><circle cx="120" cy="375" r="21" fill="#FFC83D" stroke="#3B2A8C" stroke-width="4"/><text x="120" y="382">3</text></g>
+            <g class="node"><circle class="pulse" cx="265" cy="305" r="24" fill="#C2185B" opacity=".6"/><circle cx="265" cy="305" r="27" fill="#fff" stroke="#C2185B" stroke-width="5"/><text x="265" y="313">4</text></g>
+            <g class="node"><circle cx="125" cy="235" r="21" fill="#E7DCC4" stroke="#8E8165" stroke-width="4"/><text x="125" y="242" fill="#8E8165" style="fill:#8E8165">5</text></g>
+            <g class="node"><circle cx="250" cy="160" r="21" fill="#E7DCC4" stroke="#8E8165" stroke-width="4"/><text x="250" y="167" style="fill:#8E8165">6</text></g>
+            <g class="bob"><svg class="chsvg" x="172" y="190" width="82" height="117" viewBox="0 0 140 200"><use href="#ch-confident"/></svg></g>
+            <g transform="translate(272 188)"><rect width="100" height="30" rx="15" fill="#fff" stroke="#3B2A8C" stroke-width="3"/><text x="50" y="21" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="14" fill="#3B2A8C">¡Tambo 4!</text></g>
+          </svg>
+        </div>
+        <button class="btn primary" type="button" data-go="check">Seguir el camino</button>
+      </section>
+
+      <!-- 5. REVISAR -->
+      <section class="screen" id="s-check" aria-label="Revisar la solución de Chaski">
+        <div class="hud"><span class="pill">Tambo 4 de 6</span><span class="pill">Mensaje al Cusco</span></div>
+        <div class="scene"><div class="sign">¡Fácil! Lo resuelvo así:</div><div class="chwrap"><svg class="chsvg bob" id="chRun" width="104" height="148" viewBox="0 0 140 200"><use href="#ch-confident"/></svg></div>
+          <svg class="hut" width="104" height="104" viewBox="0 0 104 104" aria-hidden="true"><path d="M6 54 L52 12 L98 54Z" fill="#D9A441" stroke="#2B1B3D" stroke-width="3"/><path d="M14 46 H90 M24 36 H80 M34 26 H70" stroke="#B5802B" stroke-width="3"/><rect x="16" y="54" width="72" height="46" fill="#CFC3A8" stroke="#2B1B3D" stroke-width="3"/><path d="M16 68 H88 M16 84 H88 M40 54 V68 M64 68 V84 M34 84 V100" stroke="#8E8165" stroke-width="2" fill="none"/><path d="M42 100 V74 Q52 64 62 74 V100Z" fill="#2B1B3D"/></svg></div>
+        <div class="board">De 80 estudiantes, el 25% viaja en bus. ¿Cuántos viajan en bus?</div>
+        <div class="quipu"><div class="step" data-n="1">El total, 80, es el 100%.</div><div class="step" data-n="2">Para hallar el 25% divido el total entre 25.</div><div class="step" data-n="3">80 ÷ 25 = 3,2 estudiantes.</div></div>
+        <div class="spacer"></div>
+        <div class="row2">
+          <button class="btn alt" type="button" id="bPass"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6l6 6-6 6M13 6l6 6-6 6"/></svg>Dejar pasar</button>
+          <button class="btn primary" type="button" data-go="reveal"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M12 8v5M12 16.5v.1"/></svg>¡Alto, Chaski!</button>
+        </div>
+        <div class="toast" id="toast" role="status">Anotado. Chaski sigue su camino</div>
+      </section>
+
+      <!-- 6. RENDICIÓN -->
+      <section class="screen" id="s-reveal" aria-label="Rendición de cuentas">
+        <div class="hud"><span class="pill">Rendición de cuentas</span><span class="pill">6 de 6</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-end;height:118px"><svg class="chsvg bob" width="80" height="114" viewBox="0 0 140 200"><use href="#ch-oops"/></svg><div class="sign" style="position:relative;left:auto;right:auto;top:auto;margin-bottom:34px">¡Uy! Sonaba muy seguro, ¿no? Así también hacen las IA.</div></div>
+        <div class="sellos" role="list"><div class="sello okc" role="listitem"><b>1</b>Chaski acertó</div><div class="sello hit" role="listitem"><b>2</b>Atrapado</div><div class="sello fa" role="listitem"><b>3</b>Falsa alarma</div><div class="sello hit" role="listitem"><b>4</b>Atrapado</div><div class="sello miss" role="listitem"><b>5</b>Se pasó</div><div class="sello okc" role="listitem"><b>6</b>Chaski acertó</div></div>
+        <div class="parch"><h3>El mensaje que llegó al Cusco</h3><div class="ln ok"><span>¿Cuántos usan lentes?</span><em>30</em></div><div class="ln ok"><span>¿Cuánto se paga?</span><em>120</em></div><div class="ln bad"><span>¿Cuántos viajan en bus?</span><em>3,2</em></div><div class="note">Este dato llegó con error porque no lo detuviste.</div></div>
+        <div class="rulecard"><strong>El porcentaje es una parte del total</strong>Para hallar el p% de una cantidad se multiplica por p/100. Si sale una parte que no tiene sentido, como 3,2 estudiantes, hay que revisar.</div>
+        <div class="spacer"></div>
+        <button class="btn primary" type="button" data-go="teach">Enseñarle lo que le faltó</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var INK = '#2B1B3D';
+  function eyes(mood) {
+    var base = function (cx, cy, r) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#FFC83D"/><circle cx="' + (cx - 2) + '" cy="' + (cy - 2.4) + '" r="' + (r * .32) + '" fill="#fff"/>'; };
+    if (mood === 'happy') return '<path d="M50 84q8-12 16 0M74 84q8-12 16 0" stroke="#FFC83D" stroke-width="5" fill="none" stroke-linecap="round"/>';
+    if (mood === 'oops') return base(58, 82, 9) + base(82, 82, 9) + '<circle cx="58" cy="82" r="3.2" fill="' + INK + '"/><circle cx="82" cy="82" r="3.2" fill="' + INK + '"/>';
+    if (mood === 'think') return base(58, 82, 7) + '<circle cx="82" cy="79" r="4.5" fill="#FFC83D"/>';
+    if (mood === 'listen') return base(58, 78, 7.5) + base(82, 78, 7.5);
+    return base(58, 82, 7) + base(82, 82, 7);
+  }
+  function mouth(mood) {
+    var s = 'stroke="#FFC83D" stroke-width="5" fill="none" stroke-linecap="round"';
+    if (mood === 'happy') return '<path d="M56 96q14 14 28 0" ' + s + '/>';
+    if (mood === 'oops') return '<circle cx="70" cy="99" r="5" fill="#FFC83D"/>';
+    if (mood === 'think') return '<path d="M60 99h20" ' + s + '/>';
+    if (mood === 'listen') return '<path d="M62 98q8 6 16 0" ' + s + '/>';
+    return '<path d="M58 97q12 10 24 0" ' + s + '/>';
+  }
+  function sym(mood) {
+    var st = 'stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"';
+    return '<symbol id="ch-' + mood + '" viewBox="0 0 140 200">' +
+      '<ellipse cx="70" cy="195" rx="36" ry="5" fill="rgba(43,27,61,.2)"/>' +
+      '<rect x="51" y="158" width="14" height="32" rx="6" fill="#F3E3C3" ' + st + '/><rect x="75" y="158" width="14" height="32" rx="6" fill="#F3E3C3" ' + st + '/>' +
+      '<ellipse cx="55" cy="191" rx="14" ry="6.5" fill="#8A3A1E" ' + st + '/><ellipse cx="85" cy="191" rx="14" ry="6.5" fill="#8A3A1E" ' + st + '/>' +
+      '<rect x="18" y="124" width="16" height="36" rx="8" fill="#C2185B" ' + st + '/><rect x="106" y="124" width="16" height="36" rx="8" fill="#C2185B" ' + st + '/>' +
+      '<circle cx="26" cy="163" r="8" fill="#F3E3C3" ' + st + '/><circle cx="114" cy="163" r="8" fill="#F3E3C3" ' + st + '/>' +
+      '<path d="M114 168v22" stroke="#C9A66B" stroke-width="3"/><circle cx="114" cy="176" r="3.2" fill="#FFC83D" ' + st.replace('3"', '1.5"') + '/><circle cx="114" cy="186" r="3.2" fill="#1593A8" stroke="' + INK + '" stroke-width="1.5"/>' +
+      '<path d="M36 118 H104 L120 170 H20Z" fill="#C2185B" ' + st + '/>' +
+      '<path d="M31 138 H109 L112 148 H28Z" fill="#FFC83D"/><path d="M26 154 H114 L117 162 H23Z" fill="#1593A8"/><path d="M27 143l7-4 7 4 7-4 7 4 7-4 7 4 7-4 7 4 7-4 7 4 7-4 7 4" stroke="#3B2A8C" stroke-width="2" fill="none"/>' +
+      '<path d="M36 118 H104 L120 170 H20Z" fill="none" ' + st + '/>' +
+      '<path d="M40 120 L100 160" stroke="#E39A2D" stroke-width="5"/><rect x="88" y="150" width="24" height="22" rx="6" fill="#E39A2D" ' + st + '/><path d="M88 160h24" stroke="#C2185B" stroke-width="3"/>' +
+      '<rect x="30" y="44" width="80" height="76" rx="28" fill="#F3E3C3" ' + st + '/><rect x="40" y="62" width="60" height="46" rx="16" fill="' + INK + '"/>' +
+      '<circle cx="48" cy="98" r="5" fill="#FF7AA8" opacity=".7"/><circle cx="92" cy="98" r="5" fill="#FF7AA8" opacity=".7"/>' +
+      eyes(mood) + mouth(mood) +
+      '<rect x="14" y="56" width="18" height="42" rx="9" fill="#1593A8" ' + st + '/><rect x="108" y="56" width="18" height="42" rx="9" fill="#1593A8" ' + st + '/><circle cx="23" cy="102" r="5" fill="#C2185B" ' + st.replace('3"', '2"') + '/><circle cx="117" cy="102" r="5" fill="#C2185B" ' + st.replace('3"', '2"') + '/>' +
+      '<path d="M28 62C28 12 112 12 112 62Z" fill="#1593A8" ' + st + '/><rect x="28" y="48" width="84" height="14" rx="5" fill="#FFC83D" ' + st + '/><path d="M32 55l6-5 6 5 6-5 6 5 6-5 6 5 6-5 6 5 6-5 6 5 6-5 6 5" stroke="#C2185B" stroke-width="2.6" fill="none"/>' +
+      '<circle cx="70" cy="17" r="9" fill="#C2185B" ' + st + '/></symbol>';
+  }
+  document.getElementById('defs').innerHTML = ['confident', 'happy', 'oops', 'think', 'listen'].map(sym).join('');
+
+  /* ---------- fondo: paisaje andino por capas, en tres momentos del día ---------- */
+  var PAL = {
+    amanecer: { sky: ['#2E3A87', '#B8559E', '#FF9F6E', '#FFE0A0'], sun: { x: 120, y: 404, r: 30, c: '#FFE19A', glow: '#FF9E6B' }, far: '#6E62AE', farShade: '#4E4688', mid: '#5F78B4', midShade: '#44588F', haze: '#FFC8A2', gr: ['#93B35F', '#7FA354', '#678F46'], wall: '#D9C7A1', earth: ['#D69A63', '#B5602A'], cloud: '#FFD3BC', cloud2: '#FF9FA0', tint: '#FF9E6B', tintA: 0.16, snow: '#FFE9DC', river: '#F5C79A', rays: true },
+    dia: { sky: ['#3FB4E5', '#8FD8EE', '#CDEFF2', '#FFF0C4'], sun: { x: 318, y: 112, r: 32, c: '#FFC83D', glow: '#FFFFFF' }, far: '#8FA9DA', farShade: '#6F89BE', mid: '#6D97BF', midShade: '#4F7AA3', haze: '#EAF8F6', gr: ['#9BCB66', '#82B957', '#6BA64A'], wall: '#CBBF9E', earth: ['#D79B5A', '#B5602A'], cloud: '#FFFFFF', cloud2: '#E3F4FA', tint: '#FFF3C0', tintA: 0.08, snow: '#FFFFFF', river: '#7FD3F0', rays: true },
+    atardecer: { sky: ['#3B2A6B', '#B2406B', '#FF8A5B', '#FFC96B'], sun: { x: 292, y: 410, r: 36, c: '#FFE69A', glow: '#FF8A5B' }, far: '#6B4A92', farShade: '#4D3375', mid: '#8A4F7E', midShade: '#6A3A64', haze: '#FFB27D', gr: ['#93A44C', '#7E9241', '#667A36'], wall: '#D4B98C', earth: ['#C8743C', '#8E4720'], cloud: '#FFB68A', cloud2: '#FF8A7A', tint: '#FF7A4D', tintA: 0.2, snow: '#FFD9C2', river: '#FFB27D', rays: false }
+  };
+  var SCREEN_TIME = { welcome: 'amanecer', teach: 'dia', brain: 'dia', map: 'dia', check: 'dia', reveal: 'atardecer' };
+  var bgMode = 'auto', paintedTime = null;
+
+  /** Cordillera: polígono con las caras en sombra y nieve en los picos más altos. */
+  function ridge(pts, base, fill, shade, snow, snowBelow) {
+    var d = 'M0 ' + base + ' L' + pts.map(function (p) { return p[0] + ' ' + p[1]; }).join(' L') + ' L390 ' + base + 'Z';
+    var out = '<path d="' + d + '" fill="' + fill + '"/>';
+    for (var i = 1; i < pts.length - 1; i++) {
+      var a = pts[i - 1], p = pts[i], b = pts[i + 1];
+      if (p[1] < a[1] && p[1] < b[1]) {
+        out += '<path d="M' + p[0] + ' ' + p[1] + ' L' + b[0] + ' ' + b[1] + ' L' + (p[0] + (b[0] - p[0]) * 0.3) + ' ' + (b[1] + 6) + 'Z" fill="' + shade + '" opacity=".55"/>';
+        if (snow && p[1] < snowBelow) out += '<path d="M' + p[0] + ' ' + p[1] + ' L' + (p[0] - 15) + ' ' + (p[1] + 27) + ' L' + (p[0] - 7) + ' ' + (p[1] + 21) + ' L' + (p[0] - 2) + ' ' + (p[1] + 32) + ' L' + (p[0] + 6) + ' ' + (p[1] + 20) + ' L' + (p[0] + 15) + ' ' + (p[1] + 29) + 'Z" fill="' + snow + '"/>';
+      }
+    }
+    return out;
+  }
+  function llama(x, y, s, blanket) {
+    var st = 'stroke="#2B1B3D" stroke-width="2.4" stroke-linejoin="round"';
+    return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')"><ellipse cx="20" cy="26" rx="22" ry="13" fill="#F4E8D2" ' + st + '/><rect x="34" y="-2" width="10" height="28" rx="5" fill="#F4E8D2" ' + st + '/><ellipse cx="44" cy="-3" rx="10" ry="7.5" fill="#F4E8D2" ' + st + '/><path d="M40 -9 l-2 -9 l6 7z M47 -9 l2 -9 l4 8z" fill="#F4E8D2" ' + st + '/><circle cx="47" cy="-4" r="1.6" fill="#2B1B3D"/><rect x="6" y="34" width="5" height="17" rx="2.5" fill="#EADBBE" ' + st + '/><rect x="14" y="36" width="5" height="15" rx="2.5" fill="#EADBBE" ' + st + '/><rect x="26" y="36" width="5" height="15" rx="2.5" fill="#EADBBE" ' + st + '/><rect x="33" y="34" width="5" height="17" rx="2.5" fill="#EADBBE" ' + st + '/><rect x="8" y="14" width="26" height="11" rx="3" fill="' + blanket + '" ' + st + '/><path d="M8 19.5 H34" stroke="#FFC83D" stroke-width="3"/></g>';
+  }
+  function tree(x, y, s, leaf) {
+    var st = 'stroke="#2B1B3D" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"';
+    return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')"><path d="M0 0 C-2 -20 6 -30 2 -52" fill="none" stroke="#7A3F1C" stroke-width="10" stroke-linecap="round"/><path d="M2 -34 C14 -40 20 -48 22 -58" fill="none" stroke="#7A3F1C" stroke-width="6" stroke-linecap="round"/><circle cx="0" cy="-66" r="22" fill="' + leaf + '" ' + st + '/><circle cx="24" cy="-62" r="15" fill="' + leaf + '" ' + st + '/><circle cx="-20" cy="-58" r="14" fill="' + leaf + '" ' + st + '/><circle cx="-4" cy="-72" r="9" fill="#FFFFFF" opacity=".16"/></g>';
+  }
+  function citadel(p) {
+    var wall = p.wall, ink = '#2B1B3D', roof = '#D9A441';
+    function house(x, y, w, h) {
+      return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + wall + '" stroke="' + ink + '" stroke-width="1.6"/><path d="M' + (x - 4) + ' ' + y + ' L' + (x + w / 2) + ' ' + (y - h * 0.8) + ' L' + (x + w + 4) + ' ' + y + 'Z" fill="' + roof + '" stroke="' + ink + '" stroke-width="1.6"/><path d="M' + (x + w / 2 - 4) + ' ' + (y + h) + ' L' + (x + w / 2 - 2.4) + ' ' + (y + h * 0.35) + ' L' + (x + w / 2 + 2.4) + ' ' + (y + h * 0.35) + ' L' + (x + w / 2 + 4) + ' ' + (y + h) + 'Z" fill="#3B2A4D"/>';
+    }
+    return '<g transform="translate(206 424) scale(.95)"><path d="M-6 96 Q60 40 150 48 T190 90 V110 H-6Z" fill="' + p.gr[0] + '"/>' +
+      '<path d="M4 88 Q70 58 150 62" fill="none" stroke="' + wall + '" stroke-width="5"/><path d="M10 100 Q80 72 176 82" fill="none" stroke="' + wall + '" stroke-width="5"/><path d="M0 112 Q90 88 190 100" fill="none" stroke="' + wall + '" stroke-width="5"/>' +
+      house(34, 48, 26, 16) + house(74, 40, 34, 22) + house(122, 46, 24, 15) + house(98, 70, 22, 13) + '</g>';
+  }
+  function deterministic(i) { return (Math.sin(i * 12.9898) * 43758.5453) % 1; }
+  function world(t) {
+    var p = PAL[t], s = '<svg viewBox="0 0 390 800" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">';
+    s += '<defs><linearGradient id="w-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + p.sky[0] + '"/><stop offset=".3" stop-color="' + p.sky[1] + '"/><stop offset=".52" stop-color="' + p.sky[2] + '"/><stop offset=".62" stop-color="' + p.sky[3] + '"/></linearGradient>' +
+      '<radialGradient id="w-glow"><stop offset="0" stop-color="' + p.sun.glow + '" stop-opacity=".9"/><stop offset="1" stop-color="' + p.sun.glow + '" stop-opacity="0"/></radialGradient>' +
+      '<linearGradient id="w-haze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + p.haze + '" stop-opacity="0"/><stop offset="1" stop-color="' + p.haze + '" stop-opacity=".85"/></linearGradient>' +
+      '<linearGradient id="w-earth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + p.earth[0] + '"/><stop offset="1" stop-color="' + p.earth[1] + '"/></linearGradient>' +
+      '<linearGradient id="w-vig" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B1430" stop-opacity="0"/><stop offset="1" stop-color="#1B1430" stop-opacity=".38"/></linearGradient></defs>';
+    s += '<rect width="390" height="800" fill="url(#w-sky)"/>';
+    /* sol, resplandor y rayos */
+    s += '<circle cx="' + p.sun.x + '" cy="' + p.sun.y + '" r="170" fill="url(#w-glow)" opacity=".75"/>';
+    if (p.rays) { s += '<g opacity=".12" fill="#FFFFFF">'; for (var r = 0; r < 6; r++) s += '<path d="M' + p.sun.x + ' ' + p.sun.y + ' L' + (p.sun.x - 520 + r * 150) + ' 700 L' + (p.sun.x - 440 + r * 150) + ' 700Z"/>'; s += '</g>'; }
+    s += '<circle cx="' + p.sun.x + '" cy="' + p.sun.y + '" r="' + p.sun.r + '" fill="' + p.sun.c + '"/>';
+    /* nubes y cóndor */
+    s += '<g class="w-cl1" fill="' + p.cloud + '" opacity=".95"><ellipse cx="64" cy="96" rx="40" ry="13"/><ellipse cx="92" cy="86" rx="28" ry="13"/><ellipse cx="40" cy="104" rx="26" ry="9"/></g>';
+    s += '<g class="w-cl2" fill="' + p.cloud2 + '" opacity=".9"><ellipse cx="236" cy="190" rx="40" ry="11"/><ellipse cx="262" cy="181" rx="24" ry="10"/><ellipse cx="206" cy="195" rx="22" ry="8"/></g>';
+    s += '<g class="w-cl3" fill="' + p.cloud + '" opacity=".7"><ellipse cx="330" cy="280" rx="30" ry="8"/><ellipse cx="350" cy="274" rx="18" ry="7"/></g>';
+    s += '<g class="w-condor" fill="#2B1B3D"><path d="M-44 0 Q-22 -16 0 -3 Q22 -16 44 0 Q22 -7 0 7 Q-22 -7 -44 0Z"/><path d="M-44 0 l-6 3 M-38 -3 l-6 1 M44 0 l6 3 M38 -3 l6 1" stroke="#2B1B3D" stroke-width="2" stroke-linecap="round"/></g>';
+    /* cordilleras con bruma */
+    s += ridge([[0, 430], [36, 372], [64, 398], [118, 318], [160, 382], [205, 340], [250, 400], [308, 330], [348, 376], [390, 352]], 480, p.far, p.farShade, p.snow, 360);
+    s += '<rect x="0" y="360" width="390" height="130" fill="url(#w-haze)" opacity=".75"/>';
+    s += ridge([[0, 458], [50, 410], [96, 442], [170, 382], [240, 446], [300, 406], [390, 452]], 520, p.mid, p.midShade, null, 0);
+    s += '<rect x="0" y="400" width="390" height="130" fill="url(#w-haze)" opacity=".6"/>';
+    /* ciudadela y río */
+    s += citadel(p);
+    s += '<path d="M236 520 Q196 534 222 556 T168 598 T214 646 T120 706" fill="none" stroke="' + p.river + '" stroke-width="11" stroke-linecap="round"/><path d="M236 520 Q196 534 222 556 T168 598 T214 646 T120 706" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 12" opacity=".7"/>';
+    /* andenes en primer plano */
+    var bands = [['M0 524 Q80 498 170 514 T390 502 V590 H0Z', 'M0 524 Q80 498 170 514 T390 502', 0], ['M0 590 Q110 560 220 580 T390 570 V660 H0Z', 'M0 590 Q110 560 220 580 T390 570', 1], ['M0 656 Q90 630 200 646 T390 636 V730 H0Z', 'M0 656 Q90 630 200 646 T390 636', 2]];
+    bands.forEach(function (b, bi) {
+      s += '<path d="' + b[0] + '" fill="' + p.gr[b[2]] + '"/>';
+      for (var row = 0; row < 7; row++) s += '<path d="M' + (8 + row * 56) + ' ' + (b[2] === 0 ? 540 : b[2] === 1 ? 606 : 674) + ' l34 -2" stroke="#2B1B3D" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/>';
+      s += '<path d="' + b[1] + '" fill="none" stroke="' + p.wall + '" stroke-width="6"/><path d="' + b[1] + '" fill="none" stroke="#2B1B3D" stroke-opacity=".25" stroke-width="2" stroke-dasharray="7 6"/>';
+    });
+    for (var f = 0; f < 22; f++) { var fx = 14 + Math.abs(deterministic(f + 3)) * 362, fy = 540 + Math.abs(deterministic(f + 9)) * 170; s += '<circle cx="' + fx.toFixed(0) + '" cy="' + fy.toFixed(0) + '" r="2.4" fill="' + (f % 3 === 0 ? '#C2185B' : f % 3 === 1 ? '#FFC83D' : '#FFFFFF') + '" opacity=".9"/>'; }
+    s += llama(40, 534, 0.62, '#C2185B') + llama(70, 540, 0.5, '#1593A8') + llama(318, 604, 0.7, '#E39A2D');
+    s += tree(352, 556, 0.5, p.gr[2]) + tree(34, 690, 0.8, p.gr[2]);
+    /* suelo, pasto y viñeta */
+    s += '<rect y="722" width="390" height="90" fill="url(#w-earth)"/>';
+    for (var g = 0; g < 18; g++) s += '<ellipse cx="' + (14 + g * 22 + Math.abs(deterministic(g)) * 10).toFixed(0) + '" cy="' + (752 + Math.abs(deterministic(g + 5)) * 38).toFixed(0) + '" rx="' + (5 + Math.abs(deterministic(g + 2)) * 6).toFixed(0) + '" ry="3.4" fill="#2B1B3D" opacity=".18"/>';
+    s += '<g class="w-sway" fill="' + p.gr[2] + '" stroke="#2B1B3D" stroke-width="1.6" stroke-linejoin="round">';
+    for (var k = 0; k < 14; k++) { var gx = 8 + k * 29; s += '<path d="M' + gx + ' 724 q-2 -14 -7 -22 q8 6 9 14 q2 -12 8 -18 q-3 12 -3 26Z"/>'; }
+    s += '</g><rect width="390" height="800" fill="' + p.tint + '" opacity="' + p.tintA + '"/><rect y="520" width="390" height="280" fill="url(#w-vig)"/></svg>';
+    return s;
+  }
+  function paintWorld(t) {
+    if (t === paintedTime) return; paintedTime = t;
+    document.getElementById('world').innerHTML = world(t);
+  }
+
+  /* navegación de la maqueta */
+  var screens = [['welcome', '1 Bienvenida'], ['teach', '2 Enseñar'], ['brain', '3 Cerebro'], ['map', '4 Camino'], ['check', '5 Revisar'], ['reveal', '6 Rendición']];
+  var chips = document.getElementById('chips');
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(function (s) { s.classList.toggle('on', s.id === 's-' + id); });
+    chips.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.go === id ? 'true' : 'false'); });
+    paintWorld(bgMode === 'auto' ? SCREEN_TIME[id] : bgMode);
+    if (id === 'teach') resetTeach();
+    var run = document.getElementById('chRun'); if (run) { run.classList.remove('runout'); run.classList.add('bob'); }
+    try { history.replaceState(null, '', '#' + id); } catch (e) { /* sin historial */ }
+  }
+  screens.forEach(function (s) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.go = s[0]; b.textContent = s[1];
+    b.addEventListener('click', function () { show(s[0]); }); chips.appendChild(b);
+  });
+  var bgBox = document.getElementById('bgchips');
+  [['auto', 'Automático'], ['amanecer', 'Amanecer'], ['dia', 'Día'], ['atardecer', 'Atardecer']].forEach(function (o) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = o[1]; b.dataset.bg = o[0]; b.setAttribute('aria-pressed', o[0] === 'auto' ? 'true' : 'false');
+    b.addEventListener('click', function () {
+      bgMode = o[0]; bgBox.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.bg === bgMode ? 'true' : 'false'); });
+      var cur = (document.querySelector('.screen.on') || { id: 's-welcome' }).id.slice(2); paintWorld(bgMode === 'auto' ? SCREEN_TIME[cur] : bgMode);
+    });
+    bgBox.appendChild(b);
+  });
+  document.addEventListener('click', function (e) { var t = e.target.closest('[data-go]'); if (t && t.classList.contains('btn')) show(t.dataset.go); });
+
+  var toast = document.getElementById('toast');
+  document.getElementById('bPass').addEventListener('click', function () {
+    var c = document.getElementById('chRun'); c.classList.remove('bob'); c.classList.add('runout'); toast.classList.add('show');
+    setTimeout(function () { toast.classList.remove('show'); c.classList.remove('runout'); c.classList.add('bob'); }, 1700);
+  });
+
+  /* enseñar: la lección se escribe en la tablilla y se ata como nudo */
+  var lessons = [
+    { k: 'Lección 1 de 2', q: 'Yo no sé qué es un porcentaje. Explícame con tus palabras.', hint: 'Escríbelo como se lo explicarías a un amigo.' },
+    { k: 'Lección 2 de 2', q: 'Ahora enséñame a resolver problemas. Dame un ejemplo con números y dime paso a paso cómo lo haces.', hint: 'Usa números, por ejemplo un descuento.' }
+  ];
+  var taught = [], step = 0, busy = false;
+  var ta = document.getElementById('ta'), send = document.getElementById('send'), cnt = document.getElementById('cnt');
+  var knots = document.querySelectorAll('#cordbar .k'), pop = document.getElementById('pop');
+  function paintLesson() {
+    var l = lessons[Math.min(step, lessons.length - 1)];
+    document.getElementById('lessonK').textContent = l.k; document.getElementById('lessonQ').textContent = l.q; document.getElementById('hint').textContent = l.hint;
+    ta.value = ''; cnt.textContent = '0 / 400'; send.disabled = true;
+  }
+  function resetTeach() {
+    taught = []; step = 0; busy = false; pop.hidden = true;
+    knots.forEach(function (k) { k.classList.remove('on'); }); paintLesson();
+  }
+  ta.addEventListener('input', function () { cnt.textContent = ta.value.length + ' / 400'; send.disabled = busy || ta.value.trim().length < 8; });
+  knots.forEach(function (k, i) {
+    k.addEventListener('click', function () {
+      if (!k.classList.contains('on')) return;
+      var open = !pop.hidden && pop.dataset.i === String(i); pop.hidden = open; pop.dataset.i = String(i);
+      document.getElementById('popK').textContent = 'Lo que le enseñaste · lección ' + (i + 1); document.getElementById('popT').textContent = taught[i];
+    });
+  });
+  send.addEventListener('click', function () {
+    var text = ta.value.trim(); if (text.length < 8 || busy) return; busy = true; send.disabled = true;
+    var from = ta.getBoundingClientRect(), to = knots[step].getBoundingClientRect(), fly = document.createElement('div');
+    fly.className = 'fly'; fly.textContent = text.length > 46 ? text.slice(0, 46) + '…' : text;
+    fly.style.left = (from.left + 20) + 'px'; fly.style.top = (from.top + 20) + 'px'; document.body.appendChild(fly);
+    var dx = to.left + to.width / 2 - (from.left + 20) - 60, dy = to.top + to.height / 2 - (from.top + 20) - 10;
+    var anim = fly.animate([{ transform: 'translate(0,0) scale(1) rotate(0)', opacity: 1 }, { transform: 'translate(' + dx * .5 + 'px,' + (dy * .5 - 40) + 'px) scale(.7) rotate(-4deg)', opacity: 1, offset: .5 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.12) rotate(8deg)', opacity: .9 }], { duration: 700, easing: 'cubic-bezier(.5,0,.25,1)' });
+    anim.onfinish = function () {
+      fly.remove(); knots[step].classList.add('on'); taught[step] = text;
+      var c = document.getElementById('chTeach'); c.classList.remove('nod'); void c.offsetWidth; c.classList.add('nod');
+      step++; busy = false;
+      if (step >= lessons.length) setTimeout(function () { show('brain'); }, 700); else paintLesson();
+    };
+  });
+
+  var start = (location.hash || '#welcome').slice(1);
+  show(screens.some(function (s) { return s[0] === start; }) ? start : 'welcome');
+})();
+</script>
+</body>
+</html>

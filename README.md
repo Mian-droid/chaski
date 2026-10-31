@@ -90,7 +90,7 @@ tests/                     Pruebas del núcleo (sin dependencias)
 worker/                    Servidor intermedio (Cloudflare Worker, TypeScript)
 apps-script/               Guardado de eventos en una hoja de Google
 scripts/, deploy/          Empaquetado del sitio y cabeceras para Cloudflare Pages
-mockup/                    Maqueta interactiva del diseño (referencia)
+mockup/                    Maquetas interactivas del diseño: A (noche) y B (textil andino de día)
 docs/                      Arquitectura, requerimientos y guía de contenido
 ```
 
