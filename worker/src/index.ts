@@ -2,6 +2,7 @@
    POST /extract  { text, topic? }  ->  { cards: {K1,K2,K3}, restatement, source: "modelo" }
    La clave de Gemini vive solo aquí, como secreto. Nunca va en la página. */
 import { DEFAULT_MODEL, buildRequest, parseReply, sanitize } from "./extract.ts";
+import { corsHeaders, json } from "./http.ts";
 import { isTopic } from "./topics.ts";
 
 export interface Env {
@@ -18,26 +19,6 @@ const MIN_TEXT = 8;
 const MAX_TEXT = 800;
 /* Menos que los 12 s que espera el juego: si Gemini tarda, el juego lee con reglas de palabras. */
 const TIMEOUT_MS = 10_000;
-
-function corsHeaders(req: Request, env: Env): Record<string, string> {
-  const allowed = (env.ALLOWED_ORIGINS ?? "*").split(",").map((s) => s.trim()).filter(Boolean);
-  const origin = req.headers.get("Origin") ?? "";
-  const allow = allowed.includes("*") ? "*" : allowed.includes(origin) ? origin : "";
-  const h: Record<string, string> = {
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    Vary: "Origin",
-  };
-  if (allow) h["Access-Control-Allow-Origin"] = allow;
-  return h;
-}
-
-function json(data: unknown, status: number, headers: Record<string, string>): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json; charset=utf-8", ...headers },
-  });
-}
 
 /* El modelo va en la dirección de la llamada: solo se aceptan nombres con forma de modelo. */
 function modelName(env: Env): string {
