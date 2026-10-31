@@ -1,13 +1,12 @@
 name = "chaski-lector"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
-compatibility_flags = ["nodejs_compat"]
 
 [vars]
-# Modelo que lee la explicación. claude-haiku-5-5 es más rápido y más barato.
-MODEL = "claude-opus-5-5"
+# Modelo de Gemini que lee la explicación. gemini-3.5-flash-lite responde rápido. gemini-3.8-flash lee mejor pero piensa más y tarda más.
+MODEL = "gemini-3.5-flash-lite"
 # Páginas que pueden llamar al servidor, separadas por coma. "*" acepta cualquiera (solo para pruebas).
 ALLOWED_ORIGINS = "*"
 
 # La clave NO va aquí. Se guarda como secreto:
-#   npx wrangler secret put ANTHROPIC_API_KEY
+#   npx wrangler secret put GEMINI_API_KEY

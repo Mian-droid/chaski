@@ -1,9 +1,9 @@
 /* Lectura de la explicación del estudiante. El modelo solo lee y llena fichas; nunca resuelve problemas. */
 import { z } from "zod";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { TOPICS, type TopicId } from "./topics.ts";
 
-export const DEFAULT_MODEL = "claude-opus-5-5";
+/* Flash-Lite piensa poco por defecto: responde rápido y el juego espera como máximo 12 s. Se cambia con la variable MODEL. */
+export const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 
 const Card = z.object({
   state: z.enum(["bien", "mal", "ausente"]),
@@ -45,19 +45,59 @@ Output fields:
 /** Prompt del tema por defecto, para las pruebas. */
 export const SYSTEM_PROMPT = buildSystem("proporciones");
 
-export function buildParams(text: string, model: string, topic: TopicId = "proporciones") {
+const CARD_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    state: { type: "STRING", enum: ["bien", "mal", "ausente"] },
+    evidence: { type: "STRING" },
+  },
+  required: ["state", "evidence"],
+  propertyOrdering: ["state", "evidence"],
+};
+
+/** Forma de la respuesta que se le pide a Gemini. Se vuelve a validar con `Extraction`: el esquema guía, no garantiza. */
+export const RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: { K1: CARD_SCHEMA, K2: CARD_SCHEMA, K3: CARD_SCHEMA, restatement: { type: "STRING" } },
+  required: ["K1", "K2", "K3", "restatement"],
+  propertyOrdering: ["K1", "K2", "K3", "restatement"],
+};
+
+/** Cuerpo de la llamada a `models/{modelo}:generateContent`. */
+export function buildRequest(text: string, topic: TopicId = "proporciones") {
   return {
-    model,
-    max_tokens: 4000,
-    system: buildSystem(topic),
-    messages: [
-      { role: "user" as const, content: `<student_text>\n${text}\n</student_text>` },
-    ],
-    output_config: {
-      effort: "low" as const,
-      format: zodOutputFormat(Extraction),
+    systemInstruction: { parts: [{ text: buildSystem(topic) }] },
+    contents: [{ role: "user", parts: [{ text: `<student_text>\n${text}\n</student_text>` }] }],
+    generationConfig: {
+      temperature: 0,
+      // Incluye los tokens de razonamiento del modelo, por eso es holgado.
+      maxOutputTokens: 2000,
+      responseMimeType: "application/json",
+      responseSchema: RESPONSE_SCHEMA,
     },
   };
+}
+
+export type Parsed = { ok: true; value: ExtractionT } | { ok: false; why: "blocked" | "invalid" };
+
+/** Saca la lectura de la respuesta de Gemini. Ignora los fragmentos de razonamiento y valida la forma. */
+export function parseReply(res: unknown): Parsed {
+  const r = res as any;
+  if (r?.promptFeedback?.blockReason) return { ok: false, why: "blocked" };
+  const parts: any[] = Array.isArray(r?.candidates?.[0]?.content?.parts) ? r.candidates[0].content.parts : [];
+  const text = parts
+    .filter((p) => p && !p.thought && typeof p.text === "string")
+    .map((p) => p.text)
+    .join("");
+  if (!text) return { ok: false, why: "blocked" };
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return { ok: false, why: "invalid" };
+  }
+  const v = Extraction.safeParse(raw);
+  return v.success ? { ok: true, value: v.data } : { ok: false, why: "invalid" };
 }
 
 function words(s: string): string[] {

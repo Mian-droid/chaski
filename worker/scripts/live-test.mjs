@@ -1,13 +1,16 @@
-/* Prueba en vivo contra el modelo real. GASTA dinero (centavos). Solo para correr tú, con tu clave:
-     ANTHROPIC_API_KEY=sk-ant-... node scripts/live-test.mjs
-   Opcional: MODEL=claude-haiku-5-5 para probar otro modelo. Cubre los tres temas. Imprime lo que leyó el modelo y si coincide con lo esperado. */
+/* Prueba en vivo contra Gemini. Usa tu cuota (o gasta centavos si tu clave es de pago). Solo para correr tú, con tu clave:
+     GEMINI_API_KEY=... node scripts/live-test.mjs        (en PowerShell: $env:GEMINI_API_KEY="..."; node scripts/live-test.mjs)
+   Opcional: MODEL=gemini-3.8-flash para probar otro modelo. PAUSE_MS=4000 (por defecto) espacia las llamadas para no pasar el límite por minuto del plan gratuito.
+   Cubre los tres temas. Imprime lo que leyó el modelo y si coincide con lo esperado. */
 import { handle } from "../src/index.ts";
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error("Falta ANTHROPIC_API_KEY en el entorno.");
+if (!process.env.GEMINI_API_KEY) {
+  console.error("Falta GEMINI_API_KEY en el entorno.");
   process.exit(1);
 }
-const env = { ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY, MODEL: process.env.MODEL };
+const env = { GEMINI_API_KEY: process.env.GEMINI_API_KEY, MODEL: process.env.MODEL };
+const PAUSE_MS = Number(process.env.PAUSE_MS ?? 4000);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /* topic: tema; expect: estado esperado por ficha (null = no se evalúa esa ficha). */
 const cases = [
@@ -39,7 +42,12 @@ const cases = [
 ];
 
 let fails = 0;
+let first = true;
 for (const c of cases) {
+  if (!c.expectStatus) {
+    if (!first) await sleep(PAUSE_MS);
+    first = false;
+  }
   const t0 = Date.now();
   const res = await handle(new Request("https://x/extract", { method: "POST", body: JSON.stringify({ text: c.text, topic: c.topic }) }), env);
   const ms = Date.now() - t0;

@@ -1,23 +1,23 @@
 /* Servidor intermedio de Chaski (Cloudflare Worker).
    POST /extract  { text, topic? }  ->  { cards: {K1,K2,K3}, restatement, source: "modelo" }
-   La clave de Anthropic vive solo aquí, como secreto. Nunca va en la página. */
-import Anthropic from "@anthropic-ai/sdk";
-import { DEFAULT_MODEL, buildParams, sanitize } from "./extract.ts";
+   La clave de Gemini vive solo aquí, como secreto. Nunca va en la página. */
+import { DEFAULT_MODEL, buildRequest, parseReply, sanitize } from "./extract.ts";
 import { isTopic } from "./topics.ts";
 
 export interface Env {
-  ANTHROPIC_API_KEY?: string;
+  GEMINI_API_KEY?: string;
   MODEL?: string;
   ALLOWED_ORIGINS?: string;
 }
 
-/* Lo mínimo que se usa del cliente, para poder probar con uno simulado. */
-export interface ClientLike {
-  messages: { parse: (params: any) => Promise<any> };
-}
+/* Lo mínimo que se usa de `fetch`, para poder probar con uno simulado. */
+export type Fetcher = (url: string, init: RequestInit) => Promise<Response>;
 
+const API = "https://generativelanguage.googleapis.com/v1beta/models";
 const MIN_TEXT = 8;
 const MAX_TEXT = 800;
+/* Menos que los 12 s que espera el juego: si Gemini tarda, el juego lee con reglas de palabras. */
+const TIMEOUT_MS = 10_000;
 
 function corsHeaders(req: Request, env: Env): Record<string, string> {
   const allowed = (env.ALLOWED_ORIGINS ?? "*").split(",").map((s) => s.trim()).filter(Boolean);
@@ -39,7 +39,13 @@ function json(data: unknown, status: number, headers: Record<string, string>): R
   });
 }
 
-export async function handle(req: Request, env: Env, deps: { client?: ClientLike } = {}): Promise<Response> {
+/* El modelo va en la dirección de la llamada: solo se aceptan nombres con forma de modelo. */
+function modelName(env: Env): string {
+  const m = (env.MODEL ?? "").trim();
+  return /^[a-z0-9][a-z0-9.-]*$/.test(m) ? m : DEFAULT_MODEL;
+}
+
+export async function handle(req: Request, env: Env, deps: { fetch?: Fetcher } = {}): Promise<Response> {
   const h = corsHeaders(req, env);
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
 
@@ -61,21 +67,38 @@ export async function handle(req: Request, env: Env, deps: { client?: ClientLike
     return json({ error: `el texto debe tener entre ${MIN_TEXT} y ${MAX_TEXT} caracteres` }, 400, h);
   }
 
-  if (!deps.client && !env.ANTHROPIC_API_KEY) return json({ error: "el servidor no tiene clave configurada" }, 500, h);
-  const client: ClientLike =
-    deps.client ?? (new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: 20_000, maxRetries: 1 }) as unknown as ClientLike);
+  if (!env.GEMINI_API_KEY) return json({ error: "el servidor no tiene clave configurada" }, 500, h);
+  const call: Fetcher = deps.fetch ?? ((u, i) => fetch(u, i));
 
+  let upstream: Response;
   try {
-    const res = await client.messages.parse(buildParams(text, env.MODEL || DEFAULT_MODEL, topic));
-    if (res.stop_reason === "refusal") return json({ error: "el modelo no respondió" }, 502, h);
-    if (!res.parsed_output) return json({ error: "respuesta sin formato" }, 502, h);
-    return json(sanitize(res.parsed_output, text), 200, h);
-  } catch (e) {
-    if (e instanceof Anthropic.RateLimitError) return json({ error: "demasiadas solicitudes, intenta de nuevo" }, 503, h);
-    if (e instanceof Anthropic.APIConnectionError) return json({ error: "sin conexión con el modelo" }, 502, h);
-    if (e instanceof Anthropic.APIError) return json({ error: "error del modelo" }, 502, h);
-    return json({ error: "error interno" }, 500, h);
+    upstream = await call(`${API}/${modelName(env)}:generateContent`, {
+      method: "POST",
+      // La clave va en la cabecera y no en la dirección, para que no quede en registros.
+      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+      body: JSON.stringify(buildRequest(text, topic)),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+  } catch {
+    return json({ error: "sin conexión con el modelo" }, 502, h);
   }
+
+  if (!upstream.ok) {
+    // El detalle va al registro del servidor, nunca al navegador. No incluye el texto del estudiante.
+    console.error("gemini", upstream.status, (await upstream.text().catch(() => "")).slice(0, 300));
+    if (upstream.status === 429) return json({ error: "demasiadas solicitudes, intenta de nuevo" }, 503, h);
+    return json({ error: "error del modelo" }, 502, h);
+  }
+
+  let data: unknown;
+  try {
+    data = await upstream.json();
+  } catch {
+    return json({ error: "respuesta sin formato" }, 502, h);
+  }
+  const parsed = parseReply(data);
+  if (!parsed.ok) return json({ error: parsed.why === "blocked" ? "el modelo no respondió" : "respuesta sin formato" }, 502, h);
+  return json(sanitize(parsed.value, text), 200, h);
 }
 
 export default {
