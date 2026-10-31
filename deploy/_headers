@@ -1,0 +1,7 @@
+# Cabeceras para Cloudflare Pages (se copian a dist/_headers al empaquetar).
+# No hay CSP a propósito: el juego usa estilos en línea y fuentes de Google, y una CSP mal ajustada lo rompería.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()

@@ -6,8 +6,12 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "serve": "python -m http.server 5190",
-    "test": "npm run test:core && npm run test:worker",
+    "test": "npm run test:core && npm run test:site && npm run test:worker",
     "test:core": "node tests/core.test.js",
-    "test:worker": "npm --prefix worker test"
+    "test:site": "node tests/build-site.test.js",
+    "test:worker": "npm --prefix worker test",
+    "build:site": "node scripts/build-site.mjs",
+    "deploy:worker": "npm --prefix worker run deploy",
+    "deploy:site": "npm run build:site && npx wrangler pages deploy dist --project-name chaski"
   }
 }
