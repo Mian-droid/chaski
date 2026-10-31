@@ -106,6 +106,7 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 - **Columnas de `events`:** `eid` (identificador único del evento: partida, hora, tipo y lección o problema), `ts` (hora en milisegundos), `cls` (código de clase en mayúsculas), `alias` (apodo, nunca el nombre), `topic` (tema), `sid` (partida), `type` (`start`, `teach`, `brain`, `ex` o `probe`) y `data` (el evento completo, en JSON).
 - **Pocas escrituras.** El juego envía los eventos en lotes de hasta 100, como máximo cada 8 segundos y siempre al llegar a la rendición y al cierre, de modo que el panel ve el avance sin una escritura por clic. Una partida genera de 16 a 20 eventos y, contando la tabla y sus dos índices, unas 70 filas escritas.
 - **Una sola puerta a la base.** Solo `worker/src/events.ts` conoce la base de datos, detrás de una interfaz mínima (`prepare`, `bind`, `run`, `all`, `batch`). Las pruebas la reemplazan por una base en memoria.
+- **Sin datos personales.** `worker/src/pii.ts` oculta correos, teléfonos y documentos de 8 cifras del texto que va a la IA y de los campos `text` y `restatement` que se guardan; el juego ya los frena antes de enviar (`ChaskiCore.personalData`). Es una red de seguridad contra descuidos, no una garantía.
 - **Lectura acotada e incremental.** El panel pide los eventos de todas las salas o de una sola (`cls`, opcional) y el servidor devuelve como máximo 20 000 filas, con `last` (el último identificador) y `more`. Mientras está abierto, el panel pide cada 15 segundos solo lo nuevo (`since`). Las salas son una etiqueta visual: sin código, la partida va a la sala `GENERAL`. Borrar exige indicar la sala.
 - **Capacidad.** Con los límites del plan gratuito de Cloudflare D1 (100 000 filas escritas por día y 500 MB por base), una base soporta del orden de 1 400 partidas por día y entre 10 000 y 30 000 partidas guardadas, según el tamaño de los textos. Las cifras salen de la documentación de D1 y de las dimensiones de un evento, no de una prueba de carga.
 - **Cómo crece.** Primero, el plan de pago de D1 (10 GB por base y 50 millones de escrituras al mes incluidas). Después, una base por colegio o por clase, con réplicas de lectura. Si hicieran falta cuentas de docentes, permisos por colegio o consultas entre colegios, el registro de eventos se exporta con un `SELECT` y se importa a Postgres (por ejemplo Supabase) reescribiendo solo `events.ts`.
@@ -122,10 +123,10 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 
 | Qué | Dónde | Cuántas |
 |---|---|---|
-| Contenido de los tres temas (cuentas verificadas de forma independiente), cerebro, lectura con reglas y con servidor simulado, originalidad, métricas | `tests/core.test.js` | 36 |
+| Contenido de los tres temas (cuentas verificadas de forma independiente), cerebro, lectura con reglas y con servidor simulado, originalidad, métricas | `tests/core.test.js` | 37 |
 | Figuras de los problemas: cada gráfico muestra datos del enunciado, marca una sola incógnita y no revela la respuesta; detección de explicaciones demasiado vagas | `tests/figures.test.js` | 9 |
-| Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
-| Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 18 |
-| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, lectura de todas las salas o de una y de lo nuevo, borrado, límites) | `worker/test/*.test.ts` | 40 |
+| Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 7 |
+| Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 19 |
+| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, lectura de todas las salas o de una y de lo nuevo, borrado, límites) | `worker/test/*.test.ts` | 42 |
 
 No hay pruebas automáticas de la interfaz.

@@ -42,6 +42,8 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RF-E21 | Si la explicación fue tan vaga que Chaski no pudo entender nada, pedir una vez que se la expliquen de otra manera, con un ejemplo con números. No repreguntar cuando Chaski entendió algo mal. |
 | RF-E22 | Mostrar un gráfico (tabla, barra de porcentaje o balanza) en los problemas que lo tienen, con los datos del enunciado y la incógnita marcada, sin revelar la respuesta. |
 | RF-E23 | Avisar, antes de las preguntas de seguimiento, qué viene y que todavía no se dice cómo le fue a Chaski. |
+| RF-E24 | No enviar a la IA ni guardar correos, teléfonos ni documentos de 8 cifras que el estudiante escriba por descuido: el juego pide quitarlos y el servidor los oculta. |
+| RF-E25 | Que cada pantalla del juego quepa en la ventana sin desplazarse, salvo la rendición final. |
 
 ### 2.2 Docente
 
@@ -146,10 +148,10 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 
 | Qué | Dónde | Pruebas |
 |---|---|---|
-| Contenido de los tres temas con cuentas verificadas de forma independiente, cerebro, lectura con reglas y con servidor simulado, originalidad y métricas | `tests/core.test.js` | 36 |
+| Contenido de los tres temas con cuentas verificadas de forma independiente, cerebro, lectura con reglas y con servidor simulado, originalidad y métricas | `tests/core.test.js` | 37 |
 | Figuras de los problemas y detección de explicaciones vagas | `tests/figures.test.js` | 9 |
-| Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
-| Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 18 |
-| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, lectura de todas las salas y de lo nuevo, borrado, topes de uso) | `worker/test/*.test.ts` | 40 |
+| Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 7 |
+| Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 19 |
+| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, lectura de todas las salas y de lo nuevo, borrado, topes de uso) | `worker/test/*.test.ts` | 42 |
 
 `npm test` las corre todas.

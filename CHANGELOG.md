@@ -5,6 +5,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 ## [Sin publicar]
 
 ### Agregado
+- **Datos personales:** si el estudiante escribe un correo, un teléfono o un documento de 8 cifras, el juego no lo envía y le pide quitarlo. El servidor también lo oculta (`[dato oculto]`) antes de mandar el texto a la IA y antes de guardar el evento. Pruebas: núcleo 37, servidor 42.
+- **Chaski corre al dejar pasar:** una versión de espaldas, con piernas y brazos en movimiento, que se achica hacia el horizonte en lugar de salir cortado por el borde de la columna.
+- **Página 404** para las direcciones que no existen (antes devolvían el juego con código 200).
 - **Panel en vivo:** el panel muestra las partidas de todas las salas, o de una, con el progreso de cada estudiante (dónde va, hace cuánto) y un punto verde si está jugando. Se actualiza solo cada 15 segundos mientras está abierto, pidiendo únicamente lo nuevo. El código de clase es opcional al jugar. El juego envía los eventos cada pocos segundos y no solo al final. Borrar exige elegir la sala. Pruebas del servidor: 40.
 - **Gráficos en los problemas** (`js/figures.js`): tabla de valores, barra de porcentaje y balanza, en los tres temas. Muestran los datos del enunciado con la incógnita marcada y llevan descripción para lectores de pantalla. Pruebas de las figuras: 9.
 - **Repregunta de Chaski:** si la explicación fue tan vaga que no se entendió nada, Chaski pide una vez que se la expliquen con un ejemplo con números. No repregunta cuando entendió algo mal.
@@ -25,6 +28,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 - Cabeceras para Cloudflare Pages (`deploy/_headers`) y guía de despliegue en `docs/despliegue.md`.
 
 ### Cambiado
+- **Cada pantalla cabe en la ventana sin desplazarse**, desde celulares de 360 x 640 hasta laptops de 1366 x 650; solo la rendición final se desplaza, porque se lee con calma. El alto de Chaski, los espacios y las piezas se ajustan al alto disponible.
+- **Las tarjetas de lo que Chaski entendió son más descriptivas:** cada una trae su nombre y una línea neutra de qué trata (por ejemplo, «Sube y baja: qué pasa si una sube y la otra baja»), sin decir si Chaski la sabe bien.
+- **La burbuja «Lo que le enseñaste» no tapa el botón:** deja pasar los clics, se cierra con Escape y al escribir.
+- **La rendición muestra el enunciado completo** cuando la pregunta sola no basta (en Ecuaciones, «¿Cuánto vale x?» no decía cuál era la ecuación).
+- Tras «¡Alto, Chaski!», la frase es neutra y no sugiere si el estudiante acertó. «Enseñarle: …» después de la rendición nombra la idea en la que Chaski se equivocó.
+- El panel escribe las señales de originalidad con palabras («Texto pegado», «No relaciona las cantidades») y explica la escala de dependencia (de 0, revisa todo, a 1, confía a ciegas).
 - La lectura con el modelo reintenta una vez si falla la conexión o Google responde con un error 5xx, dentro del mismo plazo de 10 segundos. Los fallos de conexión y de Google quedan en el registro del servidor con su tipo (nunca con el texto del estudiante).
 - Tope por defecto de envíos de partidas por IP: 1 200 cada 10 minutos (un colegio entero comparte una IP y ahora se envía con más frecuencia).
 - La salida de Chaski al dejar pasar un problema ya no cruza la zona de la tarea: se recorta en su columna y se desvanece.
