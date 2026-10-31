@@ -54,23 +54,36 @@ export async function handle(req: Request, env: Env, deps: { fetch?: Fetcher } =
   if (!lim.ok) return json({ error: lim.error }, 429, { ...h, "Retry-After": String(lim.retryAfter) });
   const call: Fetcher = deps.fetch ?? ((u, i) => fetch(u, i));
 
-  let upstream: Response;
+  let upstream: Response | undefined;
   // AbortController y no AbortSignal.timeout: funciona igual en Workers, en Pages Functions y en Node sin depender de la fecha de compatibilidad.
+  // El plazo es uno solo para los dos intentos, así que reintentar nunca pasa del tiempo que espera el juego.
   const abort = new AbortController();
   const timer = setTimeout(() => abort.abort(), TIMEOUT_MS);
   try {
-    upstream = await call(`${API}/${modelName(env)}:generateContent`, {
-      method: "POST",
-      // La clave va en la cabecera y no en la dirección, para que no quede en registros.
-      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-      body: JSON.stringify(buildRequest(text, topic)),
-      signal: abort.signal,
-    });
-  } catch {
-    return json({ error: "sin conexión con el modelo" }, 502, h);
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        upstream = await call(`${API}/${modelName(env)}:generateContent`, {
+          method: "POST",
+          // La clave va en la cabecera y no en la dirección, para que no quede en registros.
+          headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+          body: JSON.stringify(buildRequest(text, topic)),
+          signal: abort.signal,
+        });
+      } catch (e) {
+        // Solo el tipo de fallo va al registro, nunca el texto del estudiante.
+        console.error("gemini sin conexión", abort.signal.aborted ? "plazo agotado" : (e as Error)?.name ?? "error", "intento", attempt);
+        if (abort.signal.aborted || attempt === 2) return json({ error: "sin conexión con el modelo" }, 502, h);
+        continue;
+      }
+      // Un fallo del lado de Google (5xx) suele pasar solo: se reintenta una vez.
+      if (upstream.status < 500 || attempt === 2) break;
+      console.error("gemini", upstream.status, "intento", attempt);
+      await upstream.body?.cancel().catch(() => {});
+    }
   } finally {
     clearTimeout(timer);
   }
+  if (!upstream) return json({ error: "sin conexión con el modelo" }, 502, h);
 
   if (!upstream.ok) {
     // El detalle va al registro del servidor, nunca al navegador. No incluye el texto del estudiante.

@@ -5,7 +5,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 ## [Sin publicar]
 
 ### Agregado
-- **Panel en vivo:** el panel muestra las partidas de todas las salas, o de una, con el progreso de cada estudiante (dónde va, hace cuánto) y un punto verde si está jugando. Se actualiza solo cada 15 segundos mientras está abierto, pidiendo únicamente lo nuevo. El código de clase es opcional al jugar. El juego envía los eventos cada pocos segundos y no solo al final. Borrar exige elegir la sala. Pruebas del servidor: 39.
+- **Panel en vivo:** el panel muestra las partidas de todas las salas, o de una, con el progreso de cada estudiante (dónde va, hace cuánto) y un punto verde si está jugando. Se actualiza solo cada 15 segundos mientras está abierto, pidiendo únicamente lo nuevo. El código de clase es opcional al jugar. El juego envía los eventos cada pocos segundos y no solo al final. Borrar exige elegir la sala. Pruebas del servidor: 40.
 - **Gráficos en los problemas** (`js/figures.js`): tabla de valores, barra de porcentaje y balanza, en los tres temas. Muestran los datos del enunciado con la incógnita marcada y llevan descripción para lectores de pantalla. Pruebas de las figuras: 9.
 - **Repregunta de Chaski:** si la explicación fue tan vaga que no se entendió nada, Chaski pide una vez que se la expliquen con un ejemplo con números. No repregunta cuando entendió algo mal.
 - **Pausa antes de las preguntas de seguimiento:** una pantalla explica qué viene antes de pasar de los problemas a las preguntas.
@@ -25,6 +25,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 - Cabeceras para Cloudflare Pages (`deploy/_headers`) y guía de despliegue en `docs/despliegue.md`.
 
 ### Cambiado
+- La lectura con el modelo reintenta una vez si falla la conexión o Google responde con un error 5xx, dentro del mismo plazo de 10 segundos. Los fallos de conexión y de Google quedan en el registro del servidor con su tipo (nunca con el texto del estudiante).
 - Tope por defecto de envíos de partidas por IP: 1 200 cada 10 minutos (un colegio entero comparte una IP y ahora se envía con más frecuencia).
 - La salida de Chaski al dejar pasar un problema ya no cruza la zona de la tarea: se recorta en su columna y se desvanece.
 - **La lectura con el modelo corre dentro de Cloudflare Pages** como Pages Function (`functions/extract.ts`): un solo proyecto, sin Worker aparte ni CORS. En el empaquetado, `EXTRACT_URL` acepta una ruta del mismo sitio y, en Pages, `/extract` se usa sola. `zod` pasa a la raíz. El Worker independiente sigue disponible.

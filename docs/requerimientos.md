@@ -150,6 +150,6 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 | Figuras de los problemas y detección de explicaciones vagas | `tests/figures.test.js` | 9 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
 | Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 18 |
-| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, lectura de todas las salas y de lo nuevo, borrado, topes de uso) | `worker/test/*.test.ts` | 39 |
+| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, lectura de todas las salas y de lo nuevo, borrado, topes de uso) | `worker/test/*.test.ts` | 40 |
 
 `npm test` las corre todas.

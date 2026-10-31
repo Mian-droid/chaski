@@ -138,6 +138,41 @@ test("CORS: preajuste, ruta inexistente y origen no permitido", async () => {
   assert.equal(allowed.headers.get("Access-Control-Allow-Origin"), "https://mi-clase.example");
 });
 
+test("un fallo pasajero de red o de Google se reintenta una vez; el plazo agotado y los errores del cliente no", async () => {
+  const quiet = console.error;
+  console.error = () => {};
+  try {
+    const sequence = (steps: ("red" | 500 | 429 | "ok")[]) => {
+      let n = 0;
+      const good = JSON.stringify(envelope(reading(card("bien", "pagas el doble"))));
+      return {
+        get calls() { return n; },
+        fetch: async () => {
+          const step = steps[Math.min(n++, steps.length - 1)];
+          if (step === "red") throw new TypeError("fallo de red");
+          if (step === "ok") return new Response(good, { status: 200 });
+          return new Response("{}", { status: step });
+        },
+      };
+    };
+    const run = async (f: { fetch: any }) => handle(req({ text: GOOD }), ENV, { fetch: f.fetch });
+    const a = sequence(["red", "ok"]);
+    assert.equal((await run(a)).status, 200);
+    assert.equal(a.calls, 2);
+    const b = sequence([500, "ok"]);
+    assert.equal((await run(b)).status, 200);
+    assert.equal(b.calls, 2);
+    const c = sequence(["red", "red"]);
+    assert.equal((await run(c)).status, 502);
+    assert.equal(c.calls, 2, "no reintenta más de una vez");
+    const d = sequence([429]);
+    assert.equal((await run(d)).status, 503);
+    assert.equal(d.calls, 1, "una cuota agotada no se reintenta");
+  } finally {
+    console.error = quiet;
+  }
+});
+
 test("errores de Gemini devuelven 502 o 503 y nunca revientan", async () => {
   const status = async (f: { fetch: any }) => (await handle(req({ text: GOOD }), ENV, { fetch: f.fetch })).status;
   const quiet = console.error;

@@ -126,6 +126,6 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 | Figuras de los problemas: cada gráfico muestra datos del enunciado, marca una sola incógnita y no revela la respuesta; detección de explicaciones demasiado vagas | `tests/figures.test.js` | 9 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
 | Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 18 |
-| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, lectura de todas las salas o de una y de lo nuevo, borrado, límites) | `worker/test/*.test.ts` | 39 |
+| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, lectura de todas las salas o de una y de lo nuevo, borrado, límites) | `worker/test/*.test.ts` | 40 |
 
 No hay pruebas automáticas de la interfaz.

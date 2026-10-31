@@ -42,12 +42,12 @@ Sin servidor intermedio configurado, Chaski lee la explicación con reglas de pa
 ## Pruebas
 
 ```bash
-npm test                  # núcleo (36), figuras (9), dibujo (6), empaquetado del sitio (18) y servidor (39)
+npm test                  # núcleo (36), figuras (9), dibujo (6), empaquetado del sitio (18) y servidor (40)
 npm run test:core         # solo el núcleo
 npm run test:figures      # solo las figuras de los problemas (9)
 npm run test:scenery      # solo el dibujo (6)
 npm run test:site         # solo el empaquetado del sitio (18)
-npm run test:worker       # solo el servidor (39)
+npm run test:worker       # solo el servidor (40)
 ```
 
 Requiere Node 22 o superior. No hay dependencias en el juego; la lectura con el modelo usa solo `zod` (declarado en la raíz para que Cloudflare lo instale) y llama a la API de Gemini con `fetch`.
