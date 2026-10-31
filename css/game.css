@@ -15,7 +15,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: #7FD0EC; color: var(--ink); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 button, input, textarea { font: inherit; color: inherit; }
-button { cursor: pointer; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 p { margin: 0; }
 :focus-visible { outline: 3px solid var(--turqd); outline-offset: 2px; border-radius: 8px; }
 
@@ -38,16 +38,15 @@ p { margin: 0; }
 /* Estructura: una columna en el celular; en pantallas anchas, Chaski a la izquierda y la tarea a la derecha,
    todo el bloque centrado en la pantalla. */
 .cols { flex: 1; display: grid; gap: 14px; align-content: center; max-width: 620px; width: 100%; margin-inline: auto; }
-.hero-col { display: flex; align-items: flex-end; gap: 10px; min-width: 0; overflow-x: clip; }
+.hero-col { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 10px; min-width: 0; overflow-x: clip; }
 .panel-col { display: grid; gap: 12px; align-content: center; min-width: 0; position: relative; z-index: 2; }
 .hero-col .chsvg { flex: none; width: var(--chw, 110px); height: auto; }
 .duo { display: flex; align-items: flex-end; gap: 10px; }
 .duo .hut { display: none; }
 @media (min-width: 880px) {
   .cols { max-width: none; grid-template-columns: minmax(300px, 1fr) minmax(430px, 560px); gap: clamp(20px, 4vw, 56px); align-items: center; }
-  .hero-col { flex-direction: column; justify-content: center; align-items: center; gap: 14px; }
+  .hero-col { justify-content: center; gap: 14px; }
   .hero-col .chsvg { --chw: clamp(150px, 40vh, 270px); filter: drop-shadow(0 8px 0 rgba(58, 36, 18, .22)); }
-  .hero-col > .hint, .hero-col > .bubble { order: -1; }
   .duo .hut { display: block; }
   .cols.tall { align-items: start; }
   .cols.tall .hero-col { position: sticky; top: 16px; justify-content: flex-start; }
@@ -72,8 +71,7 @@ svg.ic { width: 22px; height: 22px; flex: none; }
 @keyframes bob { 50% { transform: translateY(-5px); } }
 .nod { animation: nod .6s ease-in-out 1; }
 @keyframes nod { 30% { transform: translateY(6px) rotate(-2deg); } 60% { transform: translateY(-3px); } }
-/* Chaski se va hacia la derecha pero sin cruzar por encima del problema: se desvanece dentro de su columna y el contenido queda por delante. */
-/* Chaski corre de espaldas hacia el horizonte: piernas y brazos alternan, y se achica hasta perderse. */
+/* Chaski se va caminando hacia la derecha: piernas y brazos alternan, se inclina un poco y se desvanece al final. */
 .runner .rl, .runner .ra, .runner .rb { transform-box: fill-box; }
 .runner .rl, .runner .ra { transform-origin: 50% 0; }
 .runner .rl1 { animation: stride .32s ease-in-out infinite alternate; } .runner .rl2 { animation: stride .32s ease-in-out infinite alternate-reverse; }
@@ -82,18 +80,22 @@ svg.ic { width: 22px; height: 22px; flex: none; }
 @keyframes stride { from { transform: translateY(0) rotate(-8deg); } to { transform: translateY(-16px) rotate(8deg); } }
 @keyframes swing { from { transform: rotate(-20deg); } to { transform: rotate(20deg); } }
 @keyframes hop { from { transform: translateY(0); } to { transform: translateY(-4px); } }
-.runner.away { transform-origin: 50% 100%; animation: away 1.1s cubic-bezier(.35, 0, .75, .7) forwards; }
-@keyframes away { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(34%, -70%) scale(.22); opacity: 0; } }
-.bubble { position: relative; background: #fff; color: var(--ink); border: 3px solid var(--ink); border-radius: 16px; padding: 10px 14px; font-weight: 600; font-size: .98rem; display: grid; gap: 6px; box-shadow: 0 4px 0 var(--shadow); max-width: 340px; }
-.hero-col > .bubble { flex: 1; margin-bottom: 40px; z-index: 2; }
-.hero-col > .bubble::before { content: ""; position: absolute; left: -14px; bottom: 16px; border: 8px solid transparent; border-right-color: var(--ink); border-left: 0; }
-@media (min-width: 880px) {
-  .hero-col > .bubble { flex: none; margin: 0 0 4px; }
-  .hero-col > .bubble::before { left: 50%; bottom: -14px; border: 8px solid transparent; border-top-color: var(--ink); border-bottom: 0; transform: translateX(-50%); }
-}
+.runner.away { animation: away 1.2s cubic-bezier(.4, 0, .8, 1) forwards; }
+@keyframes away { 0% { transform: translateX(0) rotate(0); opacity: 1; } 15% { transform: translateX(10%) rotate(5deg); opacity: 1; } 70% { opacity: 1; } 100% { transform: translateX(260%) rotate(5deg); opacity: 0; } }
+.bubble { position: relative; background: #fff; color: var(--ink); border: 3px solid var(--ink); border-radius: 18px; padding: 10px 14px; font-weight: 600; font-size: .98rem; display: grid; gap: 6px; box-shadow: 0 4px 0 var(--shadow); max-width: min(100%, 400px); }
+.bubble .kicker { margin: 0; }
+.bubble .sub { font: 1.1rem/1.15 var(--hand); color: #5A3A17; margin: 0; }
+.bubble p { margin: 0; }
+/* Lo que dice Chaski sale siempre en una burbuja sobre su cabeza, con la colita hacia abajo. */
+.hero-col > .bubble { order: -1; flex: none; margin: 0 0 8px; z-index: 2; }
+.hero-col > .bubble::before { content: ""; position: absolute; left: 50%; bottom: -14px; border: 8px solid transparent; border-top-color: var(--ink); border-bottom: 0; transform: translateX(-50%); }
+.hero-col > .bubble::after { content: ""; position: absolute; left: 50%; bottom: -9px; border: 6px solid transparent; border-top-color: #fff; border-bottom: 0; transform: translateX(-50%); }
+/* La boca de Chaski se mueve unos segundos cuando habla y vuelve a su gesto. Sin animación si se pidió menos movimiento. */
+.talking .mtalk { transform-box: fill-box; transform-origin: 50% 40%; animation: talk .3s ease-in-out 10; }
+.talking .mth { animation: talkhide 3s steps(1, end) 1; }
+@keyframes talk { 0%, 100% { opacity: 1; transform: scaleY(.15); } 30% { opacity: 1; transform: scaleY(1); } 60% { opacity: 1; transform: scaleY(.45); } 80% { opacity: 1; transform: scaleY(.85); } }
+@keyframes talkhide { from, to { opacity: 0; } }
 .hint { font: 1.15rem/1.15 var(--hand); color: #3A2B12; background: rgba(255, 244, 218, .92); border: 2px dashed var(--terra); border-radius: 12px; padding: 6px 10px; }
-.hero-col > .hint { flex: 1; margin-bottom: 30px; max-width: 340px; }
-@media (min-width: 880px) { .hero-col > .hint { flex: none; margin: 0; } }
 
 /* Paneles de tela */
 .card { position: relative; background: var(--cream); color: var(--ink); border: 3px solid var(--ink); border-radius: 18px; padding: 22px 16px 16px; display: grid; gap: 10px; box-shadow: 0 5px 0 var(--shadow); }
@@ -146,13 +148,22 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 .tablet textarea::placeholder { color: rgba(74, 46, 20, .55); }
 /* Dictado por voz: botón de micrófono bajo la tablilla y su mensaje de estado. */
 .tablet .voicerow { display: flex; align-items: center; gap: 10px; padding: 4px 2px 2px; flex-wrap: wrap; }
-.tablet .mic { display: inline-flex; align-items: center; gap: 6px; border: 3px solid var(--ink); border-radius: 99px; background: var(--cream); color: var(--ink); font: 800 .95rem var(--display); min-height: 44px; padding: 4px 14px; cursor: pointer; box-shadow: 0 3px 0 var(--shadow); }
+.tablet .mic { display: inline-flex; align-items: center; gap: 6px; border: 3px solid var(--ink); border-radius: 99px; background: var(--cream); color: var(--ink); font: 800 .95rem var(--display); min-height: 44px; padding: 4px 14px; cursor: pointer; box-shadow: 0 3px 0 var(--shadow); transition: transform .06s, box-shadow .06s; }
+.tablet .mic:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 0 0 var(--shadow); }
 .tablet .mic .ic { width: 20px; height: 20px; }
+/* Micrófono y cuadrado de parar viven juntos en el botón y se cruzan al cambiar de estado. */
+.micic { display: grid; flex: none; }
+.micic svg { grid-area: 1 / 1; filter: blur(0px); transition-property: scale, opacity, filter; transition-duration: .3s; transition-timing-function: cubic-bezier(.2, 0, 0, 1); }
+.micic svg:last-child, .mic.on .micic svg:first-child { opacity: 0; scale: .25; filter: blur(4px); }
+.mic.on .micic svg:last-child { opacity: 1; scale: 1; filter: blur(0px); }
 .tablet .mic.on { background: var(--magenta); color: #fff; border-color: var(--ink); animation: micpulse 1.2s ease-in-out infinite; }
-.tablet .mic:disabled { background: #DCCBB8; color: #7A6552; cursor: not-allowed; box-shadow: none; }
+.tablet .mic:disabled { background: #DCCBB8; color: #7A6552; cursor: not-allowed; box-shadow: 0 3px 0 rgba(58, 36, 18, .25); }
 .tablet .voicemsg { margin: 0; flex: 1 1 160px; font-size: .8rem; font-weight: 700; color: #5A3A17; min-height: 1.1em; }
 @keyframes micpulse { 50% { box-shadow: 0 3px 0 var(--shadow), 0 0 0 6px rgba(194, 24, 91, .25); } }
-@media (prefers-reduced-motion: reduce) { .tablet .mic.on { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .tablet .mic.on { animation: none; } .tablet .mic { transition: none; }
+  .micic svg, .mic.on .micic svg { scale: 1 !important; filter: none !important; transition-property: opacity; transition-duration: .15s; }
+}
 .tablet .foot { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: .78rem; color: #5A3A17; padding: 2px 4px 0; }
 .fly { position: fixed; z-index: 50; max-width: 170px; background: var(--cream); border: 3px solid var(--ink); border-radius: 10px; padding: 4px 8px; font: 1rem/1.1 var(--hand); color: var(--ink); pointer-events: none; }
 .cordwrap { position: relative; }
@@ -175,7 +186,8 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 .hang .f::before { content: ""; position: absolute; left: 50%; top: 0; width: 3px; height: 24px; background: #7A4D26; transform: translateX(-50%); }
 .hang .tab { border-radius: 14px; background: linear-gradient(#D9D2C4, #B9B0A0); border: 3px solid #7C7364; padding: 12px 6px 10px; font: 800 .82rem/1.1 var(--display); color: #5B5446; min-height: 92px; display: grid; place-items: center; gap: 4px; }
 .hang .tab b { font: 800 .9rem/1.1 var(--display); }
-.hang .tab small { display: block; font: 600 .7rem/1.15 system-ui, sans-serif; margin-top: 3px; opacity: .85; }
+.hang .tab small { display: block; font: 600 .76rem/1.2 system-ui, sans-serif; margin-top: 3px; opacity: .9; }
+.hang .tab em { display: block; font: 800 .7rem/1.1 var(--display); font-style: normal; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
 .hang .on .tab { background: linear-gradient(#FFE08A, var(--sun)); border-color: var(--terra); color: #4A2E14; box-shadow: 0 0 0 4px rgba(255, 200, 61, .45), 0 0 18px rgba(255, 200, 61, .9); }
 .hang .dot { width: 20px; height: 20px; border-radius: 50%; border: 3px solid #7C7364; background: #CFC8B8; }
 .hang .on .dot { background: var(--magenta); border-color: var(--ink); }
@@ -200,11 +212,11 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 .step { position: relative; background: var(--cream); border: 3px solid var(--ink); border-radius: 14px; padding: 8px 12px; font-weight: 600; color: var(--ink); text-align: left; width: 100%; box-shadow: 0 3px 0 var(--shadow); }
 .step::before { content: attr(data-n); position: absolute; left: -37px; top: 50%; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: var(--sun); border: 3px solid var(--ink); font: 800 .85rem var(--display); display: grid; place-items: center; color: var(--ink); }
 .step.hot { cursor: pointer; border-color: var(--magenta); animation: glow 1.4s ease-in-out infinite; }
-.step.hot:hover { background: var(--cream2); }
+@media (hover: hover) { .step.hot:hover { background: var(--cream2); } }
 .step.sel { background: var(--sun); animation: none; }
 @keyframes glow { 50% { box-shadow: 0 0 0 5px rgba(194, 24, 91, .3); } }
-.toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--cream); font: 800 .95rem var(--display); padding: 8px 16px; border-radius: 99px; opacity: 0; transition: .25s; pointer-events: none; z-index: 5; white-space: nowrap; }
-.toast.show { opacity: 1; transform: translateX(-50%); }
+.toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(12px); background: var(--ink); color: var(--cream); font: 800 .95rem var(--display); padding: 8px 16px; border-radius: 99px; opacity: 0; transition: opacity .15s ease-out, transform .15s ease-out; pointer-events: none; z-index: 5; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%); transition-duration: .25s; }
 
 /* Teclado de piedra */
 .slot { background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 16px; text-align: right; font: 800 2.4rem/1.1 var(--display); min-height: 66px; color: var(--magenta); box-shadow: 0 4px 0 var(--shadow); }
@@ -238,17 +250,29 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 /* Fondo animado */
 .w-cl1 { animation: drift 38s ease-in-out infinite alternate; } .w-cl2 { animation: drift 52s ease-in-out infinite alternate-reverse; } .w-cl3 { animation: drift 70s ease-in-out infinite alternate; }
 @keyframes drift { from { transform: translateX(-26px); } to { transform: translateX(34px); } }
-.w-condor { animation: glide 18s ease-in-out infinite alternate; transform-box: fill-box; }
-@keyframes glide { from { transform: translate(180px, 290px) rotate(-4deg) scale(.9); } to { transform: translate(980px, 230px) rotate(5deg) scale(1.1); } }
+.w-condor { animation: glide 44s ease-in-out infinite; transform-box: view-box; transform-origin: 0 0; }
+@keyframes glide {
+  0%, 100% { transform: translate(180px, 330px) rotate(-3deg) scale(.8); }
+  45% { transform: translate(980px, 290px) rotate(-3deg) scale(1); }
+  50% { transform: translate(980px, 290px) rotate(3deg) scale(-1, 1); }
+  95% { transform: translate(180px, 330px) rotate(3deg) scale(-.8, .8); }
+}
+.w-bird { animation: soar 5.5s ease-in-out infinite alternate; }
+@keyframes soar { from { transform: translateY(-5px); } to { transform: translateY(6px); } }
+.w-wing { animation-duration: 1.7s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; transform-box: fill-box; }
+.w-wl { transform-origin: 100% 50%; animation-name: flapl; } .w-wr { transform-origin: 0 50%; animation-name: flapr; }
+@keyframes flapl { from { transform: rotate(16deg); } to { transform: rotate(-20deg); } }
+@keyframes flapr { from { transform: rotate(-16deg); } to { transform: rotate(20deg); } }
 .w-sway { animation: sway 3.4s ease-in-out infinite alternate; transform-origin: 50% 100%; transform-box: fill-box; }
 @keyframes sway { from { transform: skewX(-2deg); } to { transform: skewX(2.5deg); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .bob, .nod, .pulse, .step.hot, .think i, .w-cl1, .w-cl2, .w-cl3, .w-condor, .w-sway, .runner .rl, .runner .ra, .runner .rb { animation: none; }
+  .bob, .nod, .pulse, .step.hot, .think i, .w-cl1, .w-cl2, .w-cl3, .w-condor, .w-bird, .w-wing, .talking .mtalk, .talking .mth, .w-sway, .runner .rl, .runner .ra, .runner .rb { animation: none; }
   .runner.away { animation: fadeout .5s forwards; }
   @keyframes fadeout { to { opacity: 0; } }
   .w-condor { transform: translate(560px, 260px); }
   .gbtn { transition: none; }
+  .toast { transform: translateX(-50%); transition-property: opacity; }
 }
 
 /* Cada pantalla debe caber en la ventana sin desplazarse (la rendición final sí puede hacerlo, porque se lee con calma).
@@ -299,6 +323,17 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
   .fig { padding: 5px 8px; }
   .fig svg { max-height: 21dvh; }
   .mapcard { height: min(52dvh, 480px); }
+}
+@media (max-height: 700px) {
+  .screen { gap: 4px; }
+  .hero-col { gap: 4px; }
+  .hero-col .chsvg { width: clamp(46px, 8.5dvh, 58px); }
+  .hero-col > .bubble { margin-bottom: 6px; }
+  .bubble { gap: 3px; padding: 6px 10px; font-size: .86rem; }
+  .bubble .sub { font-size: 1rem; }
+  .hang .f { padding-top: 16px; } .hang .f::before { height: 18px; }
+  .legend { padding: 4px 8px; }
+  .card { padding: 16px 12px 8px; gap: 4px; }
 }
 @media (min-width: 880px) {
   .hang .tab b { font-size: 1.05rem; }

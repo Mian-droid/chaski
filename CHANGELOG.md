@@ -5,9 +5,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 ## [Sin publicar]
 
 ### Agregado
+- **Chaski habla en burbujas sobre su cabeza** en todas las pantallas, y su boca se mueve los primeros segundos para simular que habla (se apaga con «reducir movimiento»).
+- **Las tablillas del cerebro dicen qué explicar:** «Explícale cómo armar y ordenar los datos», con el estado «Ya explicado» o «Sin explicar». «Quiero explicarle algo más» ahora lista las ideas que Chaski aún no sabe.
+- **Paisaje más vivo:** el cóndor bate las alas y vuela delante de las montañas, las llamas tienen cuello, orejas y manta, y los árboles son pinos y árboles de copa con ramas.
 - **Dictado por voz:** sale siempre; el docente lo apaga con una casilla en el panel (`voz=0` en el enlace). El estudiante toca el micrófono, habla (hasta 60 s) y el texto transcrito se agrega a la tablilla para revisarlo y editarlo antes de enviar. Nueva ruta `/transcribe` (Whisper en Workers AI, enlace `AI`), con topes por IP y por día (`RATE_LIMIT_TRANSCRIBE`, `DAILY_TRANSCRIBE`), filtro de frases inventadas sobre el silencio y fallo amable a texto. El audio no se guarda; los eventos registran `voz`, `editado` y `vozMs`, y el panel muestra «Dictado por voz». `Permissions-Policy` ahora permite el micrófono a la propia página. Pruebas: núcleo 39, empaquetado 20, servidor 58.
 - **Datos personales:** si el estudiante escribe un correo, un teléfono o un documento de 8 cifras, el juego no lo envía y le pide quitarlo. El servidor también lo oculta (`[dato oculto]`) antes de mandar el texto a la IA y antes de guardar el evento. Pruebas: núcleo 37, servidor 42.
-- **Chaski corre al dejar pasar:** una versión de espaldas, con piernas y brazos en movimiento, que se achica hacia el horizonte en lugar de salir cortado por el borde de la columna.
+- **Chaski camina al dejar pasar:** de frente, con piernas y brazos en movimiento, avanza de izquierda a derecha y se desvanece.
 - **Página 404** para las direcciones que no existen (antes devolvían el juego con código 200).
 - **Panel en vivo:** el panel muestra las partidas de todas las salas, o de una, con el progreso de cada estudiante (dónde va, hace cuánto) y un punto verde si está jugando. Se actualiza solo cada 15 segundos mientras está abierto, pidiendo únicamente lo nuevo. El código de clase es opcional al jugar. El juego envía los eventos cada pocos segundos y no solo al final. Borrar exige elegir la sala. Pruebas del servidor: 40.
 - **Gráficos en los problemas** (`js/figures.js`): tabla de valores, barra de porcentaje y balanza, en los tres temas. Muestran los datos del enunciado con la incógnita marcada y llevan descripción para lectores de pantalla. Pruebas de las figuras: 9.

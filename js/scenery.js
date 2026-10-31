@@ -55,14 +55,41 @@
     }
     return out;
   }
+  /** Llama de perfil mirando a la derecha: lana esponjosa, cuello largo, orejas altas, manta tejida y borlas. */
   function llama(x, y, s, blanket, flip) {
-    var st = 'stroke="' + INK + '" stroke-width="2.4" stroke-linejoin="round"';
-    var t = flip ? 'translate(' + (x + 50 * s) + ' ' + y + ') scale(' + (-s) + ' ' + s + ')' : 'translate(' + x + ' ' + y + ') scale(' + s + ')';
-    return '<g transform="' + t + '"><ellipse cx="20" cy="26" rx="22" ry="13" fill="#F4E8D2" ' + st + '/><rect x="34" y="-2" width="10" height="28" rx="5" fill="#F4E8D2" ' + st + '/><ellipse cx="44" cy="-3" rx="10" ry="7.5" fill="#F4E8D2" ' + st + '/><path d="M40 -9 l-2 -9 l6 7z M47 -9 l2 -9 l4 8z" fill="#F4E8D2" ' + st + '/><circle cx="47" cy="-4" r="1.6" fill="' + INK + '"/><rect x="6" y="34" width="5" height="17" rx="2.5" fill="#EADBBE" ' + st + '/><rect x="14" y="36" width="5" height="15" rx="2.5" fill="#EADBBE" ' + st + '/><rect x="26" y="36" width="5" height="15" rx="2.5" fill="#EADBBE" ' + st + '/><rect x="33" y="34" width="5" height="17" rx="2.5" fill="#EADBBE" ' + st + '/><rect x="8" y="14" width="26" height="11" rx="3" fill="' + blanket + '" ' + st + '/><path d="M8 19.5 H34" stroke="#FFC83D" stroke-width="3"/></g>';
+    var st = 'stroke="' + INK + '" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"';
+    var wool = '#F7EEDC', shade = '#E3D2B2', muzzle = '#EBDDC2';
+    var t = flip ? 'translate(' + (x + 60 * s) + ' ' + y + ') scale(' + (-s) + ' ' + s + ')' : 'translate(' + x + ' ' + y + ') scale(' + s + ')';
+    var leg = function (lx, ly, h, f) { return '<rect x="' + lx + '" y="' + ly + '" width="5.4" height="' + h + '" rx="2.7" fill="' + f + '" ' + st + '/><path d="M' + lx + ' ' + (ly + h - 1.5) + ' h5.4" stroke="' + INK + '" stroke-width="2.6" stroke-linecap="round"/>'; };
+    return '<g transform="' + t + '">' +
+      leg(10, 36, 17, shade) + leg(31, 36, 17, shade) +
+      '<path d="M3 22 q-8 -3 -7 5 q4 3 8 -1z" fill="' + wool + '" ' + st + '/>' +
+      '<path d="M30 24 C36 12 37 2 38 -8 L49 -8 C49 4 48 16 44 30Z" fill="' + wool + '" ' + st + '/>' +
+      '<path d="M3 30 C-1 22 5 14 12 16 C16 9 25 9 29 15 C38 14 46 21 43 30 C46 38 38 43 31 41 C26 46 17 46 12 41 C5 44 -1 37 3 30Z" fill="' + wool + '" ' + st + '/>' +
+      '<path d="M8 38 C12 43 18 44 24 43" fill="none" stroke="' + shade + '" stroke-width="3" stroke-linecap="round"/>' +
+      '<path d="M9 17 L35 17 L37 33 L11 33Z" fill="' + blanket + '" ' + st + '/><path d="M10 22 H36 M10.8 28 H36.6" stroke="#FFC83D" stroke-width="2.6"/><path d="M11 33 l1 5 M17 33 l1 5 M23 33 l1 5 M29 33 l1 5 M35 33 l1 5" stroke="' + blanket + '" stroke-width="2.4" stroke-linecap="round"/>' +
+      leg(15, 38, 15, wool) + leg(36, 38, 15, wool) +
+      '<path d="M40 -17 l-3 -13 l8 9z" fill="' + wool + '" ' + st + '/><path d="M47 -19 l1 -13 l7 11z" fill="' + wool + '" ' + st + '/><path d="M40 -22 l-1.2 -5 l3.4 3z" fill="#E8A0B0"/>' +
+      '<ellipse cx="49" cy="-12" rx="10" ry="7.6" fill="' + wool + '" ' + st + '/><path d="M42 -17 q2 -8 9 -5 q-3 -5 -9 1z" fill="' + wool + '" ' + st + '/>' +
+      '<ellipse cx="58" cy="-9" rx="5.6" ry="4.6" fill="' + muzzle + '" ' + st + '/><circle cx="61" cy="-10.5" r="1.1" fill="' + INK + '"/><path d="M56 -6 q3 1.5 6 0" fill="none" stroke="' + INK + '" stroke-width="1.5" stroke-linecap="round"/>' +
+      '<circle cx="51" cy="-14" r="2.1" fill="' + INK + '"/><circle cx="51.7" cy="-14.8" r=".7" fill="#fff"/>' +
+      '</g>';
   }
-  function tree(x, y, s, leaf) {
+  /** Árbol: `kind` 'pino' (ciprés andino, en pisos) o cualquier otro valor (árbol de copa ancha con ramas y hojas). */
+  function tree(x, y, s, leaf, kind) {
     var st = 'stroke="' + INK + '" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"';
-    return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')"><path d="M0 0 C-2 -20 6 -30 2 -52" fill="none" stroke="#7A3F1C" stroke-width="10" stroke-linecap="round"/><path d="M2 -34 C14 -40 20 -48 22 -58" fill="none" stroke="#7A3F1C" stroke-width="6" stroke-linecap="round"/><circle cx="0" cy="-66" r="22" fill="' + leaf + '" ' + st + '/><circle cx="24" cy="-62" r="15" fill="' + leaf + '" ' + st + '/><circle cx="-20" cy="-58" r="14" fill="' + leaf + '" ' + st + '/><circle cx="-4" cy="-72" r="9" fill="#FFFFFF" opacity=".16"/></g>';
+    var open = '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">';
+    if (kind === 'pino') {
+      return open + '<rect x="-4.5" y="-16" width="9" height="18" rx="2" fill="#7A3F1C" ' + st + '/>' +
+        '<path d="M0 -88 L-14 -62 L-7 -62 L-20 -40 L-11 -40 L-27 -14 L27 -14 L11 -40 L20 -40 L7 -62 L14 -62Z" fill="' + leaf + '" ' + st + '/>' +
+        '<path d="M0 -88 L14 -62 L7 -62 L20 -40 L11 -40 L27 -14 L0 -14Z" fill="#1F3A12" opacity=".22"/>' +
+        '<path d="M-8 -62 L-3 -75 M-14 -40 L-8 -54 M-21 -17 L-14 -30" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity=".28"/></g>';
+    }
+    return open + '<path d="M-5 2 C-4 -14 -3 -26 -2 -40 L5 -40 C4 -26 5 -14 6 2Z" fill="#7A3F1C" ' + st + '/>' +
+      '<path d="M0 -30 C-10 -36 -16 -44 -20 -52 M2 -34 C10 -40 16 -46 22 -54" fill="none" stroke="#7A3F1C" stroke-width="5" stroke-linecap="round"/>' +
+      '<path d="M-34 -52 C-44 -64 -30 -84 -12 -80 C-6 -96 20 -94 24 -78 C42 -78 46 -52 32 -44 C30 -34 10 -32 2 -38 C-8 -30 -30 -34 -34 -52Z" fill="' + leaf + '" ' + st + '/>' +
+      '<path d="M-30 -46 C-26 -36 -8 -34 2 -38 C10 -32 28 -34 32 -44 C26 -40 10 -40 2 -42 C-8 -38 -24 -38 -30 -46Z" fill="#1F3A12" opacity=".25"/>' +
+      '<path d="M-22 -66 q4 -8 12 -8 M2 -80 q6 -4 12 0 M14 -62 q6 -2 10 4 M-16 -54 q4 2 8 0" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".3"/></g>';
   }
   function citadel(p, x, y, sc) {
     var wall = p.wall, roof = '#D9A441';
@@ -72,6 +99,16 @@
     return '<g transform="translate(' + x + ' ' + y + ') scale(' + sc + ')"><path d="M-6 96 Q60 40 150 48 T190 90 V110 H-6Z" fill="' + p.gr[0] + '"/>' +
       '<path d="M4 88 Q70 58 150 62" fill="none" stroke="' + wall + '" stroke-width="5"/><path d="M10 100 Q80 72 176 82" fill="none" stroke="' + wall + '" stroke-width="5"/><path d="M0 112 Q90 88 190 100" fill="none" stroke="' + wall + '" stroke-width="5"/>' +
       house(34, 48, 26, 16) + house(74, 40, 34, 22) + house(122, 46, 24, 15) + house(98, 70, 22, 13) + '</g>';
+  }
+  /** Cóndor visto desde abajo: cuerpo negro, collar blanco y alas con plumas que se agitan (las anima el CSS). */
+  function condor() {
+    var wing = 'M0 -3 C-12 -14 -32 -16 -54 -5 L-50 0 L-57 2 L-48 5 L-52 9 L-42 8 L-42 12 C-28 7 -12 7 0 5Z';
+    var patch = '<path d="M-20 -3 C-30 -3 -38 -1 -46 2 L-44 4 C-34 3 -26 3 -18 3Z" fill="#fff" opacity=".85"/>';
+    return '<g class="w-condor" fill="' + INK + '"><g class="w-bird">' +
+      '<g class="w-wing w-wl"><path d="' + wing + '"/>' + patch + '</g>' +
+      '<g class="w-wing w-wr"><g transform="scale(-1 1)"><path d="' + wing + '"/>' + patch + '</g></g>' +
+      '<path d="M-6 4 L-9 15 L0 12 L9 15 L6 4Z"/><ellipse cx="0" cy="1" rx="7" ry="5.5"/>' +
+      '<path d="M-5 -2 q5 -3 10 0 l-1 4 q-4 -2 -8 0z" fill="#fff"/><circle cx="0" cy="-7" r="3.6"/><path d="M-1 -10 q1 -3 3 -2 l-1 3z" fill="#C2185B"/><path d="M1 -9 q3 0 3 3 q-2 -1 -3 -1z" fill="#E7C27A"/></g></g>';
   }
   /** Andén: franja ondulada que cruza todo el panorama. */
   function band(y0, amp) {
@@ -109,11 +146,11 @@
     s += '<g class="w-cl1" fill="' + p.cloud2 + '" opacity=".85"><ellipse cx="1010" cy="190" rx="52" ry="14"/><ellipse cx="1040" cy="180" rx="30" ry="13"/><ellipse cx="978" cy="198" rx="28" ry="9"/></g>';
     s += '<g class="w-cl3" fill="' + p.cloud + '" opacity=".7"><ellipse cx="1120" cy="300" rx="44" ry="11"/><ellipse cx="1146" cy="292" rx="24" ry="9"/></g>';
     s += '<g class="w-cl3" fill="' + p.cloud2 + '" opacity=".6"><ellipse cx="60" cy="330" rx="40" ry="9"/><ellipse cx="84" cy="324" rx="22" ry="8"/></g>';
-    s += '<g class="w-condor" fill="' + INK + '"><path d="M-44 0 Q-22 -16 0 -3 Q22 -16 44 0 Q22 -7 0 7 Q-22 -7 -44 0Z"/><path d="M-44 0 l-6 3 M-38 -3 l-6 1 M44 0 l6 3 M38 -3 l6 1" stroke="' + INK + '" stroke-width="2" stroke-linecap="round"/></g>';
     s += ridge(peaks(2, 74, 300, 392, 404, 448), 500, p.far, p.farShade, p.snow, 352);
     s += '<rect x="0" y="360" width="' + W + '" height="140" fill="url(#w-haze)" opacity=".75"/>';
     s += ridge(peaks(11, 96, 392, 428, 440, 470), 540, p.mid, p.midShade, null, 0);
     s += '<rect x="0" y="400" width="' + W + '" height="140" fill="url(#w-haze)" opacity=".6"/>';
+    s += condor();
     s += '<g class="det">' + citadel(p, 150, 428, 0.7) + citadel(p, OX + 206, 424, 0.95) + citadel(p, 960, 430, 0.8) + '</g>';
     var rv = 'M' + (OX + 236) + ' 520 Q' + (OX + 196) + ' 534 ' + (OX + 222) + ' 556 T' + (OX + 168) + ' 598 T' + (OX + 214) + ' 646 T' + (OX + 120) + ' 706';
     s += '<path d="' + rv + '" fill="none" stroke="' + p.river + '" stroke-width="11" stroke-linecap="round"/><path d="' + rv + '" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 12" opacity=".7"/>';
@@ -127,7 +164,7 @@
     for (var f = 0; f < 70; f++) s += '<circle cx="' + (14 + fixed(f + 3) * (W - 28)).toFixed(0) + '" cy="' + (540 + fixed(f + 9) * 170).toFixed(0) + '" r="2.4" fill="' + (f % 3 === 0 ? '#C2185B' : f % 3 === 1 ? '#FFC83D' : '#FFFFFF') + '" opacity=".9"/>';
     s += llama(OX + 40, 534, 0.62, '#C2185B') + llama(OX + 70, 540, 0.5, '#1593A8', true) + llama(OX + 318, 604, 0.7, '#E39A2D');
     s += llama(120, 556, 0.6, '#E39A2D') + llama(188, 566, 0.5, '#C2185B', true) + llama(930, 548, 0.62, '#1593A8') + llama(1000, 556, 0.5, '#C2185B', true) + llama(1080, 626, 0.78, '#E39A2D') + llama(70, 640, 0.8, '#1593A8', true);
-    s += tree(OX + 352, 556, 0.5, p.gr[2]) + tree(OX + 34, 690, 0.8, p.gr[2]) + tree(90, 600, 0.7, p.gr[2]) + tree(270, 690, 0.75, p.gr[1]) + tree(870, 580, 0.55, p.gr[2]) + tree(1130, 690, 0.9, p.gr[2]) + tree(1010, 700, 0.6, p.gr[1]);
+    s += tree(OX + 352, 556, 0.5, p.gr[2], 'pino') + tree(OX + 34, 690, 0.8, p.gr[2]) + tree(90, 600, 0.7, p.gr[2], 'pino') + tree(270, 690, 0.75, p.gr[1]) + tree(870, 580, 0.55, p.gr[2], 'pino') + tree(1130, 690, 0.9, p.gr[2]) + tree(1010, 700, 0.6, p.gr[1], 'pino');
     s += '</g>';
     s += '<rect y="722" width="' + W + '" height="90" fill="url(#w-earth)"/>';
     for (var g = 0; g < 56; g++) s += '<ellipse cx="' + (14 + g * 22 + fixed(g) * 10).toFixed(0) + '" cy="' + (752 + fixed(g + 5) * 38).toFixed(0) + '" rx="' + (5 + fixed(g + 2) * 6).toFixed(0) + '" ry="3.4" fill="' + INK + '" opacity=".18"/>';
@@ -156,8 +193,8 @@
     return '<path d="M58 97q12 10 24 0" ' + s + '/>';
   }
   /**
-   * El dibujo de Chaski. Con `run` se le ve de espaldas, con sus piernas y brazos en grupos propios para animar la carrera:
-   * sin cara, con el pelo y la trenza, y sin la correa ni la bolsa del frente.
+   * El dibujo de Chaski. Con `run` lleva las piernas y los brazos en grupos propios (.rl, .ra) y el cuerpo en .rb,
+   * para que el CSS anime la caminata.
    */
   function figure(mood, run) {
     var st = 'stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"', st2 = 'stroke="' + INK + '" stroke-width="2" stroke-linejoin="round"';
@@ -166,10 +203,8 @@
     var armL = '<rect x="18" y="124" width="16" height="36" rx="8" fill="#C2185B" ' + st + '/><circle cx="26" cy="163" r="8" fill="#F3E3C3" ' + st + '/>';
     var armR = '<rect x="106" y="124" width="16" height="36" rx="8" fill="#C2185B" ' + st + '/><circle cx="114" cy="163" r="8" fill="#F3E3C3" ' + st + '/>' +
       '<path d="M114 168v22" stroke="#C9A66B" stroke-width="3"/><circle cx="114" cy="176" r="3.2" fill="#FFC83D" stroke="' + INK + '" stroke-width="1.5"/><circle cx="114" cy="186" r="3.2" fill="#1593A8" stroke="' + INK + '" stroke-width="1.5"/>';
-    var face = run
-      ? '<rect x="32" y="56" width="76" height="62" rx="26" fill="' + INK + '"/><path d="M70 112q-7 22 0 38" stroke="' + INK + '" stroke-width="9" stroke-linecap="round" fill="none"/><circle cx="70" cy="152" r="5" fill="#C2185B" ' + st2 + '/>'
-      : '<rect x="40" y="62" width="60" height="46" rx="16" fill="' + INK + '"/><circle cx="48" cy="98" r="5" fill="#FF7AA8" opacity=".7"/><circle cx="92" cy="98" r="5" fill="#FF7AA8" opacity=".7"/>' + eyes(mood) + mouth(mood);
-    var front = run ? '' : '<path d="M40 120 L100 160" stroke="#E39A2D" stroke-width="5"/><rect x="88" y="150" width="24" height="22" rx="6" fill="#E39A2D" ' + st + '/><path d="M88 160h24" stroke="#C2185B" stroke-width="3"/>';
+    var face = '<rect x="40" y="62" width="60" height="46" rx="16" fill="' + INK + '"/><circle cx="48" cy="98" r="5" fill="#FF7AA8" opacity=".7"/><circle cx="92" cy="98" r="5" fill="#FF7AA8" opacity=".7"/>' + eyes(mood) + '<g class="mth">' + mouth(mood) + '</g><ellipse class="mtalk" cx="70" cy="99" rx="7.5" ry="5.5" fill="#FFC83D" opacity="0"/>';
+    var front = '<path d="M40 120 L100 160" stroke="#E39A2D" stroke-width="5"/><rect x="88" y="150" width="24" height="22" rx="6" fill="#E39A2D" ' + st + '/><path d="M88 160h24" stroke="#C2185B" stroke-width="3"/>';
     var out = '<ellipse cx="70" cy="195" rx="36" ry="5" fill="rgba(58,36,18,.2)"/>' +
       (run ? '<g class="rl rl1">' + legL + '</g><g class="rl rl2">' + legR + '</g><g class="rb">' : legL + legR) +
       (run ? '<g class="ra ra1">' + armL + '</g><g class="ra ra2">' + armR + '</g>' : armL + armR) +
@@ -186,15 +221,17 @@
   function symbol(mood) {
     return '<symbol id="ch-' + mood + '" viewBox="0 0 140 200">' + figure(mood, false) + '</symbol>';
   }
-  /** Chaski corriendo, visto de espaldas, como SVG propio (no un símbolo) para poder animar piernas y brazos. */
+  /** Chaski caminando (de frente), como SVG propio (no un símbolo) para poder animar piernas y brazos. */
   function runnerSvg(cls) {
-    return '<svg class="chsvg runner ' + (cls || '') + '" viewBox="0 0 140 200" aria-hidden="true">' + figure('run', true) + '</svg>';
+    return '<svg class="chsvg runner ' + (cls || '') + '" width="104" height="149" viewBox="0 0 140 200" aria-hidden="true">' + figure('confident', true) + '</svg>';
   }
 
   /** Elemento SVG de Chaski. `w` es el ancho en píxeles; el alto se calcula (proporción 140 x 200). */
   function chaski(mood, w, cls) {
     var d = document.createElement('div');
-    d.innerHTML = '<svg class="chsvg ' + (cls || '') + '" width="' + w + '" height="' + Math.round(w * 200 / 140) + '" viewBox="0 0 140 200" aria-hidden="true"><use href="#ch-' + mood + '"/></svg>';
+    /* Con `talk` se dibuja entero (no con <use>) para que el CSS pueda animarle la boca durante los primeros segundos. */
+    var talk = /(^|\s)talk(\s|$)/.test(cls || '');
+    d.innerHTML = '<svg class="chsvg ' + (cls || '') + (talk ? ' talking' : '') + '" width="' + w + '" height="' + Math.round(w * 200 / 140) + '" viewBox="0 0 140 200" aria-hidden="true">' + (talk ? figure(mood, false) : '<use href="#ch-' + mood + '"/>') + '</svg>';
     return d.firstChild;
   }
   /** La choza de un tambo (estación del camino). */

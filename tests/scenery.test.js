@@ -46,14 +46,13 @@ t('Chaski tiene un símbolo por cada estado de ánimo', () => {
   });
 });
 
-t('Chaski corriendo se dibuja de espaldas, con piernas y brazos en grupos para animarlos', () => {
+t('Chaski caminando se dibuja de frente, con piernas y brazos en grupos para animarlos', () => {
   const s = Scenery.runnerSvg('away');
   assert.ok(s.startsWith('<svg class="chsvg runner away"') && s.endsWith('</svg>'));
   assert.ok(!/undefined|NaN/.test(s));
   ['rl1', 'rl2', 'ra1', 'ra2', 'rb'].forEach((c) => assert.ok(s.includes('class="' + (c.startsWith('rb') ? c : (c.startsWith('rl') ? 'rl ' : 'ra ') + c) + '"'), c));
   assert.strictEqual((s.match(/<g[ >]/g) || []).length, (s.match(/<\/g>/g) || []).length);
-  assert.ok(!s.includes('#FFC83D"/><circle cx="82"'), 'sin ojos: va de espaldas');
-  assert.ok(Scenery.symbol('happy').includes('stroke="#FFC83D"'), 'de frente conserva la cara');
+  assert.ok(s.includes('class="mth"'), 'de frente: lleva cara');
 });
 
 let ok = 0;

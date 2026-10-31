@@ -100,9 +100,9 @@
   }
 
   /* ---------- piezas de pantalla ---------- */
-  var ICON_PASS = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6l6 6-6 6M13 6l6 6-6 6"/></svg>';
-  var ICON_STOP = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M12 8v5M12 16.5v.1"/></svg>';
-  var ICON_KNOT = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h8M12 12c0-4 3-6 6-6s3 4 0 6-6 0-6 0 3 2 6 0 3-6 0-6"/></svg>';
+  var ICON_PASS = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6l6 6-6 6M13 6l6 6-6 6"/></svg>';
+  var ICON_STOP = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M12 8v5M12 16.5v.1"/></svg>';
+  var ICON_KNOT = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h8M12 12c0-4 3-6 6-6s3 4 0 6-6 0-6 0 3 2 6 0 3-6 0-6"/></svg>';
   function iconBtn(icon, text, cls, fn) { var b = h('button', { type: 'button', class: 'gbtn ' + cls, onclick: fn }); b.innerHTML = icon; b.appendChild(document.createTextNode(text)); return b; }
 
   /**
@@ -125,6 +125,11 @@
   function hud(left, right) { return h('div', { class: 'hud' }, h('span', { class: 'pill', text: left }), right); }
   function msgPill(done) { return h('span', { class: 'pill' }, 'Mensaje al Cusco ', knots(done)); }
   function bubbles(lines) { return lines.map(function (t) { return h('p', { text: t }); }); }
+  /** Burbuja de Chaski (sale sobre su cabeza). `lines` es un texto o una lista; `sub` es una pista breve opcional. */
+  function say(kicker, lines, sub) {
+    return h('div', { class: 'bubble', role: 'status' }, kicker ? h('span', { class: 'kicker', text: kicker }) : null,
+      bubbles([].concat(lines)), sub ? h('p', { class: 'sub', text: sub }) : null);
+  }
 
   /**
    * Tablilla de arcilla para escribir (no es un chat: no hay historial de mensajes).
@@ -159,16 +164,17 @@
    * El estudiante toca el micrófono, habla y vuelve a tocar: el texto se agrega a la tablilla y se puede editar antes de enviar.
    * Devuelve null si la voz no está disponible: entonces la tablilla es la de siempre.
    */
-  var ICON_MIC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+  var ICON_MIC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
   var ICON_STOP_SQ = '<svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
   function voiceControls(st, warn) {
     var V = window.ChaskiVoice;
     if (!(S && S.voz && CFG.TRANSCRIBE_URL && V && V.supported())) return null;
     var status = h('p', { class: 'voicemsg', role: 'status' });
-    var mic = h('button', { type: 'button', class: 'mic' });
-    function label(icon, text) { mic.innerHTML = icon; mic.appendChild(document.createTextNode(text)); }
+    var mic = h('button', { type: 'button', class: 'mic' }), lbl = h('span');
+    mic.innerHTML = '<span class="micic" aria-hidden="true">' + ICON_MIC + ICON_STOP_SQ + '</span>'; mic.appendChild(lbl);
+    function label(text) { lbl.textContent = text; } /* los dos iconos quedan fijos: el CSS los cruza según `.on` */
     function clock(ms) { var s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
-    label(ICON_MIC, 'Hablar');
+    label('Hablar');
     mic.setAttribute('aria-label', 'Dictar con la voz');
     var rec = V.create({
       url: CFG.TRANSCRIBE_URL,
@@ -177,9 +183,9 @@
         mic.disabled = state === 'sending';
         st.area.disabled = state === 'sending';
         st.busy = state === 'sending'; st.refreshSend();
-        if (state === 'recording') { label(ICON_STOP_SQ, 'Listo · ' + clock(info.ms || 0)); mic.setAttribute('aria-label', 'Terminar de grabar'); status.textContent = 'Te escucho. Cuéntalo y toca «Listo».'; warn.textContent = ''; }
-        else if (state === 'sending') { label(ICON_MIC, 'Escribiendo…'); status.textContent = 'Chaski está pasando tu voz a texto…'; }
-        else { label(ICON_MIC, 'Hablar'); mic.setAttribute('aria-label', 'Dictar con la voz'); status.textContent = info.message || ''; }
+        if (state === 'recording') { label('Listo · ' + clock(info.ms || 0)); mic.setAttribute('aria-label', 'Terminar de grabar'); status.textContent = 'Te escucho. Cuéntalo y toca «Listo».'; warn.textContent = ''; }
+        else if (state === 'sending') { label('Escribiendo…'); status.textContent = 'Chaski está pasando tu voz a texto…'; }
+        else { label('Hablar'); mic.setAttribute('aria-label', 'Dictar con la voz'); status.textContent = info.message || ''; }
       },
       onText: function (text, ms, capped) {
         /* Si ya había dictado y el estudiante tocó el texto antes de este nuevo dictado, cuenta como editado. */
@@ -313,7 +319,7 @@
   }
   function sIntro() {
     var lines = C.lines.intro.concat([ANNOUNCE ? C.lines.mission : C.lines.missionHidden]);
-    frame({ hero: [chaski('confident', 124, 'bob')], main: [h('div', { class: 'card' }, bubbles(lines)), btn('¡Vamos!', 'go', function () { startTeach(false); })] });
+    frame({ hero: [chaski('confident', 124, 'bob talk'), say(null, lines)], main: [btn('¡Vamos!', 'go', function () { startTeach(false); })] });
   }
 
   /* ---------- escenas: enseñar ---------- */
@@ -321,7 +327,12 @@
   /** Después de la rendición, la lección extra dice en qué se equivocó Chaski (con el nombre de la idea, sin dar la respuesta). */
   function teachMoreFor() {
     var focus = S.phase === 'reteach' && S.focus ? S.focus : [];
-    if (!focus.length) return C.teachMore;
+    if (!focus.length) {
+      var missing = Brain.IDS.filter(function (k) { return S.brain[k].state === 'ausente'; }).map(function (k) { return lc(C.cards[k].ask); });
+      if (!missing.length) return C.teachMore;
+      return { k: C.teachMore.k, say: 'Todavía no sé ' + missing.join(' ni ') + '. ¿Me explicas alguna de esas ideas con un ejemplo con números?',
+        label: C.teachMore.label, ph: C.teachMore.ph, min: C.teachMore.min, minWords: C.teachMore.minWords, needNumbers: C.teachMore.needNumbers };
+    }
     var names = focus.map(function (k) { return '«' + C.cards[k].short + '»'; }).join(' y ');
     var asks = focus.map(function (k) { return C.cards[k].ask; }).filter(Boolean).join('; ').toLowerCase();
     return { k: C.teachMore.k, say: 'Me equivoqué con ' + names + (asks ? ' (' + asks + ')' : '') + '. ¿Cómo me lo explicas para que lo haga bien?',
@@ -330,7 +341,7 @@
   function sTeach(i) {
     var prompts = S.more === 'clarify' ? [C.clarify] : S.more ? [teachMoreFor()] : C.teach, p = prompts[i], t0 = Date.now(), busy = false;
     var cord = cordbar();
-    var who = h('div', { class: 'who' }, chaski('listen', 118, 'bob'));
+    var who = h('div', { class: 'who' }, chaski('listen', 118, 'bob talk'));
     var box = tablet({ ph: p.ph, label: 'Tu tablilla', min: p.min, onSend: function (text, pasted, st) {
       if (busy) return; busy = true; st.send.disabled = true; st.area.disabled = true; /* se bloquea mientras el texto vuela al nudo */
       var prior = Log.mine('teach').map(function (e) { return e.text; });
@@ -348,16 +359,17 @@
     var lesson = S.more === 'clarify' ? 'Chaski no entendió' : S.more ? 'Una lección extra' : 'Lección ' + (i + 1) + ' de ' + prompts.length;
     frame({
       hud: hud(C.topic.title + ' · ' + S.cls),
-      hero: [who, h('div', { class: 'hint', text: HINT[p.k] || '' })],
-      main: [h('div', { class: 'plaque' }, h('div', { class: 'kicker', text: lesson }), h('p', { class: 'q', text: p.say })),
-        box.el, box.send, h('div', { class: 'cordwrap' }, cord.pop, cord.bar)]
+      hero: [who, say(lesson, p.say, HINT[p.k] || '')],
+      main: [box.el, box.send, h('div', { class: 'cordwrap' }, cord.pop, cord.bar)]
     });
   }
 
+  function lc(s) { s = s || ''; return s.charAt(0).toLowerCase() + s.slice(1); }
   function hangTablets() {
     return [h('div', { class: 'beam', 'aria-hidden': 'true' }), h('div', { class: 'hang', role: 'list' }, Brain.IDS.map(function (k) {
       var on = S.brain[k].state !== 'ausente';
-      return h('div', { class: 'f' + (on ? ' on' : ''), role: 'listitem' }, h('div', { class: 'tab' }, h('span', { class: 'dot' }), h('b', { text: C.cards[k].short }), h('small', { text: C.cards[k].ask || '' })));
+      return h('div', { class: 'f' + (on ? ' on' : ''), role: 'listitem' }, h('div', { class: 'tab' }, h('span', { class: 'dot' }), h('b', { text: C.cards[k].short }),
+        h('small', { text: on ? C.cards[k].ask : 'Explícale ' + lc(C.cards[k].ask) }), h('em', { text: on ? 'Ya explicado' : 'Sin explicar' })));
     }))];
   }
   /** El cerebro: Chaski piensa en voz alta (nube) y las ideas que cree saber cuelgan encendidas. */
@@ -379,20 +391,17 @@
       var learning = Brain.IDS.some(function (k) { return S.brain[k].state !== 'ausente'; });
       frame({
         hud: hud('El cerebro de Chaski', h('span', { class: 'pill', text: learning ? 'Está aprendiendo' : 'Vacío' })),
-        hero: [chaski('think', 108, 'bob')],
-        main: [h('div', { class: 'thought' }, h('span', { class: 'kicker', text: 'Esto es lo que entendí' }), res.restatement),
-          vague ? h('p', { class: 'ask' }, h('b', { text: 'Chaski no entendió. ' }), C.lines.clarify) : null,
-          hangTablets(),
-          h('p', { class: 'legend', text: 'Una tablilla encendida significa que Chaski cree saber algo. No dice si lo sabe bien.' }),
+        hero: [chaski('think', 108, 'bob talk'), say('Esto es lo que entendí', [res.restatement].concat(vague ? [C.lines.clarify] : []))],
+        main: [hangTablets(),
+          h('p', { class: 'legend', text: 'Cada tablilla es una idea que puedes explicarle. Encendida: ya se la explicaste. Apagada: todavía no sabe nada de eso.' }),
           h('div', { class: 'stack' }, buttons)]
       });
     }
     if (!S.pending.length) { drawBrain({ restatement: S.lastRestatement || Brain.restate(S.brain) }); return; }
     frame({
       hud: hud('El cerebro de Chaski', h('span', { class: 'pill', text: 'Leyendo…' })),
-      hero: [chaski('think', 108, 'bob')],
-      main: [h('div', { class: 'thought' }, h('span', { class: 'kicker', text: 'Un momento' }), 'Déjame pensar en lo que me enseñaste…'),
-        h('div', { class: 'think', role: 'status', 'aria-label': 'Chaski está pensando' }, h('i'), h('i'), h('i'))]
+      hero: [chaski('think', 108, 'bob talk'), say('Un momento', 'Déjame pensar en lo que me enseñaste…')],
+      main: [h('div', { class: 'think', role: 'status', 'aria-label': 'Chaski está pensando' }, h('i'), h('i'), h('i'))]
     });
     var text = S.pending.join('\n');
     Brain.extract(text, { url: CFG.EXTRACT_URL, topic: S.topic }).then(function (res) {
@@ -436,9 +445,9 @@
       if (i + 1 < n) go('map', i + 1); else go('probeintro');
     }
     /** Lo que va junto a Chaski: él, la choza del tambo y lo que dice. */
-    function sceneHead(say, mood) {
-      var c = chaski(mood, 104, 'bob'); c.id = 'chRun';
-      return [h('div', { class: 'duo' }, c, hutSVG()), h('div', { class: 'bubble', text: say })];
+    function sceneHead(line, mood) {
+      var c = chaski(mood, 104, 'bob talk'); c.id = 'chRun';
+      return [h('div', { class: 'duo' }, c, hutSVG()), h('div', { class: 'bubble', role: 'status', text: line })];
     }
     /** Figura del problema (tabla, barra o balanza), si la tiene. Sale de datos fijos del contenido. */
     function figEl() {
@@ -463,10 +472,10 @@
           h('div', { class: 'row2' },
             iconBtn(ICON_PASS, 'Dejar pasar', 'pass', function () {
               rec.saidError = false; rec.decideMs = Date.now() - t0;
-              /* Chaski echa a correr, de espaldas, hacia el horizonte: se achica y se pierde en el camino sin cruzar la tarea. */
+              /* Chaski sigue su camino caminando hacia la derecha y se desvanece. */
               var c = document.getElementById('chRun'), r = Scenery.runner('away');
               r.id = 'chRun'; c.replaceWith(r); toast.classList.add('show');
-              setTimeout(finish, 1150);
+              setTimeout(finish, 1250);
             }),
             iconBtn(ICON_STOP, '¡Alto, Chaski!', 'stop', function () { rec.saidError = true; rec.decideMs = Date.now() - t0; lens(); })), toast]
       });
@@ -505,20 +514,16 @@
   function sProbeIntro() {
     frame({
       hud: hud('Fin del camino', h('span', { class: 'pill', text: 'Mensaje entregado' })),
-      hero: [chaski('listen', 110, 'bob')],
-      main: [h('div', { class: 'card' },
-          h('p', { class: 'kicker', text: 'Ahora te toca a ti' }),
-          h('p', { class: 'title', text: 'Chaski llegó al Cusco con su mensaje.' }),
-          h('p', { text: 'Todavía no te digo cómo le fue: eso lo ves al final.' }),
-          h('p', { text: 'Antes, Chaski te hace 4 preguntas para ver si tú entendiste las ideas, no solo si él acertó. Tres son con otros números y la última es para que lo expliques con tu propio ejemplo.' })),
-        btn('Ver las preguntas', 'go', function () { go('probe', 0); })]
+      hero: [chaski('listen', 110, 'bob talk'), say('Ahora te toca a ti', ['Llegué al Cusco con mi mensaje. Todavía no te digo cómo me fue: eso lo ves al final.',
+        'Antes te hago 4 preguntas para ver si tú entendiste las ideas, no solo si yo acerté. Tres son con otros números y la última es para que lo expliques con tu propio ejemplo.'])],
+      main: [btn('Ver las preguntas', 'go', function () { go('probe', 0); })]
     });
   }
 
   function sProbe(i) {
-    var p = C.probes[i], t0 = Date.now(), say = C.lines.probeSay[i];
+    var p = C.probes[i], t0 = Date.now(), line = C.lines.probeSay[i];
     var head = hud('Preguntas de Chaski', h('span', { class: 'pill', text: (i + 1) + ' de ' + C.probes.length }));
-    var hero = [chaski('think', 100, 'bob'), h('div', { class: 'bubble' }, h('p', { text: say }))];
+    var hero = [chaski('think', 100, 'bob talk'), say(null, line)];
     if (p.kind === 'num') {
       var submit = btn('Responder', 'go', function () {
         var v = Core.parseNum(kp.get());
@@ -565,7 +570,7 @@
       else reason = 'No le enseñaste este tema, así que usó su intuición.';
       why.push(h('div', { class: 'rulecard' }, h('p', { class: 'why', text: reason }), h('strong', { text: c.title }), h('span', { text: c.text })));
     });
-    var say = misses > 0 ? ['¡Uy! Sonaba muy seguro, ¿no?', 'Hice lo que aprendí de ti. Así también hacen las IA: suenan seguras aunque se equivoquen.']
+    var words = misses > 0 ? ['¡Uy! Sonaba muy seguro, ¿no?', 'Hice lo que aprendí de ti. Así también hacen las IA: suenan seguras aunque se equivoquen.']
       : ['¡No me dejaste pasar ni una!', 'Que alguien suene seguro no significa que tenga razón.'];
     var buttons = [];
     var focus = Object.keys(causes).filter(function (k) { return k !== 'S' && C.cards[k]; });
@@ -575,7 +580,7 @@
     frame({
       hud: hud('Rendición de cuentas', h('span', { class: 'pill', text: exs.length + ' de ' + exs.length })),
       mode: 'tall',
-      hero: [chaski(misses > 0 ? 'oops' : 'happy', 90, 'bob'), h('div', { class: 'bubble' }, bubbles(say))],
+      hero: [chaski(misses > 0 ? 'oops' : 'happy', 90, 'bob talk'), say(null, words)],
       main: [sellos, parch, why.length ? h('p', { class: 'legend', text: 'Por qué pasó' }) : null, why, h('div', { class: 'stack' }, buttons)]
     });
   }
@@ -590,7 +595,7 @@
       return h('div', { class: 'rulecard' }, h('strong', { text: C.cards[k].title }), h('span', { text: CARD_STATE[S.brain[k].state] }));
     });
     frame({
-      hero: [chaski('happy', 96, 'bob'), h('div', { class: 'bubble' }, bubbles(['¡Gracias por enseñarme!', 'Aprendí bien ' + Brain.good(S.brain) + ' de 3 ideas contigo.']))],
+      hero: [chaski('happy', 96, 'bob talk'), say(null, ['¡Gracias por enseñarme!', 'Aprendí bien ' + Brain.good(S.brain) + ' de 3 ideas contigo.'])],
       main: [h('div', { class: 'card' }, h('p', { class: 'kicker', text: 'Tu resumen · ' + C.topic.title }),
           h('div', { class: 'stats' }, [stat('Errores que atrapaste', m.hits + ' / ' + m.nErr), stat('Ideas bien enseñadas', Brain.good(S.brain) + ' / 3')]), ideas),
         h('div', { class: 'stack' },
