@@ -37,8 +37,10 @@ En el proyecto: *Settings → Variables and Secrets*.
 | Texto | `CONTACT_EMAIL` | correo | Correo de contacto que muestran la política de privacidad y los términos. Sin él, remiten al docente o a la institución que aplica el piloto. |
 | Texto | `MODEL` | opcional | Por defecto `gemini-3.5-flash-lite`. `gemini-3.8-flash` lee mejor pero tarda más. |
 | Texto | `SITE_URL` | opcional | Solo si tu sitio no es `chaski.pages.dev`: dirección de la imagen al compartir por WhatsApp. |
+| Enlace | `AI` (Workers AI) | opcional | *Settings → Bindings → Add → Workers AI*, con el nombre `AI`. Activa el dictado por voz (`/transcribe`). Sin él, el micrófono no aparece o responde 501 y el juego sigue con texto. |
 | Texto | `ENDPOINT` | opcional | Dirección del Apps Script para guardar datos de varios dispositivos. |
 
+- **Dictado por voz.** No hace falta `TRANSCRIBE_URL`: en Pages usa `/transcribe` solo. El micrófono solo sale si el enlace del docente lleva `voz=1` (casilla en el panel). Whisper corre en Workers AI y gasta unos 47 Neurons por minuto de audio: el plan gratuito da 10 000 al día para toda la cuenta (unos 214 minutos). Los topes `RATE_LIMIT_TRANSCRIBE` (40 por IP cada 10 minutos) y `DAILY_TRANSCRIBE` (400 al día) cuidan esa cuota; al pasarse responde 429 y el juego muestra «La voz está ocupada». Después de agregar el enlace `AI`, reintenta el despliegue. Para probar en local: `npx wrangler pages dev dist --ai AI` (usa tu cuenta real).
 - **No hace falta `EXTRACT_URL`.** Cuando el empaquetado corre en Cloudflare Pages usa `/extract` solo. Si la defines, manda la tuya (por ejemplo, la de un Worker aparte).
 - Los cambios de variables se aplican en el **siguiente despliegue**: después de editarlas, reintenta el último despliegue.
 - Las vistas previas de Pages usan otras direcciones (`https://<hash>.chaski.pages.dev`). Con `ALLOWED_ORIGINS` cerrado, en esas vistas el juego lee con reglas de palabras. Prueba en la dirección principal.
@@ -136,6 +138,7 @@ Para subir el sitio sin conectar GitHub: `EXTRACT_URL=... npm run build:site` y 
 ## Privacidad y datos
 
 - El enlace lleva el código de clase (`?clase=`). Las páginas no mandan el referente (`no-referrer`), así que ese código no viaja a Google Fonts.
+- La voz del dictado (opcional) viaja a Cloudflare Workers AI solo para pasarla a texto y no se guarda; según Cloudflare, no se usa para entrenar modelos.
 - El texto que escribe el estudiante se envía a Google (Gemini) a través de la función. Dilo antes de jugar y define el permiso de tutores si son menores.
 - **Plan gratuito de Gemini:** según los términos de Google, lo que se envía se usa para mejorar sus productos y personas pueden leerlo (desvinculado de tu cuenta). Google pide no enviar información personal. Con el plan de pago, Google dice que no usa los datos para mejorar sus productos. Cada campo del juego ya recuerda no escribir datos personales.
 - **Menores de 18 años:** los términos de la API de Gemini piden ser mayor de 18 y no permiten usar el servicio en un cliente dirigido a menores de 18 o que probablemente lo usen. Chaski es para secundaria, así que para aplicarlo con menores conviene consultar esos términos o usar el juego sin modelo, con reglas de palabras: basta no definir `GEMINI_API_KEY`.

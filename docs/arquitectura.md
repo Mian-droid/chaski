@@ -34,6 +34,8 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 | `js/config.js` | Direcciones y opciones editables. | nada |
 | `functions/events.ts` | Pages Function que responde en `/events`: guarda, lee y borra los eventos en la base D1 enlazada como `DB`. Usa `handleEvents()` de `worker/src/events.ts`. | worker/ |
 | `functions/extract.ts` | Pages Function que responde en `/extract` y llama a `handle()` de `worker/`. Es el camino por defecto en Cloudflare Pages. | worker/ |
+| `functions/transcribe.ts` | Pages Function que responde en `/transcribe`: pasa la voz del estudiante a texto con Whisper (Workers AI). | worker/ |
+| `js/voice.js` | Dictado por voz: graba con `MediaRecorder`, envía a `/transcribe` y devuelve el texto. La interfaz del botón vive en `app.js`. | MediaRecorder |
 | `worker/` | Servidor intermedio: valida, arma el prompt por tema, llama al modelo, sanea la respuesta. | API de Gemini (`fetch`), zod |
 | `apps-script/Code.gs` | Alternativa a la base de datos: recibe eventos y los guarda en una hoja. | nada |
 
@@ -127,6 +129,6 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 | Figuras de los problemas: cada gráfico muestra datos del enunciado, marca una sola incógnita y no revela la respuesta; detección de explicaciones demasiado vagas | `tests/figures.test.js` | 9 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 7 |
 | Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 19 |
-| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, lectura de todas las salas o de una y de lo nuevo, borrado, límites) | `worker/test/*.test.ts` | 42 |
+| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, lectura de todas las salas o de una y de lo nuevo, borrado, límites) | `worker/test/*.test.ts` | 58 |
 
 No hay pruebas automáticas de la interfaz.

@@ -44,6 +44,8 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RF-E23 | Avisar, antes de las preguntas de seguimiento, qué viene y que todavía no se dice cómo le fue a Chaski. |
 | RF-E24 | No enviar a la IA ni guardar correos, teléfonos ni documentos de 8 cifras que el estudiante escriba por descuido: el juego pide quitarlos y el servidor los oculta. |
 | RF-E25 | Que cada pantalla del juego quepa en la ventana sin desplazarse, salvo la rendición final. |
+| RF-E26 | Dictado por voz opcional en los textos libres: si el docente lo permitió en el enlace (`voz=1`), el estudiante toca el micrófono, habla y el texto transcrito se agrega al final de la tablilla para que lo revise y lo edite antes de enviar. Sin aviso extra en el juego: solo el permiso del navegador. |
+| RF-E27 | La voz nunca bloquea: grabación de hasta 60 s, texto cortado con aviso si pasa de 400 caracteres, y ante cualquier falla un mensaje amable sin borrar lo ya escrito. El audio no se guarda. |
 
 ### 2.2 Docente
 
@@ -59,6 +61,7 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RF-D08 | Leer las explicaciones de los estudiantes junto con las señales de originalidad. |
 | RF-D09 | Descargar los resultados en CSV. |
 | RF-D10 | Borrar del servidor los datos de una sala desde el panel. |
+| RF-D12 | Casilla opcional «Permitir el dictado por voz» al armar el enlace. Los textos dictados llevan la marca «Dictado por voz» (revisado o sin cambios); la tabla y el CSV cuentan cuántos textos fueron por voz y cuántos se editaron. |
 | RF-D11 | Ver las partidas de todas las salas, o de una, con el progreso de cada estudiante y si Chaski le repreguntó, y que el panel se actualice solo mientras está abierto. El código de clase es opcional al jugar. |
 
 ### 2.3 Sistema y contenido
@@ -111,6 +114,7 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RNF-15 | Publicar solo el juego y el panel, sin pruebas, documentos ni servidor (`npm run build:site`). |
 | RNF-16 | Leer y borrar datos de la base exige una clave (`PANEL_KEY`, en la cabecera `X-Panel-Key`, nunca en la dirección). Guardar solo se acepta de la página del juego, con un máximo de 100 eventos por envío, y cada evento se valida. |
 | RNF-18 | Limitar el uso por IP (lecturas con el modelo y envíos de partidas) y el total diario de lecturas con el modelo, guardando solo una huella de la IP, y responder 429 sin romper el juego. |
+| RNF-19 | Mantener el dictado en el plan gratuito de Workers AI (10 000 Neurons al día, unos 214 minutos de audio), con topes por IP y por día (`RATE_LIMIT_TRANSCRIBE`, `DAILY_TRANSCRIBE`) y respuesta 429 sin romper el juego. |
 | RNF-17 | Registrar los eventos en lotes y sin duplicados, con un índice por clase, y acotar la lectura a una clase por consulta. |
 
 ---
@@ -126,6 +130,7 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RD-05 | Avisar en el juego, antes de empezar, que lo escrito lo lee un servicio de inteligencia artificial, y enlazar a la política de privacidad y a los términos. |
 | RD-06 | Publicar una política de privacidad (qué datos, para qué, con quién, cuánto tiempo, derechos y contacto), unos términos de uso y una autorización imprimible para madres, padres y tutores. |
 | RD-07 | Excluir del buscador el panel docente y las rutas de datos (`robots.txt`). |
+| RD-08 | La voz se pasa a texto con Cloudflare Workers AI (Whisper), sin guardar el audio. Solo se registra si el texto fue dictado, si se editó y cuánto duró. La política de privacidad y la autorización lo declaran. |
 
 El permiso de los tutores y el tiempo de conservación de los datos corresponden a la institución o al docente que aplique el piloto; la autorización imprimible y el borrado por clase desde el panel facilitan ambos. Cuando se usa el modelo, el texto del estudiante se envía al servicio de Gemini; ver [despliegue.md](despliegue.md#privacidad-y-datos).
 
@@ -137,7 +142,8 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 - Cuentas de usuario e inicio de sesión.
 - Más de tres temas, o que el docente cree temas desde la interfaz.
 - Respuestas libres de Chaski o chat abierto con el modelo.
-- Voz y sonido.
+- Conversación por voz con Chaski (voz de respuesta o chat de voz) y sonido. Solo se implementa el dictado, a pedido de dos estudiantes de las pruebas con usuarios que dijeron que explicar con texto es complicado.
+- Explicación gráfica (propuesta, no implementada): permitir explicar con un esquema armado con piezas del tema, además del texto, porque explicar solo con texto es lento y causa malentendidos. Requisitos que debe cumplir al implementarse: se convierte a texto estructurado de forma determinista, no envía imágenes de menores, y mantiene que el estudiante produce antes de recibir ayuda. Ver [docs/problema-y-evidencia.md](problema-y-evidencia.md#7-validación).
 - Versión por WhatsApp.
 - Escalas de medición validadas: el índice de dependencia es exploratorio.
 - Limitador de uso por usuario en el servidor (el acceso se restringe por origen).
@@ -148,10 +154,10 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 
 | Qué | Dónde | Pruebas |
 |---|---|---|
-| Contenido de los tres temas con cuentas verificadas de forma independiente, cerebro, lectura con reglas y con servidor simulado, originalidad y métricas | `tests/core.test.js` | 37 |
+| Contenido de los tres temas con cuentas verificadas de forma independiente, cerebro, lectura con reglas y con servidor simulado, originalidad y métricas | `tests/core.test.js` | 39 |
 | Figuras de los problemas y detección de explicaciones vagas | `tests/figures.test.js` | 9 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 7 |
-| Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 19 |
-| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, lectura de todas las salas y de lo nuevo, borrado, topes de uso) | `worker/test/*.test.ts` | 42 |
+| Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 20 |
+| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, lectura de todas las salas y de lo nuevo, borrado, topes de uso) | `worker/test/*.test.ts` | 58 |
 
 `npm test` las corre todas.
