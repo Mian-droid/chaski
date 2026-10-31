@@ -26,15 +26,6 @@ button, input, textarea { font: inherit; color: inherit; } button { cursor: poin
 
 /* El paisaje cubre toda la ventana. */
 .world { position: fixed; inset: 0; z-index: 0; } .world svg { width: 100%; height: 100%; display: block; }
-/* El fondo es ambiente, no protagonista. Un velo crema lo aleja, los detalles (llamas, árboles, flores, casas) se atenúan
-   y una zona más clara queda detrás de la tarea. Se compara con el nivel original en el panel "Maqueta". */
-.det { opacity: var(--det, 1); }
-.veil { position: fixed; inset: 0; z-index: 0; pointer-events: none; background:
-  radial-gradient(ellipse 52% 62% at 66% 46%, rgba(255, 247, 226, var(--pool, 0)), rgba(255, 247, 226, 0) 100%),
-  linear-gradient(rgba(255, 247, 226, var(--veil, 0)), rgba(255, 247, 226, var(--veil, 0))); }
-@media (max-width: 879px) { .veil { background: linear-gradient(rgba(255, 247, 226, calc(var(--veil, 0) + var(--pool, 0) * .5)), rgba(255, 247, 226, calc(var(--veil, 0) + var(--pool, 0) * .5))); } }
-body[data-fondo="suave"] { --veil: .46; --pool: .34; --det: .32; }
-body[data-fondo="medio"] { --veil: .26; --pool: .22; --det: .6; }
 #app { position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 .screen { flex: 1; display: none; flex-direction: column; gap: 12px; width: 100%; max-width: 1120px; margin: 0 auto;
   padding: 14px clamp(14px, 3vw, 36px) 64px; }
@@ -131,7 +122,6 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 </head>
 <body>
 <div class="world" id="world" aria-hidden="true"></div>
-<div class="veil" aria-hidden="true"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs"></defs></svg>
 
 <div id="app">
@@ -202,7 +192,6 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
   <div class="box">
     <div class="grp"><b>Pantalla</b><button data-scene="welcome" aria-pressed="false">Bienvenida</button><button data-scene="teach" aria-pressed="true">Enseñar</button><button data-scene="review" aria-pressed="false">Revisar</button></div>
     <div class="grp"><b>Momento del día</b><button data-time="amanecer" aria-pressed="false">Amanecer</button><button data-time="dia" aria-pressed="true">Día</button><button data-time="atardecer" aria-pressed="false">Atardecer</button></div>
-    <div class="grp"><b>Fondo</b><button data-fondo="suave" aria-pressed="true">Suave</button><button data-fondo="medio" aria-pressed="false">Medio</button><button data-fondo="original" aria-pressed="false">Original</button></div>
     <div class="grp"><b>Otra maqueta</b><a href="propuesta-panel.html">Panel docente →</a></div>
   </div>
 </details>
@@ -218,21 +207,20 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
   }).join('');
   document.getElementById('defs').innerHTML = defs;
 
-  var scene = 'teach', time = 'dia', fondo = 'suave';
+  var scene = 'teach', time = 'dia';
   function paint() {
     document.getElementById('world').innerHTML = Paisaje.world(time);
     document.querySelectorAll('.screen').forEach(function (s) { s.classList.toggle('on', s.dataset.scene === scene); });
-    document.body.dataset.fondo = fondo;
     document.querySelectorAll('.mk button').forEach(function (b) {
-      var on = b.dataset.scene ? b.dataset.scene === scene : b.dataset.fondo ? b.dataset.fondo === fondo : b.dataset.time === time;
+      var on = b.dataset.scene ? b.dataset.scene === scene : b.dataset.time === time;
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
   }
   document.querySelectorAll('.mk button').forEach(function (b) {
-    b.addEventListener('click', function () { if (b.dataset.scene) scene = b.dataset.scene; if (b.dataset.time) time = b.dataset.time; if (b.dataset.fondo) fondo = b.dataset.fondo; paint(); });
+    b.addEventListener('click', function () { if (b.dataset.scene) scene = b.dataset.scene; if (b.dataset.time) time = b.dataset.time; paint(); });
   });
   var q = new URLSearchParams(location.search);
-  if (q.get('escena')) scene = q.get('escena'); if (q.get('hora')) time = q.get('hora'); if (q.get('fondo')) fondo = q.get('fondo'); if (q.get('menu') === '0') document.querySelector('.mk').open = false;
+  if (q.get('escena')) scene = q.get('escena'); if (q.get('hora')) time = q.get('hora'); if (q.get('menu') === '0') document.querySelector('.mk').open = false;
   function vp() { document.getElementById('vp').textContent = innerWidth + ' × ' + innerHeight; }
   addEventListener('resize', vp); vp(); paint();
 })();
