@@ -1,0 +1,13 @@
+name = "chaski-lector"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Modelo que lee la explicación. claude-haiku-5-5 es más rápido y más barato.
+MODEL = "claude-opus-5-5"
+# Páginas que pueden llamar al servidor, separadas por coma. "*" acepta cualquiera (solo para pruebas).
+ALLOWED_ORIGINS = "*"
+
+# La clave NO va aquí. Se guarda como secreto:
+#   npx wrangler secret put ANTHROPIC_API_KEY
