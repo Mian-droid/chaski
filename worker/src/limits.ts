@@ -24,7 +24,7 @@ export type Scope = "extract" | "events" | "transcribe";
 export type Verdict = { ok: true } | { ok: false; error: string; retryAfter: number };
 
 const WINDOW = 600;
-const DEFAULTS = { extract: 150, events: 1200, daily: 3000, transcribe: 40, dailyTranscribe: 400 };
+const DEFAULTS = { extract: 150, events: 1200, daily: 3000, transcribe: 150, dailyTranscribe: 200 };
 
 function num(v: string | undefined, fallback: number): number {
   const n = Number(v);
