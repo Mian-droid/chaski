@@ -131,12 +131,14 @@
    * Devuelve {el, send, area, pasted()}; el botón `send` se coloca aparte, debajo de la tablilla.
    */
   function tablet(opts) {
-    var st = { pasted: false, voiced: false, voiceMs: 0, voiceSnap: '' };
+    var st = { pasted: false, voiced: false, voiceChanged: false, voiceMs: 0, voiceSnap: '' };
     st.area = h('textarea', { id: 'resp', maxlength: 400, placeholder: opts.ph, 'aria-label': opts.label });
     var count = h('span', { text: '0 / 400' });
     var warn = h('p', { class: 'msgerr', role: 'alert' });
     /** Lo que se registra si dictó: que usó la voz, si cambió el texto después de dictar y cuánto grabó. Sin audio. */
-    st.voiceInfo = function () { return st.voiced ? { voz: true, editado: st.area.value !== st.voiceSnap, vozMs: st.voiceMs } : {}; };
+    st.voiceInfo = function () { return st.voiced ? { voz: true, editado: st.voiceChanged || st.area.value !== st.voiceSnap, vozMs: st.voiceMs } : {}; };
+    /** El botón de enviar solo sirve con texto suficiente y mientras no se está pasando la voz a texto. */
+    st.refreshSend = function () { st.send.disabled = !!st.busy || st.area.value.trim().length < (opts.min || 1); };
     st.send = iconBtn(ICON_KNOT, opts.button || 'Enseñarle', 'go', function () {
       var text = st.area.value.trim(), pd = Core.personalData(text);
       /* Un correo, un teléfono o un documento no se envían a la IA ni se guardan: se pide quitarlos. */
@@ -146,7 +148,7 @@
     });
     st.send.disabled = true;
     st.area.addEventListener('paste', function () { st.pasted = true; });
-    st.area.addEventListener('input', function () { warn.textContent = ''; count.textContent = st.area.value.length + ' / 400'; st.send.disabled = st.area.value.trim().length < (opts.min || 1); });
+    st.area.addEventListener('input', function () { warn.textContent = ''; count.textContent = st.area.value.length + ' / 400'; st.refreshSend(); });
     var voiceRow = voiceControls(st, warn);
     st.el = h('div', { class: 'tablet' }, h('label', { for: 'resp', text: opts.label }), st.area, voiceRow, h('div', { class: 'foot' }, h('span', { text: 'No escribas tu nombre ni datos personales.' }), count), warn);
     return st;
@@ -174,16 +176,20 @@
         mic.classList.toggle('on', state === 'recording');
         mic.disabled = state === 'sending';
         st.area.disabled = state === 'sending';
+        st.busy = state === 'sending'; st.refreshSend();
         if (state === 'recording') { label(ICON_STOP_SQ, 'Listo · ' + clock(info.ms || 0)); mic.setAttribute('aria-label', 'Terminar de grabar'); status.textContent = 'Te escucho. Cuéntalo y toca «Listo».'; warn.textContent = ''; }
         else if (state === 'sending') { label(ICON_MIC, 'Escribiendo…'); status.textContent = 'Chaski está pasando tu voz a texto…'; }
         else { label(ICON_MIC, 'Hablar'); mic.setAttribute('aria-label', 'Dictar con la voz'); status.textContent = info.message || ''; }
       },
-      onText: function (text, ms) {
+      onText: function (text, ms, capped) {
+        /* Si ya había dictado y el estudiante tocó el texto antes de este nuevo dictado, cuenta como editado. */
+        if (st.voiced && st.area.value !== st.voiceSnap) st.voiceChanged = true;
         var r = Core.appendDictation(st.area.value, text, 400);
+        if (r.text === st.area.value) { status.textContent = 'La tablilla está llena y no cabe lo que dijiste. Borra algo y vuelve a hablar.'; return; }
         st.area.value = r.text;
         st.area.dispatchEvent(new Event('input')); /* actualiza el contador y el botón de enviar */
         st.voiced = true; st.voiceMs += ms; st.voiceSnap = st.area.value;
-        status.textContent = r.cut ? 'Se cortó para que quepa en la tablilla. Revisa el texto.' : 'Revisa el texto: puedes cambiar lo que haga falta antes de enviarlo.';
+        status.textContent = (capped ? 'Llegaste al máximo de un minuto. ' : '') + (r.cut ? 'Se cortó para que quepa en la tablilla. Revisa el texto.' : 'Revisa el texto: puedes cambiar lo que haga falta antes de enviarlo.');
         st.area.focus(); st.area.setSelectionRange(st.area.value.length, st.area.value.length);
       }
     });
@@ -282,7 +288,7 @@
       return true;
     }
     var resume = prev && prev.scene && prev.scene !== 'end' && prev.topic
-      ? btn('Continuar donde me quedé (' + prev.alias + ')', 'ghost', function () { S = prev; S.lessons = S.lessons || []; C.use(S.topic); render(); }) : null;
+      ? btn('Continuar donde me quedé (' + prev.alias + ')', 'ghost', function () { S = prev; S.lessons = S.lessons || []; S.voz = urlParam('voz') === '1'; /* manda el enlace de ahora */ C.use(S.topic); render(); }) : null;
     frame({
       hero: [chaski('happy', 120, 'bob')],
       main: [

@@ -51,6 +51,7 @@
    */
   function create(o) {
     var rec = null, stream = null, chunks = [], t0 = 0, tick = null, stopTimer = null, state = 'idle', gone = false;
+    var starting = false, capped = false, ctl = null; /* starting: esperando el permiso del micrófono; capped: llegó al tope de tiempo */
 
     function set(s, info) { state = s; o.onState(s, info || {}); }
     function release() {
@@ -58,9 +59,9 @@
       if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
     }
 
-    function send(blob, ms) {
+    function send(blob, ms, wasCapped) {
       set('sending');
-      var abort = new AbortController(), timer = setTimeout(function () { abort.abort(); }, SEND_TIMEOUT);
+      var abort = ctl = new AbortController(), timer = setTimeout(function () { abort.abort(); }, SEND_TIMEOUT);
       fetch(o.url, { method: 'POST', headers: { 'Content-Type': blob.type || 'audio/webm' }, body: blob, signal: abort.signal })
         .then(function (r) {
           if (r.status === 429 || r.status === 501 || r.status === 503) throw new Error('busy');
@@ -71,25 +72,28 @@
           if (gone) return;
           var text = d && typeof d.text === 'string' ? d.text.trim() : '';
           if (!text) { set('empty', { message: MSG.empty }); return; }
-          set('idle'); o.onText(text, ms);
+          set('idle'); o.onText(text, ms, wasCapped);
         })
         .catch(function (e) { if (!gone) set('error', { message: e && e.message === 'busy' ? MSG.busy : MSG.fail }); })
         .then(function () { clearTimeout(timer); });
     }
 
     function finish() {
-      var ms = Date.now() - t0;
+      var ms = Date.now() - t0, wasCapped = capped;
+      capped = false;
       var blob = new Blob(chunks, { type: (rec && rec.mimeType) || 'audio/webm' });
       release(); rec = null; chunks = [];
       if (gone) return;
       if (ms < MIN_MS || blob.size < MIN_BYTES) { set('empty', { message: MSG.short }); return; }
-      send(blob, ms);
+      send(blob, ms, wasCapped);
     }
 
     function start() {
-      if (state === 'recording' || state === 'sending') return;
+      if (state === 'recording' || state === 'sending' || starting) return; /* un segundo toque no abre otro micrófono */
+      starting = true;
       /* Cancelar el ruido y subir la voz ayuda en un aula con ruido. */
       navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then(function (s) {
+        starting = false;
         if (gone) { s.getTracks().forEach(function (t) { t.stop(); }); return; }
         stream = s; chunks = [];
         var mime = pickMime();
@@ -100,15 +104,19 @@
         rec.onerror = function () { release(); rec = null; set('error', { message: MSG.fail }); };
         t0 = Date.now(); rec.start();
         tick = setInterval(function () { o.onState('recording', { ms: Date.now() - t0 }); }, 250);
-        stopTimer = setTimeout(stop, MAX_MS);
+        stopTimer = setTimeout(function () { capped = true; stop(); }, MAX_MS);
         set('recording', { ms: 0 });
-      }).catch(function (e) { if (!gone) set('error', { message: micError(e) }); });
+      }).catch(function (e) { starting = false; if (!gone) set('error', { message: micError(e) }); });
     }
 
     function stop() { if (rec && rec.state === 'recording') rec.stop(); }
     function toggle() { if (state === 'recording') stop(); else start(); }
     /** Se llama al cambiar de escena: suelta el micrófono y descarta lo grabado. */
-    function dispose() { gone = true; if (rec && rec.state === 'recording') { rec.onstop = null; try { rec.stop(); } catch (e) { /* ya parado */ } } release(); }
+    function dispose() { gone = true; document.removeEventListener('visibilitychange', onHidden); if (ctl) ctl.abort(); if (rec && rec.state === 'recording') { rec.onstop = null; try { rec.stop(); } catch (e) { /* ya parado */ } } release(); }
+
+    /* Si la página pasa a segundo plano, se deja de grabar: el micrófono no queda abierto. */
+    function onHidden() { if (document.hidden) stop(); }
+    document.addEventListener('visibilitychange', onHidden);
 
     return { toggle: toggle, dispose: dispose, state: function () { return state; }, maxMs: MAX_MS };
   }
