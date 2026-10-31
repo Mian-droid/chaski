@@ -4,7 +4,7 @@ Mensajero-IA que solo sabe lo que el estudiante le enseña. Si le explicas bien,
 
 Nació para la Grieta 02, «Aprender sin pensar», del DSC Hack 2026. Es un **piloto exploratorio**: no prueba efecto ni evalúa con nota.
 
-**Demo:** <https://chaski.pages.dev> · **Panel docente:** <https://chaski.pages.dev/panel.html>
+**Demo:** <https://chaski.pages.dev> · **Panel docente:** <https://chaski.pages.dev/panel.html> · **Pitch deck:** [docs/Chaski-pitch-deck.html](docs/Chaski-pitch-deck.html) (descárgalo y ábrelo en el navegador)
 
 ## Índice
 
@@ -26,13 +26,13 @@ Nació para la Grieta 02, «Aprender sin pensar», del DSC Hack 2026. Es un **pi
 
 **Qué se mide.** Si el estudiante atrapa los errores, cuántas falsas alarmas da, qué ideas enseñó bien, si repite lo anterior en vez de usar palabras propias y cómo responde a preguntas nuevas (ver [Métricas del piloto](#métricas-del-piloto)). El docente lo ve en un panel por clase.
 
-> **Evidencia de uso:** **todavía no se ha probado con estudiantes ni docentes reales** en lo que registra este repositorio. El registro formal de pruebas de uso va en la carpeta de evidencias del DSC Hack. Lo que sí se probó está en [Funcionalidades implementadas](#funcionalidades-implementadas).
+> **Evidencia de uso:** **una docente y dos estudiantes de secundaria probaron el piloto**; el registro está en la carpeta de evidencias del DSC Hack (Drive, «G - LLM»). Es una prueba muy pequeña: **todavía no se probó con una clase completa**. Lo que se comprobó con pruebas automáticas está en [Funcionalidades implementadas](#funcionalidades-implementadas).
 
 ## Evidencia y por qué crece
 
 | Dato | Fuente | Ojo |
 |---|---|---|
-| **Matemática, PISA 2025:** Perú 382 puntos, 9 menos que en 2022 (391). Solo **30 %** de los estudiantes de 15 años llega al nivel mínimo (Nivel 2), o sea cerca de **70 %** queda por debajo. En la OCDE, 35 % queda por debajo; en 13 países de América Latina, 76 % | PISA 2025 (OCDE, publicado 08/09/2026), vía Forbes Perú, La Cámara de Comercio de Lima y blog del Banco Mundial | Cifras de prensa y del Banco Mundial, **no leímos el informe de la OCDE/Minedu**. El 70 % es el complemento del 30 %. No usamos el puesto en el ranking porque los medios no coinciden |
+| **Matemática, PISA 2025:** Perú 382 puntos (9 menos que en 2022). Solo **30 %** de los estudiantes de 15 años llega al nivel mínimo, así que cerca de **70 %** queda por debajo. OCDE: 35 %. América Latina (13 países): 76 % | PISA 2025 (OCDE, 08/09/2026), vía Forbes Perú, Cámara de Comercio de Lima y blog del Banco Mundial | Cifras de prensa y del Banco Mundial, **no leímos el informe de la OCDE/Minedu**. El 70 % es el complemento del 30 %. No usamos el puesto en el ranking porque los medios no coinciden |
 | En PISA 2022 el nivel mínimo en matemática lo alcanzó 34 % de los estudiantes peruanos (promedio OCDE: 69 %) | Nota país PISA 2022, OCDE | Citada de la ficha de la OCDE vista en buscador; verificar |
 | Los riesgos de la IA generativa para los estudiantes superan hoy sus beneficios | Brookings (Burns, Winthrop et al., ene 2026; más de 500 personas en 50 países), según el documento del reto | No leímos el informe completo |
 | La evidencia sobre IA en educación del Perú casi no cubre secundaria | Búsqueda académica LeapSpace (31/10/2026) | Es ausencia en lo que se buscó, no prueba de que no exista |
@@ -56,7 +56,7 @@ Detalle, fuentes con enlaces, el problema del «puente» con otro chatbot y los 
 - **Cliente (hipótesis):** el colegio, que obtiene un panel con qué ideas se dejan pasar. **Falta definir quién decide la compra** (dirección o coordinación académica).
 - **Modelo (hipótesis, sin validar):** licencia anual por colegio con el panel incluido; en el futuro, versión gratuita con funciones de pago para el estudiante. La hipótesis más débil es que el colegio pague, y la primera por probar con docentes y directivos.
 - **Costo de operar:** el sitio corre en el plan gratuito de Cloudflare Pages; la lectura con el modelo ligero cuesta centavos o menos por lectura (estimado, no medido), con topes de uso por IP y por día. Un tema nuevo es un archivo de contenido, sin tocar el juego.
-- **Hoja de ruta:** probar con usuarios reales; «Chaski curioso» (repregunta como alumno); «Chaski olvida» a los 3 o 7 días para medir retención; conversación por voz con Chaski; más temas.
+- **Hoja de ruta:** probar con una clase completa y con más docentes; «Chaski curioso» (repregunta como alumno); «Chaski olvida» a los 3 o 7 días para medir retención; conversación por voz con Chaski; más temas.
 
 ## Temas
 
@@ -72,7 +72,7 @@ El docente decide en qué grado usa cada tema. Para agregar otro tema, ver [docs
 
 ## Cómo se juega
 
-1. **Enseñar.** Chaski plantea la pregunta en una placa de piedra y el estudiante responde en una tablilla de arcilla. No es un chat: al enviar, el texto vuela y ata un nudo en la cuerda de Chaski. Tocar un nudo muestra lo que se enseñó. Después puede agregar más lecciones.
+1. **Enseñar.** Chaski plantea la pregunta en una placa de piedra y el estudiante responde en una tablilla de arcilla, escribiendo o **dictando por voz** (el texto cae en la tablilla y se edita antes de enviar). No es un chat: al enviar, el texto vuela y ata un nudo en la cuerda de Chaski. Tocar un nudo muestra lo que se enseñó. Después puede agregar más lecciones.
 2. **El cerebro.** Chaski cuenta lo que entendió. Un modelo de lenguaje lee la explicación y rellena tres fichas (una por idea): bien, mal o ausente, con una cita del estudiante como evidencia.
 3. **El camino.** Chaski resuelve 6 problemas, uno por tambo del Camino Inca, usando solo sus fichas. Con la ficha bien acierta. Si falta o está mal, comete el error típico de ese tema. Cuando todo está bien enseñado, igual comete un descuido de cálculo, para que haya algo que revisar.
 4. **Revisar.** El estudiante elige «Dejar pasar» o «¡Alto, Chaski!». Si lo detiene, toca el nudo del quipu donde está el error y teclea la respuesta correcta. El juego no dice si acertó hasta el final de la ronda.
@@ -107,7 +107,7 @@ Si el modelo de lenguaje no responde (sin conexión, sin cuota o tarda más de 1
 | Tope de uso por IP y tope diario en el servidor | Pruebas del servidor |
 | Dictado por voz (Whisper en Workers AI): el texto cae en la tablilla y se edita antes de enviar; el docente puede apagarlo con `voz=0` en el enlace | Pruebas del servidor y del núcleo; falta probar en celulares reales |
 
-**Limitaciones actuales:** no se probó con estudiantes ni docentes reales, ni en celulares reales de gama baja. No se mide aprendizaje ni retención (ver [Alcance y límites](#alcance-y-límites)). La interfaz no tiene pruebas automáticas. Detalle por requerimiento en [docs/requerimientos.md](docs/requerimientos.md).
+**Limitaciones actuales:** solo lo probaron una docente y dos estudiantes; falta probarlo con una clase completa y en celulares reales de gama baja. No se mide aprendizaje ni retención (ver [Alcance y límites](#alcance-y-límites)). La interfaz no tiene pruebas automáticas. Detalle por requerimiento en [docs/requerimientos.md](docs/requerimientos.md).
 
 ## Arquitectura y tecnologías
 
@@ -182,6 +182,7 @@ El detalle para estudiantes y familias está en la [política de privacidad](pri
 - Solo se piden un **apodo** y un **código de clase**. No se piden nombre ni datos personales.
 - Los textos que escribe el estudiante se guardan (en su dispositivo y, si se configura, en la base de datos o en la hoja). Cada campo recuerda no escribir datos personales. El docente puede borrar de la base los datos de su clase desde el panel.
 - Cuando se usa el modelo, el texto del estudiante se envía a un servicio externo (Google Gemini) a través del servidor intermedio. Los términos de la API de Gemini restringen su uso en clientes dirigidos a menores de 18 años; para aplicarlo con menores, el juego funciona sin modelo, con reglas de palabras (ver [docs/despliegue.md](docs/despliegue.md#privacidad-y-datos)).
+- **Dictado por voz (opcional):** el audio viaja a Cloudflare Workers AI (Whisper), que lo pasa a texto y no se guarda. Solo queda registro de si se dictó, cuánto se grabó y si se editó el texto. El docente puede apagarlo con `voz=0` en el enlace.
 - Con menores, siempre con un adulto responsable presente. El permiso de tutores y el tiempo de conservación de los datos corresponden a la institución o al docente que aplique el piloto (ver [docs/requerimientos.md](docs/requerimientos.md)).
 
 ## Métricas del piloto
@@ -224,7 +225,7 @@ Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 - **La señal de originalidad es heurística** y puede equivocarse con textos cortos o vocabulario muy común.
 - **El índice de dependencia es exploratorio**, sin una escala validada.
 - **Los topes de uso dependen de la base de datos.** Por IP y por día, solo se aplican con D1 enlazada; si la base falla, no se limita nada para no dejar sin juego a la clase. Además se restringe el origen (`ALLOWED_ORIGINS`).
-- **Solo se puede explicar con texto.** Una persona que probó el piloto lo señaló como la mayor complicación: es lento y puede causar malentendidos con la IA. La explicación gráfica está propuesta en la [hoja de ruta](docs/problema-y-evidencia.md#8-hoja-de-ruta), no implementada.
-- **Sin validación con usuarios.** No hay pruebas con estudiantes ni docentes reales, ni en celulares reales.
+- **Se explica con texto o dictado, no con dibujos.** Dos estudiantes que probaron el piloto señalaron que explicar solo con texto es complicado: es lento y puede causar malentendidos con la IA. Por eso se agregó el dictado por voz, que todavía no se volvió a probar con usuarios. La explicación gráfica está propuesta en la [hoja de ruta](docs/problema-y-evidencia.md#8-hoja-de-ruta), no implementada.
+- **Validación con usuarios mínima.** Lo probaron una docente y dos estudiantes (evidencia en el Drive del DSC Hack, «G - LLM»). No hay pruebas con una clase completa ni en celulares reales.
 - **El modelo envía el texto del estudiante a un servicio externo** (Gemini). Con menores, ver [Datos y privacidad](#datos-y-privacidad).
 - **Los dibujos son vectoriales hechos en código**, no ilustraciones profesionales, y el juego no tiene sonido.
