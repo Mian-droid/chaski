@@ -155,26 +155,40 @@
     if (mood === 'listen') return '<path d="M62 98q8 6 16 0" ' + s + '/>';
     return '<path d="M58 97q12 10 24 0" ' + s + '/>';
   }
-  /** Símbolo SVG de Chaski con un estado de ánimo: confident, happy, oops, think o listen. */
-  function symbol(mood) {
+  /**
+   * El dibujo de Chaski. Con `run` se le ve de espaldas, con sus piernas y brazos en grupos propios para animar la carrera:
+   * sin cara, con el pelo y la trenza, y sin la correa ni la bolsa del frente.
+   */
+  function figure(mood, run) {
     var st = 'stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"', st2 = 'stroke="' + INK + '" stroke-width="2" stroke-linejoin="round"';
-    return '<symbol id="ch-' + mood + '" viewBox="0 0 140 200">' +
-      '<ellipse cx="70" cy="195" rx="36" ry="5" fill="rgba(58,36,18,.2)"/>' +
-      '<rect x="51" y="158" width="14" height="32" rx="6" fill="#F3E3C3" ' + st + '/><rect x="75" y="158" width="14" height="32" rx="6" fill="#F3E3C3" ' + st + '/>' +
-      '<ellipse cx="55" cy="191" rx="14" ry="6.5" fill="#8A3A1E" ' + st + '/><ellipse cx="85" cy="191" rx="14" ry="6.5" fill="#8A3A1E" ' + st + '/>' +
-      '<rect x="18" y="124" width="16" height="36" rx="8" fill="#C2185B" ' + st + '/><rect x="106" y="124" width="16" height="36" rx="8" fill="#C2185B" ' + st + '/>' +
-      '<circle cx="26" cy="163" r="8" fill="#F3E3C3" ' + st + '/><circle cx="114" cy="163" r="8" fill="#F3E3C3" ' + st + '/>' +
-      '<path d="M114 168v22" stroke="#C9A66B" stroke-width="3"/><circle cx="114" cy="176" r="3.2" fill="#FFC83D" stroke="' + INK + '" stroke-width="1.5"/><circle cx="114" cy="186" r="3.2" fill="#1593A8" stroke="' + INK + '" stroke-width="1.5"/>' +
+    var legL = '<rect x="51" y="158" width="14" height="32" rx="6" fill="#F3E3C3" ' + st + '/><ellipse cx="55" cy="191" rx="14" ry="6.5" fill="#8A3A1E" ' + st + '/>';
+    var legR = '<rect x="75" y="158" width="14" height="32" rx="6" fill="#F3E3C3" ' + st + '/><ellipse cx="85" cy="191" rx="14" ry="6.5" fill="#8A3A1E" ' + st + '/>';
+    var armL = '<rect x="18" y="124" width="16" height="36" rx="8" fill="#C2185B" ' + st + '/><circle cx="26" cy="163" r="8" fill="#F3E3C3" ' + st + '/>';
+    var armR = '<rect x="106" y="124" width="16" height="36" rx="8" fill="#C2185B" ' + st + '/><circle cx="114" cy="163" r="8" fill="#F3E3C3" ' + st + '/>' +
+      '<path d="M114 168v22" stroke="#C9A66B" stroke-width="3"/><circle cx="114" cy="176" r="3.2" fill="#FFC83D" stroke="' + INK + '" stroke-width="1.5"/><circle cx="114" cy="186" r="3.2" fill="#1593A8" stroke="' + INK + '" stroke-width="1.5"/>';
+    var face = run
+      ? '<rect x="32" y="56" width="76" height="62" rx="26" fill="' + INK + '"/><path d="M70 112q-7 22 0 38" stroke="' + INK + '" stroke-width="9" stroke-linecap="round" fill="none"/><circle cx="70" cy="152" r="5" fill="#C2185B" ' + st2 + '/>'
+      : '<rect x="40" y="62" width="60" height="46" rx="16" fill="' + INK + '"/><circle cx="48" cy="98" r="5" fill="#FF7AA8" opacity=".7"/><circle cx="92" cy="98" r="5" fill="#FF7AA8" opacity=".7"/>' + eyes(mood) + mouth(mood);
+    var front = run ? '' : '<path d="M40 120 L100 160" stroke="#E39A2D" stroke-width="5"/><rect x="88" y="150" width="24" height="22" rx="6" fill="#E39A2D" ' + st + '/><path d="M88 160h24" stroke="#C2185B" stroke-width="3"/>';
+    var out = '<ellipse cx="70" cy="195" rx="36" ry="5" fill="rgba(58,36,18,.2)"/>' +
+      (run ? '<g class="rl rl1">' + legL + '</g><g class="rl rl2">' + legR + '</g><g class="rb">' : legL + legR) +
+      (run ? '<g class="ra ra1">' + armL + '</g><g class="ra ra2">' + armR + '</g>' : armL + armR) +
       '<path d="M36 118 H104 L120 170 H20Z" fill="#C2185B" ' + st + '/>' +
       '<path d="M31 138 H109 L112 148 H28Z" fill="#FFC83D"/><path d="M26 154 H114 L117 162 H23Z" fill="#1593A8"/><path d="M27 143l7-4 7 4 7-4 7 4 7-4 7 4 7-4 7 4 7-4 7 4 7-4 7 4" stroke="#0B5A69" stroke-width="2" fill="none"/>' +
-      '<path d="M36 118 H104 L120 170 H20Z" fill="none" ' + st + '/>' +
-      '<path d="M40 120 L100 160" stroke="#E39A2D" stroke-width="5"/><rect x="88" y="150" width="24" height="22" rx="6" fill="#E39A2D" ' + st + '/><path d="M88 160h24" stroke="#C2185B" stroke-width="3"/>' +
-      '<rect x="30" y="44" width="80" height="76" rx="28" fill="#F3E3C3" ' + st + '/><rect x="40" y="62" width="60" height="46" rx="16" fill="' + INK + '"/>' +
-      '<circle cx="48" cy="98" r="5" fill="#FF7AA8" opacity=".7"/><circle cx="92" cy="98" r="5" fill="#FF7AA8" opacity=".7"/>' +
-      eyes(mood) + mouth(mood) +
+      '<path d="M36 118 H104 L120 170 H20Z" fill="none" ' + st + '/>' + front +
+      '<rect x="30" y="44" width="80" height="76" rx="28" fill="#F3E3C3" ' + st + '/>' + face +
       '<rect x="14" y="56" width="18" height="42" rx="9" fill="#1593A8" ' + st + '/><rect x="108" y="56" width="18" height="42" rx="9" fill="#1593A8" ' + st + '/><circle cx="23" cy="102" r="5" fill="#C2185B" ' + st2 + '/><circle cx="117" cy="102" r="5" fill="#C2185B" ' + st2 + '/>' +
       '<path d="M28 62C28 12 112 12 112 62Z" fill="#1593A8" ' + st + '/><rect x="28" y="48" width="84" height="14" rx="5" fill="#FFC83D" ' + st + '/><path d="M32 55l6-5 6 5 6-5 6 5 6-5 6 5 6-5 6 5 6-5 6 5 6-5 6 5" stroke="#C2185B" stroke-width="2.6" fill="none"/>' +
-      '<circle cx="70" cy="17" r="9" fill="#C2185B" ' + st + '/></symbol>';
+      '<circle cx="70" cy="17" r="9" fill="#C2185B" ' + st + '/>' + (run ? '</g>' : '');
+    return out;
+  }
+  /** Símbolo SVG de Chaski con un estado de ánimo: confident, happy, oops, think o listen. */
+  function symbol(mood) {
+    return '<symbol id="ch-' + mood + '" viewBox="0 0 140 200">' + figure(mood, false) + '</symbol>';
+  }
+  /** Chaski corriendo, visto de espaldas, como SVG propio (no un símbolo) para poder animar piernas y brazos. */
+  function runnerSvg(cls) {
+    return '<svg class="chsvg runner ' + (cls || '') + '" viewBox="0 0 140 200" aria-hidden="true">' + figure('run', true) + '</svg>';
   }
 
   /** Elemento SVG de Chaski. `w` es el ancho en píxeles; el alto se calcula (proporción 140 x 200). */
@@ -214,7 +228,14 @@
     if (el) el.innerHTML = world(time);
   }
 
-  var api = { PAL: PAL, world: world, symbol: symbol, symbols: symbols, chaski: chaski, hut: hut, setup: setup, paint: paint };
+  /** Elemento de Chaski corriendo. */
+  function runner(cls) {
+    var d = document.createElement('div');
+    d.innerHTML = runnerSvg(cls);
+    return d.firstChild;
+  }
+
+  var api = { PAL: PAL, world: world, runnerSvg: runnerSvg, runner: runner, symbol: symbol, symbols: symbols, chaski: chaski, hut: hut, setup: setup, paint: paint };
   root.ChaskiScenery = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
