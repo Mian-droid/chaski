@@ -131,22 +131,68 @@
    * Devuelve {el, send, area, pasted()}; el botón `send` se coloca aparte, debajo de la tablilla.
    */
   function tablet(opts) {
-    var st = { pasted: false };
+    var st = { pasted: false, voiced: false, voiceMs: 0, voiceSnap: '' };
     st.area = h('textarea', { id: 'resp', maxlength: 400, placeholder: opts.ph, 'aria-label': opts.label });
     var count = h('span', { text: '0 / 400' });
     var warn = h('p', { class: 'msgerr', role: 'alert' });
+    /** Lo que se registra si dictó: que usó la voz, si cambió el texto después de dictar y cuánto grabó. Sin audio. */
+    st.voiceInfo = function () { return st.voiced ? { voz: true, editado: st.area.value !== st.voiceSnap, vozMs: st.voiceMs } : {}; };
     st.send = iconBtn(ICON_KNOT, opts.button || 'Enseñarle', 'go', function () {
       var text = st.area.value.trim(), pd = Core.personalData(text);
       /* Un correo, un teléfono o un documento no se envían a la IA ni se guardan: se pide quitarlos. */
       if (pd) { warn.textContent = 'Parece que escribiste un ' + pd + '. Bórralo: Chaski no necesita datos personales.'; return; }
       opts.onSend(text, st.pasted, st);
+      if (st.lock) st.lock(); /* ya se envió: el micrófono se suelta y no graba mientras el texto vuela */
     });
     st.send.disabled = true;
     st.area.addEventListener('paste', function () { st.pasted = true; });
     st.area.addEventListener('input', function () { warn.textContent = ''; count.textContent = st.area.value.length + ' / 400'; st.send.disabled = st.area.value.trim().length < (opts.min || 1); });
-    st.el = h('div', { class: 'tablet' }, h('label', { for: 'resp', text: opts.label }), st.area, h('div', { class: 'foot' }, h('span', { text: 'No escribas tu nombre ni datos personales.' }), count), warn);
+    var voiceRow = voiceControls(st, warn);
+    st.el = h('div', { class: 'tablet' }, h('label', { for: 'resp', text: opts.label }), st.area, voiceRow, h('div', { class: 'foot' }, h('span', { text: 'No escribas tu nombre ni datos personales.' }), count), warn);
     return st;
   }
+
+  /**
+   * Dictado por voz en la tablilla (solo si el docente lo activó en el enlace con ?voz=1 y el navegador puede grabar).
+   * El estudiante toca el micrófono, habla y vuelve a tocar: el texto se agrega a la tablilla y se puede editar antes de enviar.
+   * Devuelve null si la voz no está disponible: entonces la tablilla es la de siempre.
+   */
+  var ICON_MIC = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+  var ICON_STOP_SQ = '<svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+  function voiceControls(st, warn) {
+    var V = window.ChaskiVoice;
+    if (!(S && S.voz && CFG.TRANSCRIBE_URL && V && V.supported())) return null;
+    var status = h('p', { class: 'voicemsg', role: 'status' });
+    var mic = h('button', { type: 'button', class: 'mic' });
+    function label(icon, text) { mic.innerHTML = icon; mic.appendChild(document.createTextNode(text)); }
+    function clock(ms) { var s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
+    label(ICON_MIC, 'Hablar');
+    mic.setAttribute('aria-label', 'Dictar con la voz');
+    var rec = V.create({
+      url: CFG.TRANSCRIBE_URL,
+      onState: function (state, info) {
+        mic.classList.toggle('on', state === 'recording');
+        mic.disabled = state === 'sending';
+        st.area.disabled = state === 'sending';
+        if (state === 'recording') { label(ICON_STOP_SQ, 'Listo · ' + clock(info.ms || 0)); mic.setAttribute('aria-label', 'Terminar de grabar'); status.textContent = 'Te escucho. Cuéntalo y toca «Listo».'; warn.textContent = ''; }
+        else if (state === 'sending') { label(ICON_MIC, 'Escribiendo…'); status.textContent = 'Chaski está pasando tu voz a texto…'; }
+        else { label(ICON_MIC, 'Hablar'); mic.setAttribute('aria-label', 'Dictar con la voz'); status.textContent = info.message || ''; }
+      },
+      onText: function (text, ms) {
+        var r = Core.appendDictation(st.area.value, text, 400);
+        st.area.value = r.text;
+        st.area.dispatchEvent(new Event('input')); /* actualiza el contador y el botón de enviar */
+        st.voiced = true; st.voiceMs += ms; st.voiceSnap = st.area.value;
+        status.textContent = r.cut ? 'Se cortó para que quepa en la tablilla. Revisa el texto.' : 'Revisa el texto: puedes cambiar lo que haga falta antes de enviarlo.';
+        st.area.focus(); st.area.setSelectionRange(st.area.value.length, st.area.value.length);
+      }
+    });
+    mic.addEventListener('click', function () { rec.toggle(); });
+    st.lock = function () { rec.dispose(); mic.disabled = true; };
+    voiceDispose = rec.dispose;
+    return h('div', { class: 'voicerow' }, mic, status);
+  }
+  var voiceDispose = null;
 
   /** Cuerda de nudos: un nudo por lección enseñada. Tocar un nudo muestra lo que se enseñó. */
   function cordbar() {
@@ -230,7 +276,9 @@
       if (c && c.length < 3) { msg.textContent = 'El código de la clase tiene 3 letras o números como mínimo. Si no lo tienes, déjalo vacío.'; return false; }
       c = c || 'GENERAL'; /* la sala es solo una etiqueta para agrupar en el panel */
       if (!ok.checked) { msg.textContent = 'Marca la casilla para continuar.'; return false; }
-      S = newState(a, c, C.topic.id); save(); Log.push('start', { version: CFG.VERSION, model: !!CFG.EXTRACT_URL });
+      S = newState(a, c, C.topic.id);
+      S.voz = urlParam('voz') === '1'; /* el docente activa el dictado en el enlace; el estudiante decide si lo usa */
+      save(); Log.push('start', { version: CFG.VERSION, model: !!CFG.EXTRACT_URL, voz: S.voz || undefined });
       return true;
     }
     var resume = prev && prev.scene && prev.scene !== 'end' && prev.topic
@@ -281,7 +329,8 @@
       if (busy) return; busy = true; st.send.disabled = true; st.area.disabled = true; /* se bloquea mientras el texto vuela al nudo */
       var prior = Log.mine('teach').map(function (e) { return e.text; });
       var orig = Core.originality(text, { refs: C.refs, prior: prior, needNumbers: p.needNumbers, contextNumbers: C.contextNumbers, pasted: pasted, minWords: p.minWords });
-      Log.push('teach', { k: p.k, text: text, pasted: pasted, ms: Date.now() - t0, orig: orig, phase: S.phase });
+      var vi = st.voiceInfo();
+      Log.push('teach', { k: p.k, text: text, pasted: pasted, voz: vi.voz, editado: vi.editado, vozMs: vi.vozMs, ms: Date.now() - t0, orig: orig, phase: S.phase });
       var idx = S.lessons.length;
       S.pending.push(text); S.lessons.push({ k: p.k, text: text }); save();
       flyTo(st.area, cord.knot(idx), text, function () {
@@ -474,10 +523,11 @@
       var kp = keypad('Tu respuesta', function (v) { submit.disabled = Core.parseNum(v) == null; }, function () { if (!submit.disabled) submit.click(); });
       frame({ hud: head, hero: hero, main: [h('div', { class: 'board', text: p.q }), kp.el, submit] });
     } else {
-      var box = tablet({ ph: 'Cuéntalo a tu manera…', label: 'Tu ejemplo', min: 12, button: 'Enviar', onSend: function (text, pasted) {
+      var box = tablet({ ph: 'Cuéntalo a tu manera…', label: 'Tu ejemplo', min: 12, button: 'Enviar', onSend: function (text, pasted, st) {
         var prior = Log.mine('teach').map(function (e) { return e.text; });
         var orig = Core.originality(text, { refs: C.refs, prior: prior, needNumbers: true, contextNumbers: C.contextNumbers, pasted: pasted, minWords: 5 });
-        Log.push('probe', { k: p.k, kind: 'free', text: text, pasted: pasted, ms: Date.now() - t0, orig: orig });
+        var vi = st.voiceInfo();
+        Log.push('probe', { k: p.k, kind: 'free', text: text, pasted: pasted, voz: vi.voz, editado: vi.editado, vozMs: vi.vozMs, ms: Date.now() - t0, orig: orig });
         go('reveal');
       } });
       frame({ hud: head, hero: hero, main: [h('div', { class: 'board', text: p.q }), box.el, box.send] });
@@ -549,6 +599,7 @@
   /* ---------- arranque ---------- */
   function render() {
     keyHandler = null; /* cada escena que use el teclado de piedra lo registra de nuevo */
+    if (voiceDispose) { voiceDispose(); voiceDispose = null; } /* suelta el micrófono al cambiar de escena */
     if (!S || !S.scene) return sWelcome();
     var map = { intro: sIntro, teach: sTeach, brain: sBrain, map: sMap, ex: sEx, probeintro: sProbeIntro, probe: sProbe, reveal: sReveal, end: sEnd };
     (map[S.scene] || sWelcome)(S.i);

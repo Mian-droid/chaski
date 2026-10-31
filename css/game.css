@@ -144,6 +144,15 @@ label { font-weight: 700; font-size: .92rem; color: var(--ink); }
 .tablet label { position: absolute; top: -13px; left: 16px; background: var(--turqd); color: var(--cream); font: 800 .74rem var(--display); letter-spacing: .09em; text-transform: uppercase; padding: 2px 10px; border-radius: 99px; }
 .tablet textarea { display: block; width: 100%; height: 136px; resize: none; border: 0; outline: none; background: repeating-linear-gradient(transparent 0 31px, rgba(110, 70, 30, .28) 31px 32px); font: 1.4rem/32px var(--hand); color: #4A2E14; padding: 2px 6px; }
 .tablet textarea::placeholder { color: rgba(74, 46, 20, .55); }
+/* Dictado por voz: botón de micrófono bajo la tablilla y su mensaje de estado. */
+.tablet .voicerow { display: flex; align-items: center; gap: 10px; padding: 4px 2px 2px; flex-wrap: wrap; }
+.tablet .mic { display: inline-flex; align-items: center; gap: 6px; border: 3px solid var(--ink); border-radius: 99px; background: var(--cream); color: var(--ink); font: 800 .95rem var(--display); min-height: 44px; padding: 4px 14px; cursor: pointer; box-shadow: 0 3px 0 var(--shadow); }
+.tablet .mic .ic { width: 20px; height: 20px; }
+.tablet .mic.on { background: var(--magenta); color: #fff; border-color: var(--ink); animation: micpulse 1.2s ease-in-out infinite; }
+.tablet .mic:disabled { background: #DCCBB8; color: #7A6552; cursor: not-allowed; box-shadow: none; }
+.tablet .voicemsg { margin: 0; flex: 1 1 160px; font-size: .8rem; font-weight: 700; color: #5A3A17; min-height: 1.1em; }
+@keyframes micpulse { 50% { box-shadow: 0 3px 0 var(--shadow), 0 0 0 6px rgba(194, 24, 91, .25); } }
+@media (prefers-reduced-motion: reduce) { .tablet .mic.on { animation: none; } }
 .tablet .foot { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: .78rem; color: #5A3A17; padding: 2px 4px 0; }
 .fly { position: fixed; z-index: 50; max-width: 170px; background: var(--cream); border: 3px solid var(--ink); border-radius: 10px; padding: 4px 8px; font: 1rem/1.1 var(--hand); color: var(--ink); pointer-events: none; }
 .cordwrap { position: relative; }
