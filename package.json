@@ -1,0 +1,13 @@
+{
+  "name": "chaski",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Mensajero-IA que solo sabe lo que el estudiante le enseña. Piloto para el DSC Hack 2026.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "serve": "python -m http.server 5190",
+    "test": "npm run test:core && npm run test:worker",
+    "test:core": "node tests/core.test.js",
+    "test:worker": "npm --prefix worker test"
+  }
+}
