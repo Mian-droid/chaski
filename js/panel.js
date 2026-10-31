@@ -53,7 +53,7 @@
     url.search = '';
     url.searchParams.set('tema', topic());
     if (cls()) url.searchParams.set('clase', cls());
-    if ($('voz').checked) url.searchParams.set('voz', '1'); /* el docente autoriza el dictado por voz */
+    if (!$('voz').checked) url.searchParams.set('voz', '0'); /* el dictado sale por defecto; el docente lo puede apagar */
     return url.toString();
   }
   function refreshLink() {

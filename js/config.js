@@ -4,7 +4,7 @@ window.CHASKI_CONFIG = {
      Ejemplo: "https://chaski-lector.tu-cuenta.workers.dev/extract". Vacío = lee con reglas de palabras. */
   EXTRACT_URL: "",
   /* Dirección del dictado por voz (Whisper en Workers AI): "/transcribe" (la Pages Function de functions/) o una https.
-     Vacío = sin dictado. Además el docente lo activa en el enlace con ?voz=1 (casilla en el panel). */
+     Vacío = sin dictado. Sale siempre; el docente lo apaga con ?voz=0 en el enlace (casilla en el panel). */
   TRANSCRIBE_URL: "",
   /* Dónde se guardan los datos de las partidas: "/events" (la base de datos del propio sitio, ver docs/despliegue.md)
      o la URL de un Apps Script que escribe en una hoja de Google. Vacío = solo en el dispositivo. */

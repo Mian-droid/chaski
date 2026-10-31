@@ -155,7 +155,7 @@
   }
 
   /**
-   * Dictado por voz en la tablilla (solo si el docente lo activó en el enlace con ?voz=1 y el navegador puede grabar).
+   * Dictado por voz en la tablilla (siempre que el navegador pueda grabar; el docente lo apaga con ?voz=0 en el enlace).
    * El estudiante toca el micrófono, habla y vuelve a tocar: el texto se agrega a la tablilla y se puede editar antes de enviar.
    * Devuelve null si la voz no está disponible: entonces la tablilla es la de siempre.
    */
@@ -283,12 +283,12 @@
       c = c || 'GENERAL'; /* la sala es solo una etiqueta para agrupar en el panel */
       if (!ok.checked) { msg.textContent = 'Marca la casilla para continuar.'; return false; }
       S = newState(a, c, C.topic.id);
-      S.voz = urlParam('voz') === '1'; /* el docente activa el dictado en el enlace; el estudiante decide si lo usa */
-      save(); Log.push('start', { version: CFG.VERSION, model: !!CFG.EXTRACT_URL, voz: S.voz || undefined });
+      S.voz = urlParam('voz') !== '0'; /* el dictado sale siempre; el docente lo apaga con ?voz=0 y el estudiante decide si lo usa */
+      save(); Log.push('start', { version: CFG.VERSION, model: !!CFG.EXTRACT_URL, voz: S.voz ? undefined : false });
       return true;
     }
     var resume = prev && prev.scene && prev.scene !== 'end' && prev.topic
-      ? btn('Continuar donde me quedé (' + prev.alias + ')', 'ghost', function () { S = prev; S.lessons = S.lessons || []; S.voz = urlParam('voz') === '1'; /* manda el enlace de ahora */ C.use(S.topic); render(); }) : null;
+      ? btn('Continuar donde me quedé (' + prev.alias + ')', 'ghost', function () { S = prev; S.lessons = S.lessons || []; S.voz = urlParam('voz') !== '0'; /* manda el enlace de ahora */ C.use(S.topic); render(); }) : null;
     frame({
       hero: [chaski('happy', 120, 'bob')],
       main: [

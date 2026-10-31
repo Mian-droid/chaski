@@ -44,7 +44,7 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RF-E23 | Avisar, antes de las preguntas de seguimiento, qué viene y que todavía no se dice cómo le fue a Chaski. |
 | RF-E24 | No enviar a la IA ni guardar correos, teléfonos ni documentos de 8 cifras que el estudiante escriba por descuido: el juego pide quitarlos y el servidor los oculta. |
 | RF-E25 | Que cada pantalla del juego quepa en la ventana sin desplazarse, salvo la rendición final. |
-| RF-E26 | Dictado por voz opcional en los textos libres: si el docente lo permitió en el enlace (`voz=1`), el estudiante toca el micrófono, habla y el texto transcrito se agrega al final de la tablilla para que lo revise y lo edite antes de enviar. Sin aviso extra en el juego: solo el permiso del navegador. |
+| RF-E26 | Dictado por voz en los textos libres, activo por defecto (el docente lo apaga con `voz=0` en el enlace): el estudiante toca el micrófono, habla y el texto transcrito se agrega al final de la tablilla para que lo revise y lo edite antes de enviar. Sin aviso extra en el juego: solo el permiso del navegador. |
 | RF-E27 | La voz nunca bloquea: grabación de hasta 60 s, texto cortado con aviso si pasa de 400 caracteres, y ante cualquier falla un mensaje amable sin borrar lo ya escrito. El audio no se guarda. |
 
 ### 2.2 Docente
@@ -61,7 +61,7 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RF-D08 | Leer las explicaciones de los estudiantes junto con las señales de originalidad. |
 | RF-D09 | Descargar los resultados en CSV. |
 | RF-D10 | Borrar del servidor los datos de una sala desde el panel. |
-| RF-D12 | Casilla opcional «Permitir el dictado por voz» al armar el enlace. Los textos dictados llevan la marca «Dictado por voz» (revisado o sin cambios); la tabla y el CSV cuentan cuántos textos fueron por voz y cuántos se editaron. |
+| RF-D12 | Casilla «Permitir el dictado por voz», marcada por defecto, al armar el enlace; desmarcada agrega `voz=0`. Los textos dictados llevan la marca «Dictado por voz» (revisado o sin cambios); la tabla y el CSV cuentan cuántos textos fueron por voz y cuántos se editaron. |
 | RF-D11 | Ver las partidas de todas las salas, o de una, con el progreso de cada estudiante y si Chaski le repreguntó, y que el panel se actualice solo mientras está abierto. El código de clase es opcional al jugar. |
 
 ### 2.3 Sistema y contenido

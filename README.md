@@ -105,7 +105,7 @@ Si el modelo de lenguaje no responde (sin conexión, sin cuota o tarda más de 1
 | Guardado de partidas de varios dispositivos (Cloudflare D1) | Pruebas del servidor |
 | Aviso de uso de IA, política de privacidad, términos y autorización imprimible para tutores | Pruebas del empaquetado |
 | Tope de uso por IP y tope diario en el servidor | Pruebas del servidor |
-| Dictado por voz opcional (Whisper en Workers AI): el texto cae en la tablilla y se edita antes de enviar; el docente lo habilita en el enlace | Pruebas del servidor y del núcleo; falta probar en celulares reales |
+| Dictado por voz (Whisper en Workers AI): el texto cae en la tablilla y se edita antes de enviar; el docente puede apagarlo con `voz=0` en el enlace | Pruebas del servidor y del núcleo; falta probar en celulares reales |
 
 **Limitaciones actuales:** no se probó con estudiantes ni docentes reales, ni en celulares reales de gama baja. No se mide aprendizaje ni retención (ver [Alcance y límites](#alcance-y-límites)). La interfaz no tiene pruebas automáticas. Detalle por requerimiento en [docs/requerimientos.md](docs/requerimientos.md).
 

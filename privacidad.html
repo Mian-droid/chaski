@@ -41,7 +41,7 @@
 <tr><td>Apodo y código de clase</td><td>Identificar tu partida y reunir los resultados de la clase.</td><td>Tu dispositivo y, si está activada, la base de datos.</td></tr>
 <tr><td>Los textos que escribes (lecciones y ejemplo propio)</td><td>Que Chaski los lea y que tu docente vea cómo enseñaste.</td><td>Igual que lo anterior. Además se envían a Google Gemini, sin apodo ni clase.</td></tr>
 <tr><td>Lo que haces en el juego: problemas que marcaste, respuestas, tiempos y lo que Chaski entendió</td><td>Calcular tu resumen y el de la clase.</td><td>Tu dispositivo y, si está activada, la base de datos.</td></tr>
-<tr><td>Tu voz, solo si tu docente activó el dictado y tú tocas el micrófono</td><td>Pasar lo que dices a texto, para que lo revises y lo edites antes de enviarlo.</td><td>El audio viaja a Cloudflare (Workers AI), que lo transcribe y lo descarta. <strong>No se guarda en ningún lado.</strong> Del uso solo queda si dictaste, cuánto grabaste y si cambiaste el texto.</td></tr>
+<tr><td>Tu voz, solo si tocas el micrófono del dictado</td><td>Pasar lo que dices a texto, para que lo revises y lo edites antes de enviarlo.</td><td>El audio viaja a Cloudflare (Workers AI), que lo transcribe y lo descarta. <strong>No se guarda en ningún lado.</strong> Del uso solo queda si dictaste, cuánto grabaste y si cambiaste el texto.</td></tr>
 <tr><td>Dirección IP</td><td>Frenar abusos y programas automáticos. La ve Cloudflare al entregar la página. El proyecto solo guarda una huella corta, no la dirección, y caduca a los pocos minutos.</td><td>Cloudflare, según su propia política.</td></tr>
 </tbody></table></div>
 <p><strong>No pedimos</strong> nombre ni apellidos, DNI, correo, teléfono, dirección, fotos ni ubicación, y no guardamos tu voz: el dictado es opcional y el audio no se conserva. No hay cuentas ni contraseñas para jugar.</p>
@@ -57,7 +57,7 @@
 
 <h2>4. Servicios que usamos</h2>
 <ul>
-<li><strong>Cloudflare</strong> aloja el sitio y guarda la base de datos (Pages, Workers y D1). Si tu docente activa el dictado, Cloudflare Workers AI también pasa tu voz a texto; según su política, no usa ese contenido para entrenar modelos ni lo conserva una vez respondida la solicitud.</li>
+<li><strong>Cloudflare</strong> aloja el sitio y guarda la base de datos (Pages, Workers y D1). Si usas el dictado, Cloudflare Workers AI también pasa tu voz a texto; según su política, no usa ese contenido para entrenar modelos ni lo conserva una vez respondida la solicitud.</li>
 <li><strong>Google Gemini</strong> lee las explicaciones. Recibe el texto que escribiste y el tema, nada más. Los términos de Google distinguen entre planes: en el gratuito, el contenido puede usarse para mejorar sus productos y ser revisado por personas; en el de pago, no se usa para mejorar sus productos. Por eso pedimos no escribir datos personales.</li>
 <li><strong>Google Fonts</strong> entrega las letras del juego. Al cargarlas, Google recibe la dirección IP de tu navegador, sin el código de tu clase.</li>
 <li>Si tu docente comparte el enlace por <strong>WhatsApp</strong>, ese mensaje lo trata WhatsApp según su política. Nosotros no recibimos nada de eso.</li>
