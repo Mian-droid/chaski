@@ -39,6 +39,8 @@
       <h2 id="h-enlace"><span class="num">1</span>Comparte el juego</h2>
       <label class="field" for="tema"><span>Tema</span><select class="inp" id="tema"></select></label>
       <label class="field" for="cls"><span>Código de clase (opcional)</span><input class="inp" id="cls" type="text" placeholder="Ej. 3A2026" maxlength="10" autocomplete="off"></label>
+      <label class="autorow" for="voz"><input type="checkbox" id="voz"> Permitir el dictado por voz (opcional)</label>
+      <p class="help" id="vozNote">Los estudiantes verán un botón de micrófono para decir su respuesta y editarla antes de enviar. El audio se manda a Cloudflare solo para pasarlo a texto y no se guarda. Actívalo solo si tienes la autorización de madres, padres y tutores.</p>
       <div class="field"><label for="link"><span>Enlace para tus estudiantes</span></label>
         <div class="linkrow"><input class="inp" id="link" type="text" readonly><button class="btn primary" type="button" id="bCopy"><svg><use href="#i-link"/></svg>Copiar</button></div></div>
       <div class="share"><a class="btn wa" id="bWa" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>WhatsApp</a><a class="btn" id="bTest" target="_blank" rel="noopener">Probar el juego</a></div>

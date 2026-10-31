@@ -53,6 +53,7 @@
     url.search = '';
     url.searchParams.set('tema', topic());
     if (cls()) url.searchParams.set('clase', cls());
+    if ($('voz').checked) url.searchParams.set('voz', '1'); /* el docente autoriza el dictado por voz */
     return url.toString();
   }
   function refreshLink() {
@@ -66,6 +67,7 @@
   C.list.forEach(function (t) { $('tema').appendChild(h('option', { value: t.id, text: t.title })); });
   $('tema').addEventListener('change', function () { C.use(topic()); sortKey = null; refreshLink(); render(); });
   $('cls').addEventListener('input', refreshLink);
+  $('voz').addEventListener('change', refreshLink);
   $('room').addEventListener('change', render);
   $('bCopy').addEventListener('click', function () {
     var input = $('link');
@@ -192,6 +194,7 @@
     ['Seguimiento', function (s) { return s.m.probesOk + '/' + s.m.probesN; }, function (s) { return ratio(s.m.probesOk, s.m.probesN); }],
     ['Textos débiles', function (s) { return s.m.weakTexts + '/' + s.m.nTexts; }, function (s) { return ratio(s.m.weakTexts, s.m.nTexts); }],
     ['Pegados', function (s) { return String(s.m.pasted); }, function (s) { return s.m.pasted; }],
+    ['Por voz', function (s) { return s.m.voiced ? s.m.voiced + '/' + s.m.nTexts + ' · revisó ' + s.m.voiceEdited : '·'; }, function (s) { return s.m.voiced; }],
     ['Dependencia', null, function (s) { return s.m.dependence; }],
     ['Ideas bien', null, function (s) { return s.m.cardsBien; }]
   ];
@@ -236,6 +239,8 @@
   /** Las señales de originalidad se muestran con palabras, no con el nombre interno. */
   var FLAG_TEXT = { pegado: 'Texto pegado', corto: 'Muy corto', copiado: 'Parecido a un libro o a otra respuesta', pocos_numeros: 'Con pocos números', mismo_ejemplo: 'Usa el mismo ejemplo que Chaski', sin_relacion: 'No relaciona las cantidades' };
   function flagChips(flags) { return flags.length ? h('div', { class: 'flags' }, flags.map(function (f) { return h('span', { class: 'flag', text: FLAG_TEXT[f] || f }); })) : null; }
+  /** Marca los textos dictados por voz: no es una señal de alerta, solo cómo se escribió. */
+  function voiceChip(e) { return e.voz ? h('span', { class: 'flag voz', text: e.editado ? 'Dictado por voz · lo revisó' : 'Dictado por voz · sin cambios' }) : null; }
 
   function renderKpis(students) {
     var hr = avg(students, function (s) { return s.m.hitRate; }), fr = avg(students, function (s) { return s.m.faRate; });
@@ -305,7 +310,7 @@
       cells.push(h('td', { 'data-l': 'Ideas bien' }, m.cardsBien == null ? '·' : [
         h('span', { class: 'dots', 'aria-hidden': 'true' }, [0, 1, 2].map(function (j) { return h('i', { class: j < m.cardsBien ? 'on' : '' }); })), m.cardsBien + '/3']));
       var det = h('tr', { class: 'det', hidden: '', id: 'det' + idx }, h('td', { colspan: String(COLS.length + 1) },
-        texts.length ? texts.map(function (e) { return [h('div', { class: 'quote', text: e.text }), flagChips(flagsOf(e))]; }) : h('p', { class: 'help', text: 'Este estudiante no escribió textos.' })));
+        texts.length ? texts.map(function (e) { return [h('div', { class: 'quote', text: e.text }), voiceChip(e), flagChips(flagsOf(e))]; }) : h('p', { class: 'help', text: 'Este estudiante no escribió textos.' })));
       var more = h('button', { type: 'button', class: 'more', 'aria-expanded': 'false', 'aria-controls': 'det' + idx, text: 'Texto' });
       more.addEventListener('click', function () {
         var open = det.hidden; det.hidden = !open; more.setAttribute('aria-expanded', String(open)); more.textContent = open ? 'Cerrar' : 'Texto';
@@ -322,7 +327,7 @@
     events.filter(function (e) {
       return (e.type === 'teach' || (e.type === 'probe' && e.kind === 'free')) && e.text && (e.topic || 'proporciones') === topic() && (!room() || String(e.cls).toUpperCase() === room());
     }).slice(-60).forEach(function (e) {
-      box.appendChild(h('div', { class: 'say' }, h('span', { class: 'who', text: e.alias + ' · ' + (e.k || e.type) }), h('div', { class: 'quote', text: e.text }), flagChips(flagsOf(e))));
+      box.appendChild(h('div', { class: 'say' }, h('span', { class: 'who', text: e.alias + ' · ' + (e.k || e.type) }), h('div', { class: 'quote', text: e.text }), voiceChip(e), flagChips(flagsOf(e))));
     });
     $('textsCard').hidden = !box.childNodes.length;
   }
@@ -343,10 +348,10 @@
   }
 
   $('bCsv').addEventListener('click', function () {
-    var rows = [['apodo', 'clase', 'tema', 'detecto', 'errores', 'falsas_alarmas', 'controles', 'corrigio', 'seguimiento_ok', 'seguimiento_n', 'textos_debiles', 'textos', 'pegados', 'dependencia', 'ideas_bien']];
+    var rows = [['apodo', 'clase', 'tema', 'detecto', 'errores', 'falsas_alarmas', 'controles', 'corrigio', 'seguimiento_ok', 'seguimiento_n', 'textos_debiles', 'textos', 'pegados', 'por_voz', 'por_voz_editados', 'dependencia', 'ideas_bien']];
     Core.groupStudents(events, room() || null, topic()).forEach(function (s) {
       var m = s.m;
-      rows.push([s.alias, s.cls, s.topic, m.hits, m.nErr, m.falseAlarms, m.nCtl, m.corrected, m.probesOk, m.probesN, m.weakTexts, m.nTexts, m.pasted, m.dependence, m.cardsBien]);
+      rows.push([s.alias, s.cls, s.topic, m.hits, m.nErr, m.falseAlarms, m.nCtl, m.corrected, m.probesOk, m.probesN, m.weakTexts, m.nTexts, m.pasted, m.voiced, m.voiceEdited, m.dependence, m.cardsBien]);
     });
     var csv = rows.map(function (r) { return r.map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' })); a.download = 'chaski-' + topic() + (room() ? '-' + room() : '') + '.csv';
