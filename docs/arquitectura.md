@@ -30,7 +30,7 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 | `js/app.js` | Interfaz del juego: escenas, estado, registro de eventos. | content, core, brain, scenery |
 | `js/panel.js` | Panel docente: elegir tema y enlace, cargar datos, resumen. | content, core |
 | `js/config.js` | Direcciones y opciones editables. | nada |
-| `worker/` | Servidor intermedio: valida, arma el prompt por tema, llama al modelo, sanea la respuesta. | SDK de Anthropic, zod |
+| `worker/` | Servidor intermedio: valida, arma el prompt por tema, llama al modelo, sanea la respuesta. | API de Gemini (`fetch`), zod |
 | `apps-script/Code.gs` | Recibe eventos y los guarda en una hoja. | nada |
 
 `content.js`, `core.js` y `brain.js` no usan el DOM, por eso se prueban en Node (`tests/core.test.js`).
@@ -91,6 +91,6 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 | Qué | Dónde | Cuántas |
 |---|---|---|
 | Contenido de los tres temas (cuentas verificadas de forma independiente), cerebro, lectura con reglas y con servidor simulado, originalidad, métricas | `tests/core.test.js` | 36 |
-| Servidor: formato, temas, CORS, errores del modelo, defensa contra instrucciones escondidas, consistencia con el contenido del juego | `worker/test/worker.test.ts` | 14 |
+| Servidor: formato, temas, CORS, clave solo en cabecera, errores de Gemini, defensa contra instrucciones escondidas, consistencia con el contenido del juego | `worker/test/worker.test.ts` | 17 |
 
 No hay pruebas automáticas de la interfaz. Se probó a mano en el navegador, con un jugador simulado.

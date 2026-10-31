@@ -102,7 +102,7 @@ Probar aquí significa pruebas con datos simulados y un jugador simulado. Ningú
 | RNF-02 | Seguir funcionando si no hay conexión con el modelo. | Probado |
 | RNF-03 | Esperar la lectura del modelo un máximo de 12 segundos desde el cliente y 20 desde el servidor. | Implementado. No se midió el tiempo real |
 | RNF-04 | Leer como máximo 800 caracteres por lectura. El servidor rechaza los textos de menos de 8 o más de 800. | Probado. Dos mensajes largos pueden quedar cortados |
-| RNF-05 | Mantener la clave de Anthropic solo en el servidor, como secreto. | Probado por diseño |
+| RNF-05 | Mantener la clave de Gemini solo en el servidor, como secreto y en una cabecera (nunca en la dirección). | Probado por diseño |
 | RNF-06 | Aceptar solicitudes únicamente de la página del juego (`ALLOWED_ORIGINS`). | Implementado. Hoy permite cualquier origen |
 | RNF-07 | Aceptar solo los temas de una lista cerrada, y no armar nunca el prompt con texto del cliente. | Probado |
 | RNF-08 | Tratar el texto del estudiante como datos: se delimita en el mensaje y el modelo debe ignorar instrucciones escondidas. En pantalla se inserta siempre como texto, nunca como HTML. | Probado con un modelo simulado. Con el real: pendiente |

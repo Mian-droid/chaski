@@ -42,13 +42,13 @@ Sin servidor intermedio configurado, Chaski lee la explicación con reglas de pa
 ## Pruebas
 
 ```bash
-npm test                  # núcleo (36), empaquetado del sitio (5) y servidor (14)
+npm test                  # núcleo (36), empaquetado del sitio (5) y servidor (17)
 npm run test:core         # solo el núcleo
 npm run test:site         # solo el empaquetado del sitio
-npm run test:worker       # solo el servidor
+npm run test:worker       # solo el servidor (17)
 ```
 
-Requiere Node 22 o superior. No hay dependencias en el juego; el servidor usa el SDK de Anthropic y `zod`.
+Requiere Node 22 o superior. No hay dependencias en el juego; el servidor usa solo `zod` y llama a la API de Gemini con `fetch`.
 
 ## Despliegue
 
@@ -56,7 +56,7 @@ Guía paso a paso para Cloudflare: [docs/despliegue.md](docs/despliegue.md).
 
 **Juego y panel:** son solo archivos. `npm run build:site` arma `dist/` con lo que se debe publicar (sin pruebas, documentos ni servidor) y `npx wrangler pages deploy dist --project-name chaski` lo sube a Cloudflare Pages.
 
-**Lectura con el modelo (opcional):** la clave de Anthropic no puede ir en la página. Hay un servidor intermedio en [worker/](worker/README.md). Después de desplegarlo, empaqueta el sitio con `EXTRACT_URL=<dirección>/extract npm run build:site`.
+**Lectura con el modelo (opcional):** la clave de Gemini no puede ir en la página. Hay un servidor intermedio en [worker/](worker/README.md). Después de desplegarlo, empaqueta el sitio con `EXTRACT_URL=<dirección>/extract npm run build:site`.
 
 **Guardar datos de varios dispositivos (opcional):** un Apps Script que escribe en una hoja de Google. Pasos en [apps-script/README.md](apps-script/README.md). Sin esto, los datos quedan en el navegador de cada estudiante y el panel los lee de ese dispositivo o de un archivo JSON.
 
@@ -64,7 +64,7 @@ Guía paso a paso para Cloudflare: [docs/despliegue.md](docs/despliegue.md).
 
 - Solo se piden un **apodo** y un **código de clase**. No se piden nombre ni datos personales.
 - Los textos que escribe el estudiante se guardan (en su dispositivo y, si se configura, en la hoja). Cada campo recuerda no escribir datos personales.
-- Cuando se usa el modelo, el texto del estudiante se envía a un servicio externo (Anthropic) a través del servidor intermedio.
+- Cuando se usa el modelo, el texto del estudiante se envía a un servicio externo (Google Gemini) a través del servidor intermedio. Los términos de Google no permiten usar su API en un cliente dirigido a menores de 18 años; ver [docs/despliegue.md](docs/despliegue.md#privacidad-y-datos) antes de un piloto con estudiantes.
 - Con menores, siempre con un adulto responsable presente. El permiso de tutores y el tiempo de retención de datos los define el equipo con el docente (ver [docs/requerimientos.md](docs/requerimientos.md)).
 
 ## Métricas del piloto
@@ -98,7 +98,7 @@ Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 
 ## Límites conocidos
 
-- **El modelo real no se ha probado.** La ruta se probó con un modelo simulado y el servidor arrancó en el runtime local de Cloudflare con una clave falsa. Falta correr `worker/scripts/live-test.mjs` con una clave real.
+- **Gemini no se ha probado con una clave real.** La ruta se probó con un `fetch` simulado. Falta correr `worker/scripts/live-test.mjs` con una clave real.
 - **Nada se ha desplegado.** Los pasos de [docs/despliegue.md](docs/despliegue.md) no se han ejecutado contra una cuenta de Cloudflare.
 - **No se mide retención ni aprendizaje.** No hay examen final ni día 2, y tampoco pretest. El piloto describe cómo enseñan y revisan los estudiantes, no cuánto aprendieron.
 - **No hay limitador de uso** en el servidor. Restringe `ALLOWED_ORIGINS` a la dirección de tu juego.
