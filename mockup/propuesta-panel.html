@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chaski · Propuesta de panel docente</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Patrick+Hand&display=swap">
+<style>
+/* Panel docente, propuesta. Mismo mundo y mismos colores que el juego (propuesta C), pero en claro y sobrio:
+   el docente lee números, así que el color se reserva para lo que importa y todo lleva etiqueta de texto.
+   - Cabecera con el paisaje, que une el panel con el juego.
+   - Dos zonas: a la izquierda lo que se hace (enlace y datos), a la derecha lo que se lee (resultados).
+   - Las cifras dicen qué significan; las barras llevan su porcentaje escrito; la tabla se vuelve tarjetas en el celular. */
+:root {
+  --ink: #3A2412; --ink2: #6B4A2E; --muted: #85694B; --paper: #FAF1DA; --card: #FFFBEF; --line: #E8D5A6; --line2: #F0E2BC;
+  --magenta: #C2185B; --turq: #0E8396; --turqd: #0B5A69; --ochre: #E8A12B; --sun: #FFC83D; --terra: #B5602A; --leaf: #3F8F4A;
+  --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif; --hand: "Patrick Hand", "Segoe Print", cursive;
+  --zig: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='12' viewBox='0 0 28 12'><rect width='28' height='12' fill='%230B5A69'/><path d='M0 12 L7 2 L14 12 L21 2 L28 12' fill='none' stroke='%23FFC83D' stroke-width='3'/><path d='M0 6 L7 -4 L14 6 L21 -4 L28 6' fill='none' stroke='%23C2185B' stroke-width='2'/></svg>");
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+button, input, select { font: inherit; color: inherit; } button { cursor: pointer; } p, h1, h2, h3 { margin: 0; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid var(--turq); outline-offset: 2px; border-radius: 8px; }
+
+/* Cabecera con paisaje */
+.hero { position: relative; height: clamp(170px, 20vw, 240px); overflow: hidden; border-bottom: 4px solid var(--ink); }
+.hero .land, .hero .land svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 12px; background: var(--zig) repeat-x; }
+.hero .in { position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; height: 100%; padding: 18px clamp(14px, 3vw, 32px); display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.brand { display: grid; gap: 4px; justify-items: start; padding-bottom: 26px; }
+.tag { background: var(--magenta); color: #fff; font: 800 .78rem var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 2px 12px; border-radius: 99px; border: 3px solid var(--ink); }
+.logo { font: 800 clamp(2.6rem, 6vw, 3.8rem)/1 var(--display); color: var(--cream, #FFF4DA); -webkit-text-stroke: 8px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 rgba(58, 36, 18, .3); }
+.hero .chsvg { flex: none; margin-bottom: 8px; width: clamp(70px, 10vw, 112px); height: auto; }
+
+/* Estructura */
+.shell { max-width: 1240px; margin: 0 auto; padding: 22px clamp(14px, 3vw, 32px) 64px; display: grid; gap: 20px; align-items: start; }
+@media (min-width: 1000px) { .shell { grid-template-columns: 320px minmax(0, 1fr); } .side { position: sticky; top: 16px; } }
+.side, .main { display: grid; gap: 16px; min-width: 0; align-content: start; }
+.panel { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 18px; display: grid; gap: 12px; box-shadow: 0 5px 0 rgba(58, 36, 18, .1); min-width: 0; }
+.panel h2 { font: 800 1.2rem/1.2 var(--display); display: flex; align-items: center; gap: 10px; }
+.num { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--sun); border: 3px solid var(--ink); display: grid; place-items: center; font: 800 .95rem var(--display); }
+.help { font-size: .86rem; color: var(--muted); }
+
+/* Formularios */
+.field { display: grid; gap: 5px; } .field > span { font-weight: 700; font-size: .88rem; }
+.inp { width: 100%; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 46px; } .inp:focus { border-color: var(--turq); outline: none; }
+select.inp { appearance: none; background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' fill='none' stroke='%233A2412' stroke-width='2.4' stroke-linecap='round'/></svg>") no-repeat right 14px center; padding-right: 38px; }
+.linkrow { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.linkrow .inp { font-size: .86rem; color: var(--ink2); text-overflow: ellipsis; }
+.btn { text-decoration: none; border: 2px solid var(--ink); border-radius: 12px; padding: 8px 14px; min-height: 46px; background: var(--card); font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 0 rgba(58, 36, 18, .25); }
+.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(58, 36, 18, .25); }
+.btn.primary { background: var(--turq); color: #fff; } .btn.wa { background: #E5F6EA; border-color: #1E7B3E; color: #14602F; }
+.btn svg { width: 18px; height: 18px; flex: none; }
+.share { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* Fuentes de datos */
+.srcs { display: grid; gap: 8px; }
+.src { display: grid; grid-template-columns: 38px 1fr; gap: 10px; align-items: center; text-align: left; width: 100%; background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+.src:hover { border-color: var(--turq); background: #F3FBFC; }
+.src .ic { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: #E1F3F6; color: var(--turqd); } .src .ic svg { width: 20px; height: 20px; }
+.src b { display: block; font-size: .95rem; } .src small { color: var(--muted); font-size: .8rem; }
+.status { display: flex; align-items: center; gap: 8px; font-size: .86rem; font-weight: 700; color: #14602F; background: #E5F6EA; border-radius: 10px; padding: 8px 10px; }
+.status i { width: 9px; height: 9px; border-radius: 50%; background: var(--leaf); flex: none; }
+.link { background: none; border: 0; padding: 0; color: var(--turqd); font-weight: 700; text-decoration: underline; justify-self: start; font-size: .86rem; }
+
+/* Barra de filtros y aviso */
+.bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.bar h2 { font: 800 1.5rem var(--display); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 2px solid var(--line); border-radius: 99px; padding: 3px 12px; font-size: .86rem; font-weight: 700; }
+.chip b { color: var(--muted); font-weight: 600; }
+.notice { display: flex; gap: 10px; background: #FFF1CC; border: 2px solid #F0D58A; border-radius: 14px; padding: 10px 14px; font-size: .88rem; color: #5B4210; }
+.notice svg { width: 20px; height: 20px; flex: none; margin-top: 2px; color: #B07A00; }
+
+/* Cifras */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 12px; }
+.kpi { position: relative; background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 14px 14px 12px; display: grid; gap: 4px; overflow: hidden; box-shadow: 0 4px 0 rgba(58, 36, 18, .08); }
+.kpi::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--c, var(--turq)); }
+.kpi .lbl { font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 4px; }
+.kpi .v { font: 800 2.3rem/1.05 var(--display); }
+.kpi .v small { font-size: 1.1rem; color: var(--muted); font-weight: 700; }
+.kpi .d { font-size: .8rem; color: var(--muted); line-height: 1.3; }
+.meter { height: 8px; border-radius: 99px; background: var(--line2); overflow: hidden; margin-top: 4px; } .meter i { display: block; height: 100%; background: var(--c, var(--turq)); border-radius: 99px; }
+
+/* Qué retomar */
+.ideas { display: grid; gap: 14px; }
+.idea { display: grid; gap: 6px; }
+.idea .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.idea .name { font-weight: 800; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.idea .pct { font: 800 1.4rem var(--display); } .idea .pct small { font: 600 .8rem system-ui; color: var(--muted); }
+.track { height: 14px; border-radius: 99px; background: var(--line2); overflow: hidden; } .track i { display: block; height: 100%; border-radius: 99px; background: var(--terra); }
+.idea.first .track i { background: var(--magenta); }
+.badge { font: 800 .7rem var(--display); letter-spacing: .06em; text-transform: uppercase; background: var(--magenta); color: #fff; border-radius: 99px; padding: 1px 10px; }
+
+/* Tabla */
+.scroll { border: 2px solid var(--line); border-radius: 14px; overflow-x: auto; background: #fff; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; font-variant-numeric: tabular-nums; min-width: 700px; }
+th, td { padding: 10px 6px; text-align: left; border-bottom: 1px solid var(--line2); white-space: nowrap; }
+th { white-space: normal; vertical-align: bottom; background: #FBF3DC; color: var(--muted); font-size: .68rem; letter-spacing: .07em; text-transform: uppercase; position: sticky; top: 0; }
+th button { background: none; border: 0; padding: 0; font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit; display: inline-flex; gap: 4px; align-items: center; }
+th button[aria-sort="descending"]::after { content: "▼"; font-size: .6rem; } th button[aria-sort="ascending"]::after { content: "▲"; font-size: .6rem; }
+tbody tr.row:hover { background: #FFFAEA; }
+tbody tr:last-child td { border-bottom: 0; }
+td.who { font-weight: 800; }
+.dots { display: inline-flex; gap: 3px; vertical-align: middle; margin-right: 6px; } .dots i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ink); background: #fff; } .dots i.on { background: var(--leaf); }
+.dep { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; border-radius: 99px; padding: 1px 10px 1px 8px; font-size: .84rem; }
+.dep i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.dep.lo { background: #DDF2F5; color: #0A5F6E; } .dep.mid { background: #FFEBC2; color: #8A5A00; } .dep.hi { background: #FBD9E6; color: #A0124C; }
+.more { background: none; border: 2px solid var(--line); border-radius: 99px; padding: 0 10px; font-size: .8rem; font-weight: 700; min-height: 28px; } .more[aria-expanded="true"] { background: var(--turq); color: #fff; border-color: var(--turq); }
+tr.det td { background: #FFFAEA; white-space: normal; padding: 12px 16px 14px; }
+.quote { font: 1.2rem/1.25 var(--hand); color: #4A2E14; background: #fff; border-left: 6px solid var(--ochre); border-radius: 8px; padding: 8px 12px; }
+.flags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.flag { font-size: .74rem; font-weight: 800; border-radius: 99px; padding: 1px 9px; background: #FFEBC2; color: #8A5A00; }
+
+/* Lo que escribieron */
+.texts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.say { background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 12px; display: grid; gap: 6px; align-content: start; }
+.say .who { font-size: .8rem; font-weight: 800; color: var(--muted); }
+
+/* Sin datos */
+.empty { display: grid; justify-items: center; text-align: center; gap: 10px; padding: 34px 18px; }
+.empty h2 { font: 800 1.5rem var(--display); justify-content: center; } .empty p { max-width: 460px; color: var(--ink2); }
+.steps { display: grid; gap: 8px; text-align: left; margin-top: 6px; } .steps li { list-style: none; display: flex; gap: 10px; align-items: center; } .steps { padding: 0; }
+
+/* Celular: la tabla se vuelve tarjetas */
+@media (max-width: 760px) {
+  .scroll { border: 0; background: none; overflow: visible; } table, tbody { display: block; min-width: 0; } thead { display: none; }
+  tr.row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+  tr.row td { display: block; border: 0; padding: 0; white-space: normal; }
+  tr.row td::before { content: attr(data-l); display: block; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 800; }
+  tr.row td.who { grid-column: 1 / -1; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; } tr.row td.who::before { display: none; }
+  tr.det { display: block; margin: -4px 0 10px; } tr.det td { display: block; border: 2px solid var(--line); border-radius: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+.w-cl1, .w-cl2, .w-cl3 { animation: drift 40s ease-in-out infinite alternate; } @keyframes drift { from { transform: translateX(-26px); } to { transform: translateX(34px); } }
+.w-condor { display: none; } .w-sway { animation: sway 3.4s ease-in-out infinite alternate; transform-origin: 50% 100%; transform-box: fill-box; } @keyframes sway { from { transform: skewX(-2deg); } to { transform: skewX(2.5deg); } }
+
+/* Controles de la maqueta */
+.mk { position: fixed; left: 12px; bottom: 12px; z-index: 100; font: 600 .82rem system-ui; color: #fff; }
+.mk summary { list-style: none; cursor: pointer; background: rgba(40, 24, 10, .88); padding: 8px 14px; border-radius: 99px; display: inline-block; } .mk summary::-webkit-details-marker { display: none; }
+.mk .box { margin-top: 8px; background: rgba(40, 24, 10, .94); border-radius: 14px; padding: 10px; display: grid; gap: 8px; width: min(280px, calc(100vw - 24px)); }
+.mk .grp { display: flex; flex-wrap: wrap; gap: 6px; } .mk .grp b { width: 100%; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+.mk button, .mk a { background: rgba(255, 255, 255, .14); color: #fff; border: 0; border-radius: 99px; padding: 6px 12px; font: inherit; text-decoration: none; box-shadow: none; min-height: 0; }
+.mk button[aria-pressed="true"] { background: var(--sun); color: #3A2412; font-weight: 800; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs">
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4 9h16M4 15h16M10 9v12" stroke="currentColor" stroke-width="2.2"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z M14 3v4h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 11v6M12 7.5v.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+</defs></svg>
+
+<header class="hero">
+  <div class="land" id="land" aria-hidden="true"></div>
+  <div class="in">
+    <div class="brand"><span class="tag">Panel docente</span><h1 class="logo">Chaski</h1></div>
+    <svg class="chsvg bob" viewBox="0 0 140 200" aria-hidden="true"><use href="#ch-happy"/></svg>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="side">
+    <section class="panel" aria-labelledby="h1">
+      <h2 id="h1"><span class="num">1</span>Comparte el juego</h2>
+      <label class="field"><span>Tema</span>
+        <select class="inp" id="tema"><option>Proporciones</option><option>Porcentajes</option><option>Ecuaciones de primer grado</option></select></label>
+      <label class="field"><span>Código de clase</span><input class="inp" id="cls" value="3A2026" maxlength="10" autocomplete="off"></label>
+      <div class="field"><span>Enlace para tus estudiantes</span>
+        <div class="linkrow"><input class="inp" id="link" readonly aria-label="Enlace"><button class="btn primary" id="copy" type="button"><svg><use href="#i-link"/></svg>Copiar</button></div></div>
+      <div class="share"><a class="btn wa" id="wa" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>WhatsApp</a><button class="btn" type="button" id="test">Probar el juego</button></div>
+      <p class="help" id="note">Los estudiantes abren el enlace y juegan con ese tema. El código de clase ya va escrito.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="h2">
+      <h2 id="h2"><span class="num">2</span>Trae los resultados</h2>
+      <div class="srcs">
+        <button class="src" data-src="la hoja de Google" type="button"><span class="ic"><svg><use href="#i-sheet"/></svg></span><span><b>Hoja de Google</b><small>Todos los dispositivos, con la clave del panel</small></span></button>
+        <button class="src" data-src="este dispositivo" type="button"><span class="ic"><svg><use href="#i-phone"/></svg></span><span><b>Este dispositivo</b><small>Lo que se jugó en este navegador</small></span></button>
+        <button class="src" data-src="un archivo" type="button"><span class="ic"><svg><use href="#i-file"/></svg></span><span><b>Archivo JSON</b><small>Un respaldo que guardaste antes</small></span></button>
+      </div>
+      <div class="status" id="status" hidden><i></i><span id="statusText"></span></div>
+      <button class="link" id="clear" type="button" hidden>Quitar los datos cargados</button>
+    </section>
+  </aside>
+
+  <main class="main">
+    <div class="bar">
+      <h2>Resultados</h2>
+      <div class="chips"><span class="chip"><b>Tema</b> <span id="chipT">Proporciones</span></span><span class="chip"><b>Clase</b> <span id="chipC">3A2026</span></span></div>
+    </div>
+    <p class="notice"><svg><use href="#i-info"/></svg><span>Datos de un piloto exploratorio. Las cifras son señales para conversar con la clase, no una evaluación ni una prueba de efecto.</span></p>
+
+    <section class="panel empty" id="empty" hidden>
+      <svg class="chsvg" width="110" height="157" viewBox="0 0 140 200" aria-hidden="true"><use href="#ch-listen"/></svg>
+      <h2>Todavía no hay resultados</h2>
+      <p>Cuando tus estudiantes terminen una partida, aquí verás cómo enseñaron y qué dejaron pasar.</p>
+      <ul class="steps"><li><span class="num">1</span>Comparte el enlace de arriba</li><li><span class="num">2</span>Pide que jueguen un tema completo</li><li><span class="num">3</span>Trae los resultados</li></ul>
+    </section>
+
+    <div id="results" style="display:grid;gap:16px">
+      <div class="kpis" id="kpis"></div>
+
+      <section class="panel" aria-labelledby="h3">
+        <h2 id="h3">Qué retomar en clase</h2>
+        <p class="help">Porcentaje de estudiantes que dejó pasar el error de cada idea. Lo más alto es lo primero que conviene volver a explicar.</p>
+        <div class="ideas" id="ideas"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h4">
+        <div class="bar"><h2 id="h4">Estudiantes</h2><button class="btn" type="button" id="csv"><svg><use href="#i-down"/></svg>Descargar CSV</button></div>
+        <div class="scroll"><table id="tbl"></table></div>
+        <p class="help"><b>Dependencia</b>: de 0 a 1, más alto es más dependencia (errores que se le pasaron, preguntas de seguimiento falladas y explicaciones que no parecen propias). Es un índice exploratorio sin validar. <b>Ideas bien</b>: cuántas de las 3 ideas quedaron bien enseñadas.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="h5">
+        <h2 id="h5">Lo que escribieron</h2>
+        <p class="help">Léelas tú: la señal automática de originalidad puede equivocarse.</p>
+        <div class="texts" id="texts"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<details class="mk" open>
+  <summary>Maqueta</summary>
+  <div class="box">
+    <div class="grp"><b>Estado</b><button data-st="con" aria-pressed="true">Con resultados</button><button data-st="sin" aria-pressed="false">Sin datos</button></div>
+    <div class="grp"><b>Otra maqueta</b><a href="propuesta-pantalla-completa.html">← Juego del estudiante</a></div>
+  </div>
+</details>
+
+<script src="../js/scenery.js"></script>
+<script src="paisaje.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  document.getElementById('defs').insertAdjacentHTML('beforeend', ['happy', 'listen'].map(function (m) {
+    return ChaskiScenery.symbol(m).replace(/#2B1B3D/gi, '#3A2412').replace(/#3B2A8C/gi, '#0B5A69');
+  }).join(''));
+  $('land').innerHTML = Paisaje.world('dia', { viewBox: '0 300 1200 330', par: 'xMidYMid slice' });
+
+  /* Datos de ejemplo. d = dependencia (0 a 1), cb = ideas bien, miss = ideas que dejó pasar. */
+  var S = [
+    { a: 'Cóndor12', hit: [3, 3], fa: [0, 3], cor: [3, 3], seg: [4, 4], dbl: [0, 2], peg: 0, d: 0.08, cb: 3, miss: [], t: 'Una proporción es cuando dos cantidades crecen parejo: si compras el doble, pagas el doble. Por ejemplo, 2 cuadernos cuestan 6 y 4 cuestan 12.' },
+    { a: 'Wayra07', hit: [2, 3], fa: [1, 3], cor: [2, 3], seg: [3, 4], dbl: [1, 2], peg: 0, d: 0.31, cb: 2, miss: ['K3'], t: 'si compras mas pagas mas, se multiplica' },
+    { a: 'Killa_9', hit: [1, 3], fa: [2, 3], cor: [0, 3], seg: [2, 4], dbl: [2, 2], peg: 1, d: 0.71, cb: 1, miss: ['K1', 'K3'], t: 'Es una relación entre dos magnitudes que varían de manera directamente proporcional.', f: ['Texto pegado', 'Vocabulario de libro'] },
+    { a: 'Inti88', hit: [3, 3], fa: [0, 3], cor: [2, 3], seg: [3, 4], dbl: [0, 2], peg: 0, d: 0.18, cb: 3, miss: [], t: 'Si hay 3 kilos de arroz a 9 soles, 6 kilos cuestan 18 porque multiplicas todo por 2.' },
+    { a: 'Amaru', hit: [0, 3], fa: [3, 3], cor: [0, 3], seg: [1, 4], dbl: [2, 2], peg: 2, d: 0.92, cb: 0, miss: ['K1', 'K2', 'K3'], t: 'proporcion es cuando algo es igual', f: ['Texto pegado'] },
+    { a: 'Sami21', hit: [2, 2], fa: [0, 4], cor: [2, 2], seg: [4, 4], dbl: [0, 2], peg: 0, d: 0.05, cb: 3, miss: [], t: 'Cuando compras el doble pagas el doble, no se suma, se multiplica por el mismo número.' },
+    { a: 'Puma_T', hit: [1, 3], fa: [1, 3], cor: [1, 3], seg: [2, 4], dbl: [1, 2], peg: 0, d: 0.55, cb: 1, miss: ['K1', 'K2'], t: 'si 2 cuestan 6 entonces 4 cuestan 6 + 4 = 10' },
+    { a: 'Yaku', hit: [2, 3], fa: [0, 3], cor: [2, 3], seg: [3, 4], dbl: [0, 2], peg: 0, d: 0.22, cb: 2, miss: ['K3'], t: 'Es multiplicar las dos cosas por lo mismo. Si 2 lápices son 4 soles, 4 lápices son 8.' },
+    { a: 'Mayu_5', hit: [3, 3], fa: [1, 3], cor: [3, 3], seg: [3, 4], dbl: [0, 2], peg: 0, d: 0.2, cb: 3, miss: [], t: 'Si una cosa sube, la otra sube igual. Pero si hay más obreros, tardan menos días: eso es al revés.' },
+    { a: 'Qori', hit: [1, 3], fa: [2, 3], cor: [1, 3], seg: [2, 4], dbl: [1, 2], peg: 0, d: 0.48, cb: 2, miss: ['K3', 'K2'], t: 'en la regla de tres pones lo de arriba con lo de abajo' },
+    { a: 'Illari', hit: [2, 3], fa: [0, 3], cor: [2, 3], seg: [4, 4], dbl: [0, 2], peg: 0, d: 0.14, cb: 3, miss: [], t: 'Una proporción es una igualdad de dos razones, como 2/6 = 4/12.' },
+    { a: 'Tayta_8', hit: [0, 2], fa: [2, 4], cor: [0, 2], seg: [1, 4], dbl: [2, 2], peg: 1, d: 0.83, cb: 0, miss: ['K1', 'S'], t: 'Es una cosa que va con otra cosa.', f: ['Texto pegado'] }
+  ];
+  var IDEAS = [['K1', 'Multiplicar, no sumar'], ['K2', 'Cada dato con su pareja'], ['K3', 'Si una sube, la otra baja'], ['S', 'Descuidos de cálculo']];
+  var sortKey = null, sortDir = 1, state = 'con';
+
+  function pct(n, d) { return d ? Math.round(100 * n / d) : 0; }
+  function avg(f) { return S.reduce(function (a, s) { return a + f(s); }, 0) / S.length; }
+  function dep(d) { return d < 0.34 ? ['lo', 'Baja'] : d < 0.67 ? ['mid', 'Media'] : ['hi', 'Alta']; }
+
+  function kpis() {
+    var hr = avg(function (s) { return s.hit[0] / s.hit[1]; }), fr = avg(function (s) { return s.fa[0] / s.fa[1]; }), dp = avg(function (s) { return s.d; }), cb = avg(function (s) { return s.cb; });
+    var k = [
+      ['Estudiantes', S.length, '', 'que jugaron este tema', null, 'var(--ochre)'],
+      ['Detección media', Math.round(hr * 100) + '<small>%</small>', hr, 'de los errores de Chaski, cuántos atraparon', 1, 'var(--leaf)'],
+      ['Falsas alarmas', Math.round(fr * 100) + '<small>%</small>', fr, 'soluciones correctas que marcaron como error', 1, 'var(--terra)'],
+      ['Dependencia media', dp.toFixed(2), dp, '0 revisan, 1 confían a ciegas · ' + dep(dp)[1].toLowerCase(), 1, 'var(--magenta)'],
+      ['Ideas bien', cb.toFixed(1) + '<small> / 3</small>', cb / 3, 'de las 3 que Chaski podía aprender', 1, 'var(--turq)']
+    ];
+    $('kpis').innerHTML = k.map(function (x) {
+      return '<div class="kpi" style="--c:' + x[5] + '"><span class="lbl">' + x[0] + '</span><span class="v">' + x[1] + '</span>' + (x[4] ? '<div class="meter" aria-hidden="true"><i style="width:' + Math.round(x[2] * 100) + '%"></i></div>' : '') + '<span class="d">' + x[3] + '</span></div>';
+    }).join('');
+  }
+  function ideas() {
+    var rows = IDEAS.map(function (i) { var n = S.filter(function (s) { return s.miss.indexOf(i[0]) >= 0; }).length; return { k: i[0], name: i[1], n: n, p: pct(n, S.length) }; });
+    var top = rows.reduce(function (m, r) { return r.p > m.p ? r : m; }, rows[0]);
+    $('ideas').innerHTML = rows.map(function (r) {
+      return '<div class="idea' + (r === top ? ' first' : '') + '"><div class="top"><span class="name">' + r.name + (r === top ? '<span class="badge">Retomar primero</span>' : '') + '</span><span class="pct">' + r.p + '%<small> · ' + r.n + ' de ' + S.length + '</small></span></div><div class="track" role="img" aria-label="' + r.p + ' por ciento"><i style="width:' + r.p + '%"></i></div></div>';
+    }).join('');
+  }
+  function table() {
+    var head = [['a', 'Apodo'], ['hit', 'Detectó'], ['fa', 'Falsas alarmas'], ['cor', 'Corrigió'], ['seg', 'Seguimiento'], ['dbl', 'Textos débiles'], ['peg', 'Pegados'], ['d', 'Dependencia'], ['cb', 'Ideas bien']];
+    var list = S.slice();
+    if (sortKey) list.sort(function (x, y) {
+      var a = x[sortKey], b = y[sortKey]; if (Array.isArray(a)) { a = a[0] / a[1]; b = b[0] / b[1]; }
+      return (a > b ? 1 : a < b ? -1 : 0) * sortDir;
+    });
+    var h = '<thead><tr>' + head.map(function (c) { return '<th scope="col"><button type="button" data-k="' + c[0] + '"' + (sortKey === c[0] ? ' aria-sort="' + (sortDir > 0 ? 'ascending' : 'descending') + '"' : '') + '>' + c[1] + '</button></th>'; }).join('') + '<th></th></tr></thead>';
+    var b = '<tbody>' + list.map(function (s, i) {
+      var dd = dep(s.d), dots = '<span class="dots" aria-hidden="true">' + [0, 1, 2].map(function (j) { return '<i class="' + (j < s.cb ? 'on' : '') + '"></i>'; }).join('') + '</span>';
+      return '<tr class="row"><td class="who" data-l="Apodo">' + s.a + '</td>' +
+        '<td data-l="Detectó">' + s.hit.join('/') + '</td><td data-l="Falsas alarmas">' + s.fa.join('/') + '</td><td data-l="Corrigió">' + s.cor.join('/') + '</td><td data-l="Seguimiento">' + s.seg.join('/') + '</td><td data-l="Textos débiles">' + s.dbl.join('/') + '</td><td data-l="Pegados">' + s.peg + '</td>' +
+        '<td data-l="Dependencia"><span class="dep ' + dd[0] + '"><i></i>' + s.d.toFixed(2) + ' · ' + dd[1] + '</span></td><td data-l="Ideas bien">' + dots + s.cb + '/3</td>' +
+        '<td data-l=""><button class="more" type="button" aria-expanded="false" data-i="' + i + '">Texto</button></td></tr>' +
+        '<tr class="det" hidden id="d' + i + '"><td colspan="10"><div class="quote">' + s.t + '</div>' + (s.f ? '<div class="flags">' + s.f.map(function (f) { return '<span class="flag">' + f + '</span>'; }).join('') + '</div>' : '') + '</td></tr>';
+    }).join('') + '</tbody>';
+    $('tbl').innerHTML = h + b;
+  }
+  function texts() {
+    $('texts').innerHTML = S.filter(function (s) { return s.f || s.d > 0.5; }).slice(0, 4).map(function (s) {
+      return '<div class="say"><span class="who">' + s.a + ' · lección 1</span><div class="quote">' + s.t + '</div>' + (s.f ? '<div class="flags">' + s.f.map(function (f) { return '<span class="flag">' + f + '</span>'; }).join('') + '</div>' : '') + '</div>';
+    }).join('');
+  }
+  $('tbl').addEventListener('click', function (e) {
+    var th = e.target.closest('th button'), mo = e.target.closest('.more');
+    if (th) { var k = th.dataset.k; sortDir = sortKey === k ? -sortDir : 1; sortKey = k; table(); }
+    if (mo) { var row = $('d' + mo.dataset.i), open = row.hidden; row.hidden = !open; mo.setAttribute('aria-expanded', open); mo.textContent = open ? 'Cerrar' : 'Texto'; }
+  });
+
+  /* Enlace */
+  var SLUG = { 'Proporciones': 'proporciones', 'Porcentajes': 'porcentajes', 'Ecuaciones de primer grado': 'ecuaciones' };
+  function link() {
+    var u = 'https://chaski.pages.dev/?tema=' + SLUG[$('tema').value] + ($('cls').value.trim() ? '&clase=' + encodeURIComponent($('cls').value.trim().toUpperCase()) : '');
+    $('link').value = u; $('wa').href = 'https://wa.me/?text=' + encodeURIComponent('Juega Chaski: ' + u);
+    $('chipT').textContent = $('tema').value; $('chipC').textContent = $('cls').value.trim().toUpperCase() || 'Todas';
+  }
+  $('tema').addEventListener('change', link); $('cls').addEventListener('input', link);
+  $('copy').addEventListener('click', function () { $('note').textContent = 'Enlace copiado.'; try { navigator.clipboard.writeText($('link').value); } catch (e) {} });
+  $('test').addEventListener('click', function () { $('note').textContent = 'En el panel real, esto abre el juego con ese tema en otra pestaña.'; });
+
+  function show(st) {
+    state = st;
+    $('results').style.display = st === 'con' ? 'grid' : 'none'; $('empty').hidden = st === 'con';
+    $('status').hidden = $('clear').hidden = st !== 'con';
+    document.querySelectorAll('.mk button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.st === st ? 'true' : 'false'); });
+  }
+  document.querySelectorAll('.src').forEach(function (b) { b.addEventListener('click', function () { $('statusText').textContent = S.length + ' estudiantes cargados de ' + b.dataset.src; show('con'); }); });
+  $('clear').addEventListener('click', function () { show('sin'); });
+  document.querySelectorAll('.mk button').forEach(function (b) { b.addEventListener('click', function () { $('statusText').textContent = S.length + ' estudiantes cargados de este dispositivo'; show(b.dataset.st); }); });
+  $('csv').addEventListener('click', function () {});
+
+  var q = new URLSearchParams(location.search); if (q.get('menu') === '0') document.querySelector('.mk').open = false;
+  link(); kpis(); ideas(); table(); texts(); $('statusText').textContent = S.length + ' estudiantes cargados de este dispositivo'; show(q.get('estado') === 'sin' ? 'sin' : 'con');
+})();
+</script>
+</body>
+</html>
