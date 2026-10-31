@@ -30,6 +30,21 @@
     return Math.abs(a - b) <= (tol == null ? 0.01 : tol);
   }
 
+  /**
+   * Agrega lo dictado al final de lo ya escrito, con un espacio de por medio. Si no cabe en `max` letras, corta en
+   * una palabra completa.
+   * @returns {{text: string, cut: boolean}} cut: true si se perdió parte de lo dictado.
+   */
+  function appendDictation(current, add, max) {
+    var cur = String(current == null ? '' : current), extra = String(add == null ? '' : add).replace(/\s+/g, ' ').trim();
+    if (!extra) return { text: cur, cut: false };
+    var joined = cur && !/\s$/.test(cur) ? cur + ' ' + extra : cur + extra;
+    if (joined.length <= max) return { text: joined, cut: false };
+    var head = joined.slice(0, max);
+    if (!/\s/.test(joined.charAt(max))) head = head.replace(/\s*\S*$/, '');
+    return { text: head.replace(/\s+$/, ''), cut: true };
+  }
+
   function trigrams(tokens) {
     var out = [];
     for (var i = 0; i + 2 < tokens.length; i++) out.push(tokens[i] + ' ' + tokens[i + 1] + ' ' + tokens[i + 2]);
@@ -102,6 +117,9 @@
     var texts = frees.concat(teach);
     var weakTexts = texts.filter(function (t) { return !t.orig || t.orig.score < 2; }).length;
     var pasted = texts.filter(function (t) { return t.pasted; }).length;
+    /* Textos dictados por voz y, de esos, cuántos el estudiante revisó y cambió antes de enviar. */
+    var voiced = texts.filter(function (t) { return t.voz; }).length;
+    var voiceEdited = texts.filter(function (t) { return t.voz && t.editado; }).length;
 
     /* Calidad de enseñanza: fichas del último cerebro, según lo que leyó el modelo o las reglas. */
     var brains = of('brain'), lastCards = brains.length ? brains[brains.length - 1].cards : null;
@@ -122,7 +140,7 @@
       hitRate: hitRate == null ? null : round(hitRate), faRate: faRate == null ? null : round(faRate),
       discrimination: hitRate != null && faRate != null ? round(hitRate - faRate) : null,
       corrected: corrected, missedByRule: missedByRule,
-      probesOk: numOk, probesN: nums.length, weakTexts: weakTexts, nTexts: texts.length, pasted: pasted,
+      probesOk: numOk, probesN: nums.length, weakTexts: weakTexts, nTexts: texts.length, pasted: pasted, voiced: voiced, voiceEdited: voiceEdited,
       cardsBien: lastCards ? cardsBien : null, cardsMal: lastCards ? cardsMal : null, teachTurns: teach.length,
       dependence: dependence
     };
@@ -168,7 +186,7 @@
     return '';
   }
 
-  var api = { personalData: personalData, strip: strip, words: words, parseNum: parseNum, numEq: numEq, overlap: overlap, originality: originality, metricsFor: metricsFor, groupStudents: groupStudents, round: round };
+  var api = { personalData: personalData, appendDictation: appendDictation, strip: strip, words: words, parseNum: parseNum, numEq: numEq, overlap: overlap, originality: originality, metricsFor: metricsFor, groupStudents: groupStudents, round: round };
   root.ChaskiCore = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -337,6 +337,34 @@ t('métricas: detección, falsas alarmas, dependencia y calidad de enseñanza', 
   assert.strictEqual(m.teachTurns, 2);
 });
 
+t('dictado: se agrega al final con un espacio y respeta el límite de la tablilla', () => {
+  assert.deepStrictEqual(Core.appendDictation('', 'Si compras el doble', 400), { text: 'Si compras el doble', cut: false });
+  assert.deepStrictEqual(Core.appendDictation('Primero esto.', '  luego   aquello ', 400), { text: 'Primero esto. luego aquello', cut: false });
+  assert.deepStrictEqual(Core.appendDictation('Ya escribí ', 'y sigo', 400), { text: 'Ya escribí y sigo', cut: false }, 'no duplica el espacio');
+  assert.deepStrictEqual(Core.appendDictation('algo', '   ', 400), { text: 'algo', cut: false }, 'lo vacío no cambia nada');
+  assert.deepStrictEqual(Core.appendDictation(null, undefined, 400), { text: '', cut: false });
+  const cut = Core.appendDictation('uno dos', 'tres cuatro cinco', 14);
+  assert.strictEqual(cut.cut, true);
+  assert.strictEqual(cut.text, 'uno dos tres', 'corta en una palabra completa');
+  assert.ok(Core.appendDictation('x'.repeat(390), 'palabra '.repeat(20), 400).text.length <= 400);
+  assert.strictEqual(Core.appendDictation('a'.repeat(400), 'más', 400).text.length, 400, 'si la tablilla está llena no agrega nada');
+});
+
+t('métricas: cuenta los textos dictados por voz y cuántos revisó el estudiante', () => {
+  const m = Core.metricsFor([
+    { type: 'teach', text: 'a', orig: { score: 2 }, voz: true, editado: true, vozMs: 9000 },
+    { type: 'teach', text: 'b', orig: { score: 2 }, voz: true, editado: false, vozMs: 4000 },
+    { type: 'probe', kind: 'free', text: 'c', orig: { score: 2 } },
+    { type: 'teach', text: 'd', orig: { score: 2 }, editado: true }
+  ]);
+  assert.strictEqual(m.voiced, 2);
+  assert.strictEqual(m.voiceEdited, 1);
+  assert.strictEqual(m.nTexts, 4);
+  const none = Core.metricsFor([{ type: 'teach', text: 'a', orig: { score: 2 } }]);
+  assert.strictEqual(none.voiced, 0);
+  assert.strictEqual(none.voiceEdited, 0);
+});
+
 t('métricas: sin datos no revienta', () => {
   const m = Core.metricsFor([]);
   assert.strictEqual(m.hitRate, null);
