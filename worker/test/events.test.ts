@@ -1,7 +1,8 @@
 /* Ejecutar: npm test (en la carpeta worker). Usa una base D1 simulada en memoria: no toca ninguna base real. */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { handleEvents, type Db } from "../src/events.ts";
+import { readFileSync } from "node:fs";
+import { handleEvents, INSERT, type Db } from "../src/events.ts";
 import { onRequest } from "../../functions/events.ts";
 
 const KEY = "clave-del-panel-de-prueba";
@@ -158,4 +159,21 @@ test("la función de Pages (functions/events.ts) responde igual que el servidor"
   assert.equal(res.status, 200);
   const got: any = await (await onRequest({ request: panel("GET", "3A2026"), env: env(db) })).json();
   assert.equal(got.events.length, 1);
+});
+
+test("db/schema.sql se ejecuta en SQLite aunque se pegue en una sola línea, y encaja con lo que inserta el servidor", async () => {
+  const { DatabaseSync } = await import("node:sqlite");
+  const sql = readFileSync(new URL("../../db/schema.sql", import.meta.url), "utf8");
+  // La consola de D1 junta lo pegado en una línea: un comentario con -- taparía todo lo que sigue.
+  assert.ok(!sql.includes("--"), "el esquema no debe llevar comentarios");
+  const oneLine = sql.replace(/\s+/g, " ").trim();
+  const mem = new DatabaseSync(":memory:");
+  mem.exec(oneLine);
+  mem.exec(oneLine); // se puede ejecutar dos veces sin error
+  const row = ["sid1|1760000000000|teach|t1", 1760000000000, "3A2026", "Condor12", "proporciones", "sid1", "teach", "{}"];
+  mem.prepare(INSERT).run(...(row as any[]));
+  mem.prepare(INSERT).run(...(row as any[])); // el mismo evento no se guarda dos veces
+  assert.equal((mem.prepare("SELECT COUNT(*) AS n FROM events").get() as any).n, 1);
+  const plan = mem.prepare("EXPLAIN QUERY PLAN SELECT data FROM events WHERE cls = ? ORDER BY ts").all("3A2026").map((r: any) => r.detail).join(" ");
+  assert.match(plan, /events_by_class/, "la lectura por clase usa el índice");
 });

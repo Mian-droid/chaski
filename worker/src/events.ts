@@ -27,7 +27,7 @@ const MAX_BODY = 200_000;
 const MAX_BATCH = 100;
 const MAX_EVENT = 20_000;
 const MAX_ROWS = 20_000;
-const INSERT = "INSERT OR IGNORE INTO events (eid, ts, cls, alias, topic, sid, type, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+export const INSERT = "INSERT OR IGNORE INTO events (eid, ts, cls, alias, topic, sid, type, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
 /** Valida un evento y lo deja listo para guardar. Devuelve null si no tiene la forma esperada. */
 function clean(x: any): unknown[] | null {

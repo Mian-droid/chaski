@@ -88,7 +88,7 @@ npx wrangler pages dev dist --binding GEMINI_API_KEY=tu-clave
 Sin esto, cada partida queda solo en el navegador del estudiante. Con la base de datos **D1** de Cloudflare, el panel docente muestra los resultados de todos los dispositivos. Todo se configura en el panel de Cloudflare, sin instalar nada.
 
 1. *Storage & Databases → D1 SQL database → Create*. Nombre: `chaski-db`.
-2. En esa base, pestaña *Console*: pega el contenido de [`db/schema.sql`](../db/schema.sql) y ejecútalo. Crea la tabla `events` y su índice.
+2. En esa base, pestaña *Console*: pega el contenido de [`db/schema.sql`](../db/schema.sql) y ejecútalo. Crea la tabla `events` y su índice. El archivo no lleva comentarios a propósito: la consola junta lo pegado en una línea y un comentario taparía el resto. Si da error, ejecuta las dos sentencias por separado.
 3. En el proyecto de Pages: *Settings → Bindings → Add → D1 database*. Variable `DB`, base `chaski-db` (en producción y en vistas previas).
 4. En *Variables and Secrets*: un secreto `PANEL_KEY` con una clave larga (20 caracteres o más) y una variable de texto `ENDPOINT` con el valor `/events`.
 5. Reintenta el último despliegue.

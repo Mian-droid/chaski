@@ -141,6 +141,6 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 | Contenido de los tres temas con cuentas verificadas de forma independiente, cerebro, lectura con reglas y con servidor simulado, originalidad y métricas | `tests/core.test.js` | 36 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
 | Empaquetado del sitio: qué se publica, direcciones, referente, favicon y vista previa al compartir | `tests/build-site.test.js` | 12 |
-| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/worker.test.ts` y `worker/test/events.test.ts` | 29 |
+| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/worker.test.ts` y `worker/test/events.test.ts` | 30 |
 
 `npm test` las corre todas.

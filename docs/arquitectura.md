@@ -94,6 +94,7 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 ## Datos y escalabilidad
 
 - **Registro de eventos que solo se agrega.** Una tabla `events` (ver [`db/schema.sql`](../db/schema.sql)) con una fila por evento, el evento completo en JSON y un índice por clase, tema y hora. Un identificador por evento evita guardarlo dos veces si el juego reintenta un envío.
+- **Columnas de `events`:** `eid` (identificador único del evento: partida, hora, tipo y lección o problema), `ts` (hora en milisegundos), `cls` (código de clase en mayúsculas), `alias` (apodo, nunca el nombre), `topic` (tema), `sid` (partida), `type` (`start`, `teach`, `brain`, `ex` o `probe`) y `data` (el evento completo, en JSON).
 - **Pocas escrituras.** El juego envía los eventos en lotes de hasta 100, al llegar a la rendición y al cierre: unas dos o tres escrituras por partida, no una por clic. Una partida genera de 16 a 20 eventos.
 - **Una sola puerta a la base.** Solo `worker/src/events.ts` conoce la base de datos, detrás de una interfaz mínima (`prepare`, `bind`, `run`, `all`, `batch`). Las pruebas la reemplazan por una base en memoria.
 - **Lectura acotada.** El panel pide los eventos de una sola clase y el servidor devuelve como máximo 20 000 filas.
@@ -106,6 +107,6 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 |---|---|---|
 | Contenido de los tres temas (cuentas verificadas de forma independiente), cerebro, lectura con reglas y con servidor simulado, originalidad, métricas | `tests/core.test.js` | 36 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
-| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/worker.test.ts` y `worker/test/events.test.ts` | 29 |
+| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/worker.test.ts` y `worker/test/events.test.ts` | 30 |
 
 No hay pruebas automáticas de la interfaz.
