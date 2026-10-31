@@ -14,7 +14,7 @@ El docente elige el tema y comparte un enlace. Hay tres paquetes de matemática 
 | Porcentajes | el porcentaje es una parte del total · descuento y aumento · si te dan la parte, busca el total |
 | Ecuaciones de primer grado | lo que suma pasa restando · el paréntesis se reparte · primero suma o resta, después divide |
 
-El grado exacto en que se enseña cada tema lo debe confirmar un docente. Para agregar otro tema, ver [docs/contenido-de-temas.md](docs/contenido-de-temas.md).
+El docente decide en qué grado usa cada tema. Para agregar otro tema, ver [docs/contenido-de-temas.md](docs/contenido-de-temas.md).
 
 ## Cómo se juega
 
@@ -62,8 +62,8 @@ Guía paso a paso para Cloudflare: [docs/despliegue.md](docs/despliegue.md).
 
 - Solo se piden un **apodo** y un **código de clase**. No se piden nombre ni datos personales.
 - Los textos que escribe el estudiante se guardan (en su dispositivo y, si se configura, en la hoja). Cada campo recuerda no escribir datos personales.
-- Cuando se usa el modelo, el texto del estudiante se envía a un servicio externo (Google Gemini) a través del servidor intermedio. Los términos de Google no permiten usar su API en un cliente dirigido a menores de 18 años; ver [docs/despliegue.md](docs/despliegue.md#privacidad-y-datos) antes de un piloto con estudiantes.
-- Con menores, siempre con un adulto responsable presente. El permiso de tutores y el tiempo de retención de datos los define el equipo con el docente (ver [docs/requerimientos.md](docs/requerimientos.md)).
+- Cuando se usa el modelo, el texto del estudiante se envía a un servicio externo (Google Gemini) a través del servidor intermedio. Los términos de la API de Gemini restringen su uso en clientes dirigidos a menores de 18 años; para aplicarlo con menores, el juego funciona sin modelo, con reglas de palabras (ver [docs/despliegue.md](docs/despliegue.md#privacidad-y-datos)).
+- Con menores, siempre con un adulto responsable presente. El permiso de tutores y el tiempo de conservación de los datos corresponden a la institución o al docente que aplique el piloto (ver [docs/requerimientos.md](docs/requerimientos.md)).
 
 ## Métricas del piloto
 
@@ -90,20 +90,16 @@ functions/                 Pages Function /extract: usa el código de worker/ de
 apps-script/               Guardado de eventos en una hoja de Google
 scripts/, deploy/          Empaquetado del sitio y cabeceras para Cloudflare Pages
 brand/                     Favicon e imagen para compartir por WhatsApp (ver brand/README.md)
-mockup/                    Maquetas interactivas del diseño: A (noche) y B (textil andino de día)
+mockup/                    Exploraciones de diseño interactivas (juego y panel docente)
 docs/                      Arquitectura, requerimientos y guía de contenido
 ```
 
 Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 
-## Límites conocidos
+## Alcance y límites
 
-- **Gemini no se ha probado con una clave real.** La ruta se probó con un `fetch` simulado. Falta correr `worker/scripts/live-test.mjs` con una clave real.
-- **Nada se ha desplegado.** La función corrió en local con `wrangler pages dev`, pero los pasos de [docs/despliegue.md](docs/despliegue.md) no se han ejecutado contra una cuenta de Cloudflare.
-- **No se mide retención ni aprendizaje.** No hay examen final ni día 2, y tampoco pretest. El piloto describe cómo enseñan y revisan los estudiantes, no cuánto aprendieron.
-- **No hay limitador de uso** en el servidor. Restringe `ALLOWED_ORIGINS` a la dirección de tu juego.
+- **Piloto exploratorio.** Describe cómo enseñan y revisan los estudiantes. No hay examen final, día 2 ni pretest, así que no mide retención ni aprendizaje.
 - **La señal de originalidad es heurística** y puede equivocarse con textos cortos o vocabulario muy común.
-- **No se validó con estudiantes reales** ni con un docente.
-- **El fondo pesa más** que un cielo plano: varias capas de dibujo vectorial y animaciones suaves. No se midió en celulares de gama baja. Si va lento, se puede apagar la animación sin perder el paisaje.
-- **Los dibujos son vectoriales hechos en código**, no ilustraciones profesionales.
-- **No hay sonido.**
+- **El índice de dependencia es exploratorio**, sin una escala validada.
+- **El servidor no limita el uso por usuario.** El acceso se restringe por origen (`ALLOWED_ORIGINS`).
+- **Los dibujos son vectoriales hechos en código**, no ilustraciones profesionales, y el juego no tiene sonido.

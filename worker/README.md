@@ -74,7 +74,7 @@ npm test                         # 18 pruebas con un fetch simulado: no llaman a
 GEMINI_API_KEY=... npm run live  # prueba en vivo con Gemini: usa tu cuota (PowerShell: $env:GEMINI_API_KEY="..."; npm run live)
 ```
 
-`scripts/live-test.mjs` corre explicaciones de ejemplo de cada tema (buenas, con el error típico, con negación, vagas y con una instrucción escondida) y dice si el modelo leyó lo esperado. **Todavía no se ha corrido con una clave real.** Tarda unos 90 s porque espacia las llamadas (`PAUSE_MS`, 4000 por defecto) para no pasar el límite por minuto del plan gratuito. Si algún caso no coincide, ajusta el prompt del tema en `src/topics.ts` o `src/extract.ts`.
+`scripts/live-test.mjs` corre explicaciones de ejemplo de cada tema (buenas, con el error típico, con negación, vagas y con una instrucción escondida) y dice si el modelo leyó lo esperado. Tarda unos 90 s porque espacia las llamadas (`PAUSE_MS`, 4000 por defecto) para no pasar el límite por minuto del plan gratuito. Si algún caso no coincide, ajusta el prompt del tema en `src/topics.ts` o `src/extract.ts`.
 
 ## Agregar un tema
 
@@ -84,5 +84,4 @@ Ver [../docs/contenido-de-temas.md](../docs/contenido-de-temas.md). En el servid
 
 - Sin limitador de uso: con `ALLOWED_ORIGINS` abierto, cualquiera que conozca la dirección puede gastar la clave.
 - No hay reintento si Gemini rechaza o bloquea la solicitud (`blockReason`). Para explicaciones de matemática de secundaria es muy poco probable, y el juego cae a las reglas.
-- El formato de la llamada (`generateContent` con `responseSchema`) sigue la documentación de Google, pero **no se ha probado con una clave real**: Google rechazó la clave de prueba antes de revisar el modelo y el esquema.
 - **Términos de Google:** los términos de la API de Gemini no permiten usarla en un cliente dirigido a menores de 18 años o que probablemente usen ellos. Y en el plan gratuito, Google usa lo enviado para mejorar sus productos y personas pueden revisarlo. Ver [../docs/despliegue.md](../docs/despliegue.md#privacidad-y-datos).

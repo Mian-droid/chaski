@@ -50,7 +50,7 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 
 **El tema se elige por enlace.** `index.html?tema=porcentajes&clase=3A`. No hay cuentas ni base de datos propia. El panel docente genera el enlace.
 
-**Sin exámenes ni día 2.** Por decisión del equipo (30 de octubre de 2026) se quitó el examen de Chaski, el examen sin Chaski y el día 2. Consecuencia: no se mide retención ni aprendizaje, solo cómo enseñan y revisan los estudiantes.
+**Sin exámenes ni día 2.** El piloto no incluye el examen de Chaski, el examen sin Chaski ni el día 2. Consecuencia: no se mide retención ni aprendizaje, solo cómo enseñan y revisan los estudiantes.
 
 **Servidor con lista cerrada de temas.** El tema llega desde la página, por eso el servidor solo acepta los de `worker/src/topics.ts` y nunca arma el prompt con texto del cliente. Una prueba verifica que esa lista coincida con la del juego.
 
@@ -94,4 +94,4 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 | Contenido de los tres temas (cuentas verificadas de forma independiente), cerebro, lectura con reglas y con servidor simulado, originalidad, métricas | `tests/core.test.js` | 36 |
 | Servidor: formato, temas, CORS, clave solo en cabecera, errores de Gemini, defensa contra instrucciones escondidas, consistencia con el contenido del juego | `worker/test/worker.test.ts` | 18 |
 
-No hay pruebas automáticas de la interfaz. Se probó a mano en el navegador, con un jugador simulado.
+No hay pruebas automáticas de la interfaz.

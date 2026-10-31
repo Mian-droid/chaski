@@ -36,12 +36,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 - Documentación: arquitectura, guía para agregar temas y requerimientos.
 
 ### Quitado
-- Examen de Chaski, examen sin Chaski y día 2, por decisión del equipo. Ya no se mide retención.
-
-### Pendiente
-- Prueba con un modelo real (`worker/scripts/live-test.mjs`), despliegue y prueba con estudiantes. Ver `docs/requerimientos.md`.
+- Examen de Chaski, examen sin Chaski y día 2. El piloto ya no mide retención.
 
 ## [0.1.0] - 2026-10-30
 
 ### Agregado
-- Primera versión: errores escritos en el guion para proporciones, examen y día 2. Reemplazada por la 0.2.0 antes de usarse con estudiantes.
+- Primera versión: errores escritos en el guion para proporciones, examen y día 2. Reemplazada por la 0.2.0.

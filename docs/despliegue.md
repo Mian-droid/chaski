@@ -4,8 +4,6 @@ Todo vive en **un solo proyecto de Cloudflare Pages**: el juego y el panel (arch
 
 Si solo quieres probar el juego sin el modelo, no pongas la clave: Chaski leerá con reglas de palabras.
 
-> Estado: la función se compiló como Pages Function (también sin `worker/node_modules`, como en Cloudflare), corrió en local con `wrangler pages dev` y respondió en `/extract`. Su código se probó con un `fetch` simulado. **Nunca se ha desplegado** ni se ha llamado a Gemini con una clave real.
-
 ## Qué necesitas
 
 - Una cuenta de Cloudflare (el plan gratuito alcanza para un piloto) y el repositorio en GitHub con la rama `main`.
@@ -44,9 +42,9 @@ En el proyecto: *Settings → Variables and Secrets*.
 - Los cambios de variables se aplican en el **siguiente despliegue**: después de editarlas, reintenta el último despliegue.
 - Las vistas previas de Pages usan otras direcciones (`https://<hash>.chaski.pages.dev`). Con `ALLOWED_ORIGINS` cerrado, en esas vistas el juego lee con reglas de palabras. Prueba en la dirección principal.
 
-## 3. Probar el modelo real
+## 3. Verificar la lectura con el modelo
 
-Antes de que lo use ningún estudiante. En tu computadora, dentro de `worker/` (el servidor y la función comparten el mismo código):
+Prueba en vivo contra Gemini. En tu computadora, dentro de `worker/` (el servidor y la función comparten el mismo código):
 
 ```bash
 cd worker && npm install
@@ -55,7 +53,7 @@ GEMINI_API_KEY=tu-clave npm run live           # tarda unos 90 s; usa tu cuota
 
 En PowerShell: `$env:GEMINI_API_KEY="tu-clave"; npm run live`.
 
-Corre explicaciones de los tres temas y dice si el modelo leyó lo esperado. Si algún caso falla, ajusta el prompt del tema en `worker/src/topics.ts` y vuelve a probar. Esta prueba **todavía no se ha corrido**.
+Corre explicaciones de los tres temas y dice si el modelo leyó lo esperado. Si algún caso falla, ajusta el prompt del tema en `worker/src/topics.ts` y vuelve a probar.
 
 Ya desplegado, prueba la función (el encabezado `Origin` es necesario si cerraste `ALLOWED_ORIGINS`):
 
@@ -106,7 +104,7 @@ Para subir el sitio sin conectar GitHub: `EXTRACT_URL=... npm run build:site` y 
 - El enlace lleva el código de clase (`?clase=`). Las páginas no mandan el referente (`no-referrer`), así que ese código no viaja a Google Fonts.
 - El texto que escribe el estudiante se envía a Google (Gemini) a través de la función. Dilo antes de jugar y define el permiso de tutores si son menores.
 - **Plan gratuito de Gemini:** según los términos de Google, lo que se envía se usa para mejorar sus productos y personas pueden leerlo (desvinculado de tu cuenta). Google pide no enviar información personal. Con el plan de pago, Google dice que no usa los datos para mejorar sus productos. Cada campo del juego ya recuerda no escribir datos personales.
-- **Menores de 18 años:** los términos de la API de Gemini (consultados el 31 de octubre de 2026) piden ser mayor de 18 y no permiten usar el servicio en un cliente dirigido a menores de 18 o que probablemente lo usen. Chaski es para secundaria. Es razonable para una demostración con adultos (jurado, docentes). Para un piloto con estudiantes, confírmalo con Google o con el docente antes. Mientras tanto, el juego funciona sin modelo, con reglas de palabras: basta no poner `GEMINI_API_KEY`.
+- **Menores de 18 años:** los términos de la API de Gemini piden ser mayor de 18 y no permiten usar el servicio en un cliente dirigido a menores de 18 o que probablemente lo usen. Chaski es para secundaria, así que para aplicarlo con menores conviene consultar esos términos o usar el juego sin modelo, con reglas de palabras: basta no definir `GEMINI_API_KEY`.
 - El panel docente es una página pública. Los datos que muestra son los del dispositivo, un archivo o la hoja de Google (esta última protegida con una clave). No hay cuentas.
 
 ## Límites y costos

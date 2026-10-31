@@ -1,7 +1,7 @@
-/* Maqueta: paisaje en panorámica para llenar cualquier pantalla (celular, tablet, laptop).
+/* Paisaje en panorámica para llenar cualquier pantalla (celular, tablet, laptop).
    Se dibuja 1200 x 800. El centro de 390 de ancho es la composición del celular; los lados agregan montañas,
    andenes, llamas y árboles que solo se ven en pantallas anchas. Con "slice" y anclado abajo, cada pantalla
-   ve lo que le cabe, sin franjas vacías. Si la maqueta se aprueba, esto reemplaza a world() de js/scenery.js. */
+   ve lo que le cabe, sin franjas vacías. */
 (function (root) {
   'use strict';
   var INK = '#3A2412', W = 1200, H = 800, OX = 405;
