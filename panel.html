@@ -48,14 +48,15 @@
     <section class="panel" aria-labelledby="h-datos">
       <h2 id="h-datos"><span class="num">2</span>Trae los resultados</h2>
       <div class="srcs">
-        <button class="src" type="button" id="bSheet" hidden><span class="ic"><svg><use href="#i-sheet"/></svg></span><span><b>Hoja de Google</b><small>Todos los dispositivos, con la clave del panel</small></span></button>
+        <button class="src" type="button" id="bSheet" hidden><span class="ic"><svg><use href="#i-sheet"/></svg></span><span><b id="srcTitle">Hoja de Google</b><small id="srcSub">Todos los dispositivos, con la clave del panel</small></span></button>
         <button class="src" type="button" id="bLocal"><span class="ic"><svg><use href="#i-phone"/></svg></span><span><b>Este dispositivo</b><small>Lo que se jugó en este navegador</small></span></button>
         <label class="src" for="file" tabindex="0" id="bFile"><span class="ic"><svg><use href="#i-file"/></svg></span><span><b>Archivo JSON</b><small>Un respaldo que guardaste antes</small></span><input id="file" type="file" accept="application/json,.json" hidden></label>
       </div>
-      <label class="field" for="key" id="keybox" hidden><span>Clave del panel (la del Apps Script)</span><input class="inp" id="key" type="text" autocomplete="off"></label>
+      <label class="field" for="key" id="keybox" hidden><span id="keyLbl">Clave del panel (la del Apps Script)</span><input class="inp" id="key" type="password" autocomplete="off"></label>
       <p class="status" id="status" role="status" hidden><i></i><span id="statusText"></span></p>
       <p class="msg" id="msg" role="status"></p>
       <button class="link" id="bClear" type="button" hidden>Quitar los datos cargados</button>
+      <button class="link danger" id="bWipe" type="button" hidden>Borrar del servidor los datos de esta clase</button>
     </section>
   </aside>
 

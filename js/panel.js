@@ -84,15 +84,41 @@
     render();
   }
 
+  /* El guardado puede ser la base de datos del propio sitio ("/events") o un Apps Script que escribe en una hoja. */
+  var SAME = (CFG.ENDPOINT || '').charAt(0) === '/';
+  var STORE = SAME ? 'la base de datos' : 'la hoja de Google';
   $('keybox').hidden = !CFG.ENDPOINT;
   $('bSheet').hidden = !CFG.ENDPOINT;
+  $('bWipe').hidden = !SAME;
+  if (SAME) {
+    $('srcTitle').textContent = 'Base de datos';
+    $('srcSub').textContent = 'Los resultados de todos los dispositivos, con la clave del panel';
+    $('keyLbl').textContent = 'Clave del panel';
+  }
+  /** Llama al guardado con la clave del panel. La base del sitio la recibe en una cabecera; el Apps Script, en la dirección. */
+  function storeCall(method) {
+    var key = $('key').value.trim(), q = '?cls=' + encodeURIComponent(cls());
+    if (SAME) return fetch(CFG.ENDPOINT + q, { method: method, headers: { 'X-Panel-Key': key } }).then(function (r) { return r.json(); });
+    return fetch(CFG.ENDPOINT + q + '&key=' + encodeURIComponent(key)).then(function (r) { return r.json(); });
+  }
   $('bSheet').addEventListener('click', function () {
     if (!cls()) return say('Escribe el código de clase.');
     say('Cargando…');
-    fetch(CFG.ENDPOINT + '?cls=' + encodeURIComponent(cls()) + '&key=' + encodeURIComponent($('key').value.trim()))
-      .then(function (r) { return r.json(); })
-      .then(function (d) { if (d.error) return say('La hoja respondió: ' + d.error); merge(d.events || [], 'la hoja de Google'); say(''); })
-      .catch(function () { say('No se pudo leer la hoja. Revisa la dirección del Apps Script y la clave.'); });
+    storeCall('GET')
+      .then(function (d) { if (d.error) return say('Respondió ' + STORE + ': ' + d.error); merge(d.events || [], STORE); say(''); })
+      .catch(function () { say('No se pudo leer ' + STORE + '. Revisa la dirección y la clave.'); });
+  });
+  $('bWipe').addEventListener('click', function () {
+    if (!cls()) return say('Escribe el código de clase que quieres borrar.');
+    if (!window.confirm('Se borrarán del servidor todos los datos de la clase ' + cls() + '. No se puede deshacer. ¿Continuar?')) return;
+    say('Borrando…');
+    storeCall('DELETE')
+      .then(function (d) {
+        if (d.error) return say('Respondió ' + STORE + ': ' + d.error);
+        events = events.filter(function (e) { return String(e.cls).toUpperCase() !== cls(); });
+        render(); say('Se borraron los datos de la clase ' + cls() + ' del servidor.');
+      })
+      .catch(function () { say('No se pudo borrar. Revisa la clave y la conexión.'); });
   });
   $('bLocal').addEventListener('click', function () {
     try { var d = JSON.parse(localStorage.getItem('chaski.log.v1') || 'null'); merge(d && d.events ? d.events : [], 'este dispositivo'); say(''); }
