@@ -233,7 +233,9 @@
     });
   }
   function flagsOf(e) { return e.orig && e.orig.flags && e.orig.flags.length ? e.orig.flags : []; }
-  function flagChips(flags) { return flags.length ? h('div', { class: 'flags' }, flags.map(function (f) { return h('span', { class: 'flag', text: f }); })) : null; }
+  /** Las señales de originalidad se muestran con palabras, no con el nombre interno. */
+  var FLAG_TEXT = { pegado: 'Texto pegado', corto: 'Muy corto', copiado: 'Parecido a un libro o a otra respuesta', pocos_numeros: 'Con pocos números', mismo_ejemplo: 'Usa el mismo ejemplo que Chaski', sin_relacion: 'No relaciona las cantidades' };
+  function flagChips(flags) { return flags.length ? h('div', { class: 'flags' }, flags.map(function (f) { return h('span', { class: 'flag', text: FLAG_TEXT[f] || f }); })) : null; }
 
   function renderKpis(students) {
     var hr = avg(students, function (s) { return s.m.hitRate; }), fr = avg(students, function (s) { return s.m.faRate; });
@@ -243,7 +245,7 @@
       ['Estudiantes', String(students.length), null, 'que jugaron este tema', 'var(--ochre)'],
       ['Detección media', fmtPct(hr), hr, 'de los errores de Chaski, cuántos atraparon', 'var(--leaf)'],
       ['Falsas alarmas', fmtPct(fr), fr, 'soluciones correctas que marcaron como error', 'var(--terra)'],
-      ['Dependencia media', dp == null ? '·' : String(Core.round(dp, 2)).replace('.', ','), dp, '0 revisan, 1 confían a ciegas' + (band ? ' · ' + band[1].toLowerCase() : ''), 'var(--magenta)'],
+      ['Dependencia media', dp == null ? '·' : String(Core.round(dp, 2)).replace('.', ','), dp, 'escala de 0 (revisa todo) a 1 (confía a ciegas)' + (band ? ' · ' + band[1].toLowerCase() : ''), 'var(--magenta)'],
       ['Ideas bien', cb == null ? '·' : String(Core.round(cb, 1)).replace('.', ',') + ' / 3', cb == null ? null : cb / 3, 'de las 3 que Chaski podía aprender', 'var(--turq)']
     ];
     var box = $('kpis'); box.textContent = '';
