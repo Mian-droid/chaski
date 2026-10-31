@@ -135,6 +135,10 @@ tr.det td { background: #FFFAEA; white-space: normal; padding: 12px 16px 14px; }
   tr.det { display: block; margin: -4px 0 10px; } tr.det td { display: block; border: 2px solid var(--line); border-radius: 14px; }
 }
 
+.foot { max-width: 1240px; margin: 0 auto; padding: 0 clamp(14px, 3vw, 32px) 40px; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: .9rem; }
+.foot a { color: var(--turqd); }
+.help a { color: var(--turqd); font-weight: 700; }
+
 /* Paisaje animado de la cabecera */
 .w-cl1, .w-cl2, .w-cl3 { animation: drift 40s ease-in-out infinite alternate; } @keyframes drift { from { transform: translateX(-26px); } to { transform: translateX(34px); } }
 .w-condor { display: none; }

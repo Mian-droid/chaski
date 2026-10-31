@@ -8,6 +8,8 @@ window.CHASKI_CONFIG = {
   ENDPOINT: "",
   /* true: Chaski avisa que se equivocará si lo enseñas mal (se juega a revisarlo).
      false: no lo avisa y mide cuánto confía el estudiante a ciegas. */
+  /* Correo de contacto que muestran las páginas de privacidad y términos. Se fija al empaquetar con CONTACT_EMAIL. */
+  CONTACT_EMAIL: "",
   ANNOUNCE_ERRORS: true,
   VERSION: "0.2"
 };

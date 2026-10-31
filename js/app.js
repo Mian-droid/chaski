@@ -198,6 +198,8 @@
   function urlParam(name) {
     try { return new URLSearchParams(location.search).get(name) || ''; } catch (e) { return ''; }
   }
+  /** Enlace a una página informativa; se abre en otra pestaña para no perder la partida. */
+  function pageLink(href, text) { return h('a', { href: href, target: '_blank', rel: 'noopener', text: text }); }
   function sWelcome() {
     var alias = h('input', { id: 'alias', class: 'inp', type: 'text', maxlength: 16, placeholder: 'Un apodo (no tu nombre)', autocomplete: 'off' });
     var cls = h('input', { id: 'cls', class: 'inp', type: 'text', maxlength: 10, placeholder: 'Código de la clase', autocomplete: 'off' });
@@ -224,10 +226,12 @@
           h('label', { for: 'alias', text: 'Tu apodo' }), alias,
           h('label', { for: 'cls', text: 'Código de la clase' }), cls,
           h('label', { class: 'check', for: 'ok' }, ok, h('span', { text: 'Estoy con un adulto responsable y no escribiré mi nombre ni datos personales.' })),
+          h('p', { class: 'small' }, 'Lo que le enseñes a Chaski lo lee un servicio de inteligencia artificial (Google Gemini). Al continuar aceptas los ', pageLink('terminos.html', 'Términos de uso'), ' y la ', pageLink('privacidad.html', 'Política de privacidad'), '.'),
           msg,
           btn('Enseñarle a Chaski', 'go', function () { if (read()) render(); }),
           resume),
-        h('p', { class: 'legend', text: 'Piloto exploratorio: no es una evaluación con nota.' })]
+        h('p', { class: 'legend', text: 'Piloto exploratorio: no es una evaluación con nota.' }),
+        h('p', { class: 'footlinks' }, pageLink('acerca.html', 'Acerca de Chaski'), ' · ', pageLink('privacidad.html', 'Privacidad'), ' · ', pageLink('terminos.html', 'Términos'))]
     });
   }
 
