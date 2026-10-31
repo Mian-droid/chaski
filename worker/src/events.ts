@@ -9,6 +9,7 @@ import type { Db } from "./db.ts";
 import { corsHeaders, json } from "./http.ts";
 import { checkLimits, type LimitsEnv } from "./limits.ts";
 import { isTopic } from "./topics.ts";
+import { redact } from "./pii.ts";
 
 export type { Db, DbStatement } from "./db.ts";
 export interface EventsEnv extends LimitsEnv {
@@ -37,7 +38,10 @@ function clean(x: any): unknown[] | null {
   const c = cls.trim().toUpperCase();
   if (c.length < 3 || c.length > 10) return null;
   if (!isTopic(topic)) return null;
-  const data = JSON.stringify({ ...x, cls: c, topic });
+  // Lo que escribió el estudiante y lo que Chaski repite de eso no guardan correos, teléfonos ni documentos.
+  const safe = { ...x, cls: c, topic };
+  for (const key of ["text", "restatement"]) if (typeof safe[key] === "string") safe[key] = redact(safe[key]);
+  const data = JSON.stringify(safe);
   if (data.length > MAX_EVENT) return null;
   const k = typeof x.k === "string" ? x.k : typeof x.ex === "string" ? x.ex : "";
   return [`${sid}|${ts}|${type}|${k}`, ts, c, alias, topic, sid, type, data];

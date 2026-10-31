@@ -156,7 +156,19 @@
     }).sort(function (a, b) { return String(a.alias).localeCompare(String(b.alias)); });
   }
 
-  var api = { strip: strip, words: words, parseNum: parseNum, numEq: numEq, overlap: overlap, originality: originality, metricsFor: metricsFor, groupStudents: groupStudents, round: round };
+  /**
+   * ¿El texto trae un dato personal que no debe enviarse ni guardarse? Devuelve 'correo', 'teléfono' o 'documento', o '' si no hay.
+   * Es una red de seguridad contra descuidos, no una garantía: el aviso del juego sigue pidiendo no escribirlos.
+   */
+  function personalData(text) {
+    var t = String(text || '');
+    if (/[\w.+-]+@[\w-]+(\.[\w-]+)+/.test(t)) return 'correo';
+    if (/(^|[^\d])(\+?51[\s.-]?)?9\d{2}[\s.-]?\d{3}[\s.-]?\d{3}(?!\d)/.test(t)) return 'teléfono';
+    if (/(^|[^\d])\d{8}(?!\d)/.test(t)) return 'documento';
+    return '';
+  }
+
+  var api = { personalData: personalData, strip: strip, words: words, parseNum: parseNum, numEq: numEq, overlap: overlap, originality: originality, metricsFor: metricsFor, groupStudents: groupStudents, round: round };
   root.ChaskiCore = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

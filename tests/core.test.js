@@ -24,6 +24,18 @@ t('parseNum acepta coma, punto y texto', () => {
   assert.strictEqual(Core.parseNum(''), null);
 });
 
+t('personalData detecta correo, teléfono y documento, y deja pasar los números de matemática', () => {
+  const pd = Core.personalData;
+  assert.strictEqual(pd('escríbeme a juan@gmail.com'), 'correo');
+  assert.strictEqual(pd('mi cel es 987654321'), 'teléfono');
+  assert.strictEqual(pd('987 654 321'), 'teléfono');
+  assert.strictEqual(pd('+51 987-654-321'), 'teléfono');
+  assert.strictEqual(pd('mi dni es 12345678'), 'documento');
+  ['el 20% de 150 es 30', '2 cuadernos cuestan 6 soles y 8 cuestan 24', '12 000 000 soles', '1 000 000 y 2.500', 'x + 8 = 20 entonces x = 12'].forEach((s) => assert.strictEqual(pd(s), '', s));
+  assert.strictEqual(pd(''), '');
+  assert.strictEqual(pd(null), '');
+});
+
 t('numEq con tolerancia', () => {
   assert.ok(Core.numEq(24, 24.004));
   assert.ok(!Core.numEq(24, 12));

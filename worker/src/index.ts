@@ -5,6 +5,7 @@ import { DEFAULT_MODEL, buildRequest, parseReply, sanitize } from "./extract.ts"
 import { corsHeaders, json } from "./http.ts";
 import { checkLimits, type LimitsEnv } from "./limits.ts";
 import { isTopic } from "./topics.ts";
+import { redact } from "./pii.ts";
 
 export interface Env extends LimitsEnv {
   GEMINI_API_KEY?: string;
@@ -42,10 +43,11 @@ export async function handle(req: Request, env: Env, deps: { fetch?: Fetcher } =
     return json({ error: "JSON inválido" }, 400, h);
   }
   const fields = (body ?? {}) as { text?: unknown; topic?: unknown };
-  const text = typeof fields.text === "string" ? fields.text.trim() : "";
+  const raw = typeof fields.text === "string" ? fields.text.trim() : "";
+  const text = redact(raw);
   const topic = fields.topic ?? "proporciones";
   if (!isTopic(topic)) return json({ error: "tema desconocido" }, 400, h);
-  if (text.length < MIN_TEXT || text.length > MAX_TEXT) {
+  if (raw.length < MIN_TEXT || raw.length > MAX_TEXT) {
     return json({ error: `el texto debe tener entre ${MIN_TEXT} y ${MAX_TEXT} caracteres` }, 400, h);
   }
 

@@ -216,3 +216,15 @@ test("borrar exige indicar la sala, y una sala inválida se rechaza al leer", as
   assert.equal((await handleEvents(panel("GET", "AB"), e)).status, 400);
   assert.equal((await (await handleEvents(panel("GET", "3A2026"), e)).json() as any).events.length, 1, "no se borró nada");
 });
+
+test("los correos, teléfonos y documentos no se guardan, y el resto del evento queda igual", async () => {
+  const { db } = sqliteDb();
+  const e = env(db);
+  const res = await handleEvents(post([ev({ type: "teach", k: "K1", text: "escríbeme a juan@gmail.com o al 987654321, mi dni 12345678, y 2 cuadernos cuestan 6 soles", restatement: "te llamo al 987 654 321" })]), e);
+  assert.equal(res.status, 200);
+  const get: any = await (await handleEvents(new Request("https://chaski.example/events", { headers: { "X-Panel-Key": KEY } }), e)).json();
+  const saved = get.events[0];
+  assert.equal(saved.text, "escríbeme a [dato oculto] o al [dato oculto], mi dni [dato oculto], y 2 cuadernos cuestan 6 soles");
+  assert.equal(saved.restatement, "te llamo al [dato oculto]");
+  assert.equal(saved.sid, "abc123");
+});

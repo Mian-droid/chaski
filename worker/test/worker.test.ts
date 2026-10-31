@@ -173,6 +173,17 @@ test("un fallo pasajero de red o de Google se reintenta una vez; el plazo agotad
   }
 });
 
+test("el servidor oculta correos, teléfonos y documentos antes de enviar el texto a Gemini", async () => {
+  const f = fake(envelope(reading(card("bien", "pagas el doble"))));
+  const text = "Si compras el doble pagas el doble. Escríbeme a juan@gmail.com o al 987654321, mi dni es 12345678.";
+  const res = await handle(req({ text }), ENV, { fetch: f.fetch });
+  assert.equal(res.status, 200);
+  const sent = JSON.stringify(f.calls[0].body);
+  assert.ok(!/juan@gmail|987654321|12345678/.test(sent), "los datos personales no deben salir hacia Gemini");
+  assert.match(sent, /\[dato oculto\]/);
+  assert.match(sent, /pagas el doble/);
+});
+
 test("errores de Gemini devuelven 502 o 503 y nunca revientan", async () => {
   const status = async (f: { fetch: any }) => (await handle(req({ text: GOOD }), ENV, { fetch: f.fetch })).status;
   const quiet = console.error;
