@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /panel.html
+Disallow: /events
+Disallow: /extract
