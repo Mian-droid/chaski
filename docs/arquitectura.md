@@ -26,9 +26,9 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 | `js/content.js` | Un paquete por tema: fichas, problemas con su solución correcta y su error típico, preguntas de seguimiento, reglas de palabras. `use(id)` activa un tema. | nada |
 | `js/core.js` | Funciones puras: leer números, señal de originalidad, métricas por sesión, agrupación por estudiante. | nada |
 | `js/brain.js` | Cerebro (fichas), solución por fichas, lectura de la explicación (servidor o reglas). | content, core |
-| `js/scenery.js` | Dibujo: fondo por capas en tres momentos del día (amanecer, día, atardecer), Chaski con cinco estados de ánimo y la choza del tambo. Solo SVG, sin lógica de juego. | nada |
+| `js/scenery.js` | Dibujo: paisaje panorámico en tres momentos del día (amanecer, día, atardecer), Chaski con cinco estados de ánimo y la choza del tambo. Solo SVG, sin lógica de juego. | nada |
 | `js/app.js` | Interfaz del juego: escenas, estado, registro de eventos. | content, core, brain, scenery |
-| `js/panel.js` | Panel docente: elegir tema y enlace, cargar datos, resumen. | content, core |
+| `js/panel.js` | Panel docente: elegir tema y enlace, cargar datos, cifras, ideas por retomar y tabla de estudiantes. | content, core, scenery |
 | `js/config.js` | Direcciones y opciones editables. | nada |
 | `functions/extract.ts` | Pages Function que responde en `/extract` y llama a `handle()` de `worker/`. Es el camino por defecto en Cloudflare Pages. | worker/ |
 | `worker/` | Servidor intermedio: valida, arma el prompt por tema, llama al modelo, sanea la respuesta. | API de Gemini (`fetch`), zod |
@@ -56,12 +56,15 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 
 ## Interfaz
 
-- **Dirección visual:** textil andino de día. Paneles de tela con borde tejido, colores de tejidos andinos, paisaje de andenes con nieve, ciudadela, río, cóndor, llamas y pasto que se mueve.
-- **Enseñar no es un chat.** Cada pregunta de Chaski va en una placa de piedra; el estudiante responde en una tablilla de arcilla; al enviar, el texto vuela y ata un nudo en la cuerda «Lo que Chaski sabe». El estado guarda las lecciones (`lessons`), no una conversación. Mientras el texto vuela, el campo queda bloqueado.
+- **Dirección visual:** textil andino de día. Paneles de tela con borde tejido, colores de tejidos andinos sobre una paleta de tierra (contornos y textos en cacao), y un paisaje de andenes con nieve, ciudadelas, río, cóndor, llamas y pasto que se mueve.
+- **Paisaje a pantalla completa.** Es un panorama de 1200 x 800 anclado abajo. En el celular se ve el centro; en tablet y laptop se ven también las montañas, ciudadelas y llamas de los lados. No hay franjas vacías en ningún tamaño.
+- **Reparto en pantallas anchas.** Cada escena se arma con `frame({ hud, hero, main })`. En el celular todo va en una columna. Desde 880 px de ancho, Chaski (`hero`) queda a la izquierda y la tarea (`main`) a la derecha, y todo el bloque va centrado en la pantalla. El camino usa una sola columna y la rendición de cuentas, que es larga, deja a Chaski fijo mientras se desplaza.
+- **La indicación manda.** La pregunta de Chaski va en una placa oscura con letras claras, la de más contraste de la pantalla. Debajo, la tablilla de arcilla para responder, el botón y la cuerda de nudos.
+- **Enseñar no es un chat.** Cada pregunta de Chaski va en la placa; el estudiante responde en una tablilla de arcilla; al enviar, el texto vuela y ata un nudo en la cuerda «Lo que Chaski sabe». El estado guarda las lecciones (`lessons`), no una conversación. Mientras el texto vuela, el campo queda bloqueado.
 - **Momento del día por escena:** amanecer al entrar (bienvenida e introducción), día para jugar y atardecer en la rendición y el cierre. Se define en `SCENE_TIME` de `app.js`.
-- **Pantallas anchas:** el paisaje es una columna del ancho de un celular, centrada. El juego está pensado para el celular.
 - **Menos movimiento:** con la preferencia del sistema de reducir movimiento se apagan las animaciones del fondo y el vuelo del texto.
-- Las maquetas que dieron origen al diseño están en `mockup/`.
+- **Panel docente:** misma identidad, en claro y sobrio. Cabecera con el paisaje, a la izquierda el enlace (con botón de WhatsApp) y la carga de datos, a la derecha cifras con su significado, ideas por retomar con su porcentaje escrito y una tabla ordenable que en el celular se vuelve tarjetas. Las etiquetas de dependencia llevan texto además de color.
+- Las primeras exploraciones de diseño (A: noche, B: textil andino de día) están en `mockup/`.
 
 ## Flujo de escenas
 
@@ -92,6 +95,7 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 | Qué | Dónde | Cuántas |
 |---|---|---|
 | Contenido de los tres temas (cuentas verificadas de forma independiente), cerebro, lectura con reglas y con servidor simulado, originalidad, métricas | `tests/core.test.js` | 36 |
+| Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
 | Servidor: formato, temas, CORS, clave solo en cabecera, errores de Gemini, defensa contra instrucciones escondidas, consistencia con el contenido del juego | `worker/test/worker.test.ts` | 18 |
 
 No hay pruebas automáticas de la interfaz.

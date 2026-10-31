@@ -5,6 +5,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 ## [Sin publicar]
 
 ### Agregado
+- **Paisaje a pantalla completa** en celular, tablet y laptop, con Chaski y la tarea en dos columnas centradas en pantallas anchas. Pruebas del dibujo: 6.
+- **Panel docente rediseñado:** cabecera con paisaje, enlace con botón de WhatsApp, cifras con su significado, barras con porcentaje, tabla ordenable con el texto de cada estudiante y estado sin datos.
 - **Favicon con el personaje** (`brand/`): SVG, `.ico` y el ícono de iOS.
 - **Vista previa al compartir** por WhatsApp y redes: título, descripción e imagen de 1200 x 630 con Chaski. `SITE_URL` fija la dirección de la imagen al empaquetar.
 - El panel docente lleva favicon y no se indexa.
@@ -17,7 +19,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 ### Cambiado
 - **La lectura con el modelo corre dentro de Cloudflare Pages** como Pages Function (`functions/extract.ts`): un solo proyecto, sin Worker aparte ni CORS. En el empaquetado, `EXTRACT_URL` acepta una ruta del mismo sitio y, en Pages, `/extract` se usa sola. `zod` pasa a la raíz. El Worker independiente sigue disponible.
 - **El servidor lee con Google Gemini** en lugar de Anthropic. Llama a `generateContent` con `fetch`, sin SDK (el paquete bajó de 1,7 MiB a 779 KiB). Secreto `GEMINI_API_KEY`; modelo por defecto `gemini-3.5-flash-lite`. El juego no cambió.
-- **Nueva dirección visual: textil andino de día.** Paneles de tela, paisaje por capas en tres momentos del día, y un Chaski con más carácter.
+- **Nueva dirección visual: textil andino de día.** Paneles de tela, paisaje en tres momentos del día, y un Chaski con más carácter. Sin morado: contornos y textos en cacao, y cielos de azul a coral y oro.
+- **La indicación se lee primero:** va en una placa oscura con letras claras, y las instrucciones de repaso van en tarjetas y no sueltas sobre el paisaje.
 - **Enseñar ya no es un chat.** Pregunta en una placa de piedra, respuesta en una tablilla de arcilla, y cada lección ata un nudo en la cuerda de Chaski (se puede releer tocándolo). El cerebro pasa a ser una nube de pensamiento y tres tablillas colgadas.
 - Las páginas no mandan el referente (`no-referrer`): el enlace lleva el código de clase y no debe viajar a Google Fonts.
 

@@ -88,19 +88,20 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | ID | Requerimiento |
 |---|---|
 | RNF-01 | Funcionar en un celular con navegador moderno, sin instalar nada, como página estática sin compilación. |
-| RNF-02 | Seguir funcionando si no hay conexión con el modelo. |
-| RNF-03 | Esperar la lectura del modelo un máximo de 12 segundos desde el cliente y 10 desde el servidor. |
-| RNF-04 | Leer como máximo 800 caracteres por lectura. El servidor rechaza los textos de menos de 8 o más de 800. |
-| RNF-05 | Mantener la clave de Gemini solo en el servidor, como secreto y en una cabecera (nunca en la dirección). |
-| RNF-06 | Aceptar solicitudes únicamente de la página del juego (`ALLOWED_ORIGINS`). |
-| RNF-07 | Aceptar solo los temas de una lista cerrada, y no armar nunca el prompt con texto del cliente. |
-| RNF-08 | Tratar el texto del estudiante como datos: se delimita en el mensaje y el modelo debe ignorar instrucciones escondidas. En pantalla se inserta siempre como texto, nunca como HTML. |
-| RNF-09 | Accesibilidad básica: foco visible, etiquetas en los controles, respeto de la preferencia de reducir movimiento. |
-| RNF-10 | Español de Perú, con soles como moneda. |
-| RNF-11 | La tipografía del juego (Baloo 2 y Patrick Hand) se carga de Google Fonts. Sin conexión, usa una fuente del sistema. |
-| RNF-12 | El fondo animado y el vuelo del texto respetan la preferencia de reducir movimiento. |
-| RNF-13 | La lectura con el modelo corre como Cloudflare Pages Function (`functions/extract.ts`) o como Worker independiente, con el mismo código. |
-| RNF-14 | Publicar solo el juego y el panel, sin pruebas, documentos ni servidor (`npm run build:site`). |
+| RNF-02 | Verse bien en celular, tablet y laptop: el paisaje llena la pantalla y, en pantallas anchas, Chaski y la tarea se reparten en dos columnas centradas. |
+| RNF-03 | Seguir funcionando si no hay conexión con el modelo. |
+| RNF-04 | Esperar la lectura del modelo un máximo de 12 segundos desde el cliente y 10 desde el servidor. |
+| RNF-05 | Leer como máximo 800 caracteres por lectura. El servidor rechaza los textos de menos de 8 o más de 800. |
+| RNF-06 | Mantener la clave de Gemini solo en el servidor, como secreto y en una cabecera (nunca en la dirección). |
+| RNF-07 | Aceptar solicitudes únicamente de la página del juego (`ALLOWED_ORIGINS`). |
+| RNF-08 | Aceptar solo los temas de una lista cerrada, y no armar nunca el prompt con texto del cliente. |
+| RNF-09 | Tratar el texto del estudiante como datos: se delimita en el mensaje y el modelo debe ignorar instrucciones escondidas. En pantalla se inserta siempre como texto, nunca como HTML. |
+| RNF-10 | Accesibilidad básica: foco visible, etiquetas en los controles, respeto de la preferencia de reducir movimiento. |
+| RNF-11 | Español de Perú, con soles como moneda. |
+| RNF-12 | La tipografía del juego (Baloo 2 y Patrick Hand) se carga de Google Fonts. Sin conexión, usa una fuente del sistema. |
+| RNF-13 | El fondo animado y el vuelo del texto respetan la preferencia de reducir movimiento. |
+| RNF-14 | La lectura con el modelo corre como Cloudflare Pages Function (`functions/extract.ts`) o como Worker independiente, con el mismo código. |
+| RNF-15 | Publicar solo el juego y el panel, sin pruebas, documentos ni servidor (`npm run build:site`). |
 
 ---
 
@@ -135,6 +136,7 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 | Qué | Dónde | Pruebas |
 |---|---|---|
 | Contenido de los tres temas con cuentas verificadas de forma independiente, cerebro, lectura con reglas y con servidor simulado, originalidad y métricas | `tests/core.test.js` | 36 |
+| Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
 | Empaquetado del sitio: qué se publica, direcciones, referente, favicon y vista previa al compartir | `tests/build-site.test.js` | 11 |
 | Servidor y función de Pages: formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas | `worker/test/worker.test.ts` | 18 |
 

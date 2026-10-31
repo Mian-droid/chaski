@@ -42,8 +42,9 @@ Sin servidor intermedio configurado, Chaski lee la explicación con reglas de pa
 ## Pruebas
 
 ```bash
-npm test                  # núcleo (36), empaquetado del sitio (11) y servidor (18)
+npm test                  # núcleo (36), dibujo (6), empaquetado del sitio (11) y servidor (18)
 npm run test:core         # solo el núcleo
+npm run test:scenery      # solo el dibujo (6)
 npm run test:site         # solo el empaquetado del sitio (11)
 npm run test:worker       # solo el servidor (18)
 ```
@@ -83,14 +84,14 @@ Como los errores salen de lo enseñado, cada estudiante tiene una mezcla distint
 ```
 index.html, panel.html     Juego y panel docente
 css/                       game.css (juego) y panel.css (panel)
-js/                        content, core, brain, scenery (dibujo), app, panel, config
+js/                        content, core, brain, scenery (paisaje y personaje), app, panel, config
 tests/                     Pruebas del núcleo (sin dependencias)
 worker/                    Lector con el modelo: lógica y pruebas (TypeScript), desplegable como Worker
 functions/                 Pages Function /extract: usa el código de worker/ dentro del mismo sitio
 apps-script/               Guardado de eventos en una hoja de Google
 scripts/, deploy/          Empaquetado del sitio y cabeceras para Cloudflare Pages
 brand/                     Favicon e imagen para compartir por WhatsApp (ver brand/README.md)
-mockup/                    Exploraciones de diseño interactivas (juego y panel docente)
+mockup/                    Primeras exploraciones de diseño (A: noche, B: textil andino de día)
 docs/                      Arquitectura, requerimientos y guía de contenido
 ```
 
