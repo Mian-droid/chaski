@@ -38,8 +38,8 @@ p { margin: 0; }
 /* Estructura: una columna en el celular; en pantallas anchas, Chaski a la izquierda y la tarea a la derecha,
    todo el bloque centrado en la pantalla. */
 .cols { flex: 1; display: grid; gap: 14px; align-content: center; max-width: 620px; width: 100%; margin-inline: auto; }
-.hero-col { display: flex; align-items: flex-end; gap: 10px; min-width: 0; }
-.panel-col { display: grid; gap: 12px; align-content: center; min-width: 0; }
+.hero-col { display: flex; align-items: flex-end; gap: 10px; min-width: 0; overflow-x: clip; }
+.panel-col { display: grid; gap: 12px; align-content: center; min-width: 0; position: relative; z-index: 2; }
 .hero-col .chsvg { flex: none; width: var(--chw, 110px); height: auto; }
 .duo { display: flex; align-items: flex-end; gap: 10px; }
 .duo .hut { display: none; }
@@ -72,9 +72,10 @@ svg.ic { width: 22px; height: 22px; flex: none; }
 @keyframes bob { 50% { transform: translateY(-5px); } }
 .nod { animation: nod .6s ease-in-out 1; }
 @keyframes nod { 30% { transform: translateY(6px) rotate(-2deg); } 60% { transform: translateY(-3px); } }
-.runout { animation: none; transition: transform .8s cubic-bezier(.5, 0, .9, .6); transform: translateX(160%); }
+/* Chaski se va hacia la derecha pero sin cruzar por encima del problema: se desvanece dentro de su columna y el contenido queda por delante. */
+.runout { animation: none; transition: transform .8s cubic-bezier(.5, 0, .9, .6), opacity .5s ease-in; transform: translateX(100%); opacity: 0; }
 .bubble { position: relative; background: #fff; color: var(--ink); border: 3px solid var(--ink); border-radius: 16px; padding: 10px 14px; font-weight: 600; font-size: .98rem; display: grid; gap: 6px; box-shadow: 0 4px 0 var(--shadow); max-width: 340px; }
-.hero-col > .bubble { flex: 1; margin-bottom: 40px; }
+.hero-col > .bubble { flex: 1; margin-bottom: 40px; z-index: 2; }
 .hero-col > .bubble::before { content: ""; position: absolute; left: -14px; bottom: 16px; border: 8px solid transparent; border-right-color: var(--ink); border-left: 0; }
 @media (min-width: 880px) {
   .hero-col > .bubble { flex: none; margin: 0 0 4px; }
@@ -87,6 +88,23 @@ svg.ic { width: 22px; height: 22px; flex: none; }
 /* Paneles de tela */
 .card { position: relative; background: var(--cream); color: var(--ink); border: 3px solid var(--ink); border-radius: 18px; padding: 22px 16px 16px; display: grid; gap: 10px; box-shadow: 0 5px 0 var(--shadow); }
 .card::before { content: ""; position: absolute; left: 10px; right: 10px; top: -3px; height: 12px; background: var(--zig) repeat-x; border-radius: 0 0 8px 8px; }
+.card .title { font: 800 1.3rem/1.2 var(--display); color: var(--ink); }
+.fig { background: var(--cream); border: 3px solid var(--ink); border-radius: 14px; padding: 8px 10px; box-shadow: 0 4px 0 var(--shadow); display: flex; justify-content: center; }
+.fig svg { width: 100%; max-width: 380px; height: auto; display: block; }
+.f-cell { fill: #fff; stroke: var(--ink); stroke-width: 2.5; }
+.f-head { fill: var(--cream2); stroke: var(--ink); stroke-width: 2.5; }
+.f-unk { fill: #FFE08A; stroke: var(--magenta); stroke-width: 3; stroke-dasharray: 6 4; }
+.f-t { font: 800 18px var(--display); fill: var(--ink); }
+.f-l { font: 700 15px var(--display); fill: var(--ink2); }
+.f-q { font: 800 24px var(--display); fill: var(--magenta); }
+.f-bar { fill: #fff; stroke: var(--ink); stroke-width: 2.5; }
+.f-part { fill: var(--turq); opacity: .85; }
+.f-line { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.f-pan { fill: #fff; stroke: var(--ink); stroke-width: 2.5; }
+.f-beam { fill: none; stroke: #7A4D26; stroke-width: 7; stroke-linecap: round; }
+.f-post { fill: none; stroke: #7A4D26; stroke-width: 6; stroke-linecap: round; }
+.f-base { fill: #A8713C; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.f-pivot { fill: var(--sun); stroke: var(--ink); stroke-width: 2.5; }
 .kicker { font: 800 .76rem var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--terra); }
 .small { font-size: .86rem; color: var(--ink2); }
 .msgerr { color: #B3260A; font-size: .92rem; font-weight: 700; min-height: 1.2em; }

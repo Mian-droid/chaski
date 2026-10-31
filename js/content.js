@@ -32,10 +32,13 @@
       slip: slip ? { steps: slip[0], said: slip[1], errStep: slip[2] } : undefined
     };
   }
+  /** Agrega una figura al problema (ver js/figures.js). La figura muestra los datos del enunciado, no los cambia. */
+  function withFig(problem, spec) { problem.fig = spec; return problem; }
   function probes(list, freeQ) {
     return list.map(function (p) { return { k: p[0], rule: p[1], kind: 'num', q: p[2], answer: p[3] }; })
       .concat([{ k: 'pr4', rule: null, kind: 'free', q: freeQ }]);
   }
+  var fig = withFig;
   function index(list) { var o = {}; list.forEach(function (p) { o[p.id] = p; }); return o; }
 
   /* ---------------------------------------------------------------------------------------------
@@ -55,27 +58,27 @@
         belief: { bien: 'si una cantidad sube, la otra baja y el producto se mantiene', mal: 'si una cantidad sube, la otra también sube' } }
     },
     problems: index([
-      prob('p1', 'K1', '2 cuadernos cuestan 6 soles. ¿Cuánto cuestan 8 cuadernos?', 24,
+      fig(prob('p1', 'K1', '2 cuadernos cuestan 6 soles. ¿Cuánto cuestan 8 cuadernos?', 24,
         ['De 2 a 8 cuadernos se multiplica por 4.', 'Entonces el precio también se multiplica por 4.', '4 × 6 = 24 soles.'],
-        [['De 2 a 8 cuadernos hay 6 cuadernos más.', 'Entonces el precio también sube 6 soles.', '6 + 6 = 12 soles.'], 12, 1]),
+        [['De 2 a 8 cuadernos hay 6 cuadernos más.', 'Entonces el precio también sube 6 soles.', '6 + 6 = 12 soles.'], 12, 1]), { type: 'table', rows: [['Cuadernos', '2', '8'], ['Soles', '6', '?']] }),
       prob('p2', 'K1', '3 tazas de harina alcanzan para 12 galletas. ¿Cuántas tazas se necesitan para 36 galletas?', 9,
         ['De 12 a 36 galletas se multiplica por 3.', 'Entonces las tazas también se multiplican por 3.', '3 × 3 = 9 tazas.'],
         [['De 12 a 36 galletas hay 24 galletas más.', 'Entonces las tazas también suben 24.', '3 + 24 = 27 tazas.'], 27, 1],
         [['De 12 a 36 galletas se multiplica por 3.', 'Entonces las tazas también se multiplican por 3.', '3 × 3 = 12 tazas.'], 12, 2]),
-      prob('p3', 'K3', '4 obreros terminan una obra en 6 días. ¿Cuántos días tardarán 8 obreros trabajando al mismo ritmo?', 3,
+      fig(prob('p3', 'K3', '4 obreros terminan una obra en 6 días. ¿Cuántos días tardarán 8 obreros trabajando al mismo ritmo?', 3,
         ['De 4 a 8 obreros: se duplican.', 'Con más obreros se tarda menos: el trabajo total es 4 × 6 = 24.', '24 ÷ 8 = 3 días.'],
-        [['De 4 a 8 obreros: se duplican.', 'Entonces los días también se duplican.', '6 × 2 = 12 días.'], 12, 1]),
-      prob('p4', 'K2', '3 kg de arroz cuestan 12 soles. ¿Cuánto cuestan 5 kg?', 20,
+        [['De 4 a 8 obreros: se duplican.', 'Entonces los días también se duplican.', '6 × 2 = 12 días.'], 12, 1]), { type: 'table', rows: [['Obreros', '4', '8'], ['Días', '6', '?']] }),
+      fig(prob('p4', 'K2', '3 kg de arroz cuestan 12 soles. ¿Cuánto cuestan 5 kg?', 20,
         ['Armo la proporción: 3/12 = 5/x.', 'Multiplico en cruz: 3 · x = 5 · 12 = 60.', 'x = 60 ÷ 3 = 20 soles.'],
         [['Armo la proporción: 3/12 = x/5.', 'Multiplico en cruz: 3 · 5 = 12 · x, o sea 15 = 12x.', 'x = 15 ÷ 12 = 1,25 soles.'], 1.25, 0],
-        [['Armo la proporción: 3/12 = 5/x.', 'Multiplico en cruz: 3 · x = 5 · 12 = 60.', 'x = 60 ÷ 3 = 15 soles.'], 15, 2]),
+        [['Armo la proporción: 3/12 = 5/x.', 'Multiplico en cruz: 3 · x = 5 · 12 = 60.', 'x = 60 ÷ 3 = 15 soles.'], 15, 2]), { type: 'table', rows: [['Kilos de arroz', '3', '5'], ['Soles', '12', '?']] }),
       prob('p5', 'K2', '5 lapiceros cuestan 10 soles. ¿Cuánto cuestan 7 lapiceros?', 14,
         ['Armo la proporción: 5/10 = 7/x.', 'Multiplico en cruz: 5 · x = 7 · 10 = 70.', 'x = 70 ÷ 5 = 14 soles.'],
         [['Armo la proporción: 5/10 = x/7.', 'Multiplico en cruz: 5 · 7 = 10 · x, o sea 35 = 10x.', 'x = 35 ÷ 10 = 3,5 soles.'], 3.5, 0]),
-      prob('p6', 'K3', '6 máquinas hacen un pedido en 10 días. ¿En cuántos días lo harán 12 máquinas al mismo ritmo?', 5,
+      fig(prob('p6', 'K3', '6 máquinas hacen un pedido en 10 días. ¿En cuántos días lo harán 12 máquinas al mismo ritmo?', 5,
         ['De 6 a 12 máquinas: se duplican.', 'Con más máquinas se tarda menos: el trabajo total es 6 × 10 = 60.', '60 ÷ 12 = 5 días.'],
         [['De 6 a 12 máquinas: se duplican.', 'Entonces los días también se duplican.', '10 × 2 = 20 días.'], 20, 1],
-        [['De 6 a 12 máquinas: se duplican.', 'Con más máquinas se tarda menos: el trabajo total es 6 × 10 = 60.', '60 ÷ 12 = 6 días.'], 6, 2])
+        [['De 6 a 12 máquinas: se duplican.', 'Con más máquinas se tarda menos: el trabajo total es 6 × 10 = 60.', '60 ÷ 12 = 6 días.'], 6, 2]), { type: 'table', rows: [['Máquinas', '6', '12'], ['Días', '10', '?']] })
     ]),
     round: ['p1', 'p4', 'p3', 'p2', 'p5', 'p6'],
     slipOrder: ['p2', 'p6', 'p4'],
@@ -124,27 +127,27 @@
         belief: { bien: 'si conozco el porcentaje y cuánto es, hallo el total dividiendo entre el porcentaje y multiplicando por 100', mal: 'para hallar el total calculo el porcentaje de lo que me dan' } }
     },
     problems: index([
-      prob('p1', 'K1', 'En un colegio hay 150 estudiantes y el 20% usa lentes. ¿Cuántos estudiantes usan lentes?', 30,
+      fig(prob('p1', 'K1', 'En un colegio hay 150 estudiantes y el 20% usa lentes. ¿Cuántos estudiantes usan lentes?', 30,
         ['El total, 150, es el 100%.', 'Para hallar el 20% multiplico el total por 20/100.', '150 × 20/100 = 30 estudiantes.'],
-        [['El total, 150, es el 100%.', 'Para hallar el 20% divido el total entre 20.', '150 ÷ 20 = 7,5 estudiantes.'], 7.5, 1]),
-      prob('p2', 'K2', 'Unas zapatillas cuestan 150 soles y tienen un descuento del 20%. ¿Cuánto se paga?', 120,
+        [['El total, 150, es el 100%.', 'Para hallar el 20% divido el total entre 20.', '150 ÷ 20 = 7,5 estudiantes.'], 7.5, 1]), { type: 'bar', pct: 20, whole: '150', part: '?', unit: 'estudiantes' }),
+      fig(prob('p2', 'K2', 'Unas zapatillas cuestan 150 soles y tienen un descuento del 20%. ¿Cuánto se paga?', 120,
         ['El descuento es el 20% de 150: 150 × 20/100 = 30 soles.', 'Ese descuento se resta del precio.', '150 − 30 = 120 soles.'],
         [['El descuento es del 20%.', 'Entonces al precio le resto 20 soles.', '150 − 20 = 130 soles.'], 130, 1],
-        [['El descuento es el 20% de 150: 150 × 20/100 = 30 soles.', 'Ese descuento se resta del precio.', '150 − 30 = 110 soles.'], 110, 2]),
-      prob('p3', 'K3', 'El 20% de las entradas de un concierto son 30 entradas. ¿Cuántas entradas hay en total?', 150,
+        [['El descuento es el 20% de 150: 150 × 20/100 = 30 soles.', 'Ese descuento se resta del precio.', '150 − 30 = 110 soles.'], 110, 2]), { type: 'bar', pct: 20, whole: '150', part: '?', unit: 'soles' }),
+      fig(prob('p3', 'K3', 'El 20% de las entradas de un concierto son 30 entradas. ¿Cuántas entradas hay en total?', 150,
         ['Si el 20% son 30 entradas, el 1% es 30 ÷ 20 = 1,5.', 'El total es el 100%, o sea 100 veces el 1%.', '1,5 × 100 = 150 entradas.'],
-        [['Tengo el 20% y quiero el total.', 'Calculo el 20% de 30: 30 × 20/100.', '30 × 20/100 = 6 entradas.'], 6, 1]),
-      prob('p4', 'K1', 'De 80 estudiantes, el 25% viaja en bus. ¿Cuántos viajan en bus?', 20,
+        [['Tengo el 20% y quiero el total.', 'Calculo el 20% de 30: 30 × 20/100.', '30 × 20/100 = 6 entradas.'], 6, 1]), { type: 'bar', pct: 20, whole: '?', part: '30', unit: 'entradas' }),
+      fig(prob('p4', 'K1', 'De 80 estudiantes, el 25% viaja en bus. ¿Cuántos viajan en bus?', 20,
         ['El total, 80, es el 100%.', 'Para hallar el 25% multiplico el total por 25/100.', '80 × 25/100 = 20 estudiantes.'],
         [['El total, 80, es el 100%.', 'Para hallar el 25% divido el total entre 25.', '80 ÷ 25 = 3,2 estudiantes.'], 3.2, 1],
-        [['El total, 80, es el 100%.', 'Para hallar el 25% multiplico el total por 25/100.', '80 × 25/100 = 22 estudiantes.'], 22, 2]),
+        [['El total, 80, es el 100%.', 'Para hallar el 25% multiplico el total por 25/100.', '80 × 25/100 = 22 estudiantes.'], 22, 2]), { type: 'bar', pct: 25, whole: '80', part: '?', unit: 'estudiantes' }),
       prob('p5', 'K2', 'Una laptop cuesta 2000 soles y sube de precio un 10%. ¿Cuál es el nuevo precio?', 2200,
         ['El aumento es el 10% de 2000: 2000 × 10/100 = 200 soles.', 'Ese aumento se suma al precio.', '2000 + 200 = 2200 soles.'],
         [['El aumento es del 10%.', 'Entonces al precio le sumo 10 soles.', '2000 + 10 = 2010 soles.'], 2010, 1]),
-      prob('p6', 'K3', 'El 40% de un libro son 60 páginas. ¿Cuántas páginas tiene el libro?', 150,
+      fig(prob('p6', 'K3', 'El 40% de un libro son 60 páginas. ¿Cuántas páginas tiene el libro?', 150,
         ['Si el 40% son 60 páginas, el 10% es 60 ÷ 4 = 15.', 'El total es el 100%, o sea 10 veces el 10%.', '15 × 10 = 150 páginas.'],
         [['Tengo el 40% y quiero el total.', 'Calculo el 40% de 60: 60 × 40/100.', '60 × 40/100 = 24 páginas.'], 24, 1],
-        [['Si el 40% son 60 páginas, el 10% es 60 ÷ 4 = 15.', 'El total es el 100%, o sea 10 veces el 10%.', '15 × 10 = 160 páginas.'], 160, 2])
+        [['Si el 40% son 60 páginas, el 10% es 60 ÷ 4 = 15.', 'El total es el 100%, o sea 10 veces el 10%.', '15 × 10 = 160 páginas.'], 160, 2]), { type: 'bar', pct: 40, whole: '?', part: '60', unit: 'páginas' })
     ]),
     round: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
     slipOrder: ['p2', 'p6', 'p4'],
@@ -191,23 +194,23 @@
         belief: { bien: 'primero paso lo que suma o resta y al final divido entre el número de la x', mal: 'divido entre el número de la x solo algunos de los términos' } }
     },
     problems: index([
-      prob('p1', 'K1', 'Resuelve: x + 8 = 20. ¿Cuánto vale x?', 12,
+      fig(prob('p1', 'K1', 'Resuelve: x + 8 = 20. ¿Cuánto vale x?', 12,
         ['Tengo x + 8 = 20.', 'El 8 suma, pasa al otro lado restando.', 'x = 20 − 8 = 12.'],
-        [['Tengo x + 8 = 20.', 'El 8 pasa al otro lado sumando.', 'x = 20 + 8 = 28.'], 28, 1]),
-      prob('p2', 'K2', 'Resuelve: 2(x + 3) = 14. ¿Cuánto vale x?', 4,
+        [['Tengo x + 8 = 20.', 'El 8 pasa al otro lado sumando.', 'x = 20 + 8 = 28.'], 28, 1]), { type: 'balance', left: 'x + 8', right: '20' }),
+      fig(prob('p2', 'K2', 'Resuelve: 2(x + 3) = 14. ¿Cuánto vale x?', 4,
         ['Tengo 2(x + 3) = 14.', 'El 2 multiplica a todo el paréntesis: 2x + 6 = 14.', '2x = 14 − 6 = 8, entonces x = 4.'],
         [['Tengo 2(x + 3) = 14.', 'El 2 multiplica solo a la x: 2x + 3 = 14.', '2x = 14 − 3 = 11, entonces x = 5,5.'], 5.5, 1],
-        [['Tengo 2(x + 3) = 14.', 'El 2 multiplica a todo el paréntesis: 2x + 6 = 14.', '2x = 14 − 6 = 9, entonces x = 4,5.'], 4.5, 2]),
-      prob('p3', 'K3', 'Resuelve: 3x + 6 = 21. ¿Cuánto vale x?', 5,
+        [['Tengo 2(x + 3) = 14.', 'El 2 multiplica a todo el paréntesis: 2x + 6 = 14.', '2x = 14 − 6 = 9, entonces x = 4,5.'], 4.5, 2]), { type: 'balance', left: '2(x + 3)', right: '14' }),
+      fig(prob('p3', 'K3', 'Resuelve: 3x + 6 = 21. ¿Cuánto vale x?', 5,
         ['Tengo 3x + 6 = 21.', 'El 6 suma, pasa restando: 3x = 21 − 6 = 15.', 'Divido entre 3: x = 15 ÷ 3 = 5.'],
-        [['Tengo 3x + 6 = 21.', 'Divido entre 3 solo la x y el 21: x + 6 = 7.', 'Paso el 6 restando: x = 7 − 6 = 1.'], 1, 1]),
+        [['Tengo 3x + 6 = 21.', 'Divido entre 3 solo la x y el 21: x + 6 = 7.', 'Paso el 6 restando: x = 7 − 6 = 1.'], 1, 1]), { type: 'balance', left: '3x + 6', right: '21' }),
       prob('p4', 'K1', 'Resuelve: x − 5 = 9. ¿Cuánto vale x?', 14,
         ['Tengo x − 5 = 9.', 'El 5 resta, pasa al otro lado sumando.', 'x = 9 + 5 = 14.'],
         [['Tengo x − 5 = 9.', 'El 5 pasa al otro lado restando también.', 'x = 9 − 5 = 4.'], 4, 1],
         [['Tengo x − 5 = 9.', 'El 5 resta, pasa al otro lado sumando.', 'x = 9 + 5 = 15.'], 15, 2]),
-      prob('p5', 'K2', 'Resuelve: 4(x − 2) = 20. ¿Cuánto vale x?', 7,
+      fig(prob('p5', 'K2', 'Resuelve: 4(x − 2) = 20. ¿Cuánto vale x?', 7,
         ['Tengo 4(x − 2) = 20.', 'El 4 multiplica a todo el paréntesis: 4x − 8 = 20.', '4x = 20 + 8 = 28, entonces x = 7.'],
-        [['Tengo 4(x − 2) = 20.', 'El 4 multiplica solo a la x: 4x − 2 = 20.', '4x = 20 + 2 = 22, entonces x = 5,5.'], 5.5, 1]),
+        [['Tengo 4(x − 2) = 20.', 'El 4 multiplica solo a la x: 4x − 2 = 20.', '4x = 20 + 2 = 22, entonces x = 5,5.'], 5.5, 1]), { type: 'balance', left: '4(x − 2)', right: '20' }),
       prob('p6', 'K3', 'Resuelve: 2x + 10 = 30. ¿Cuánto vale x?', 10,
         ['Tengo 2x + 10 = 30.', 'El 10 suma, pasa restando: 2x = 30 − 10 = 20.', 'Divido entre 2: x = 20 ÷ 2 = 10.'],
         [['Tengo 2x + 10 = 30.', 'Divido entre 2 solo la x y el 30: x + 10 = 15.', 'Paso el 10 restando: x = 15 − 10 = 5.'], 5, 1],
@@ -247,6 +250,7 @@
     mission: 'Ojo: cuando resuelva problemas, voy a hacer lo que aprendí de ti. Si me explicaste mal, me voy a equivocar. Tu misión es revisarme.',
     missionHidden: 'Después te muestro cómo resuelvo yo los problemas.',
     confident: ['¡Fácil! Lo resuelvo así:', '¡Esto lo tengo dominado!', 'Mira, es sencillo:', '¡Pan comido!', 'Seguro, seguro. Así se hace:', '¡Listo, listo! Mira:'],
+    clarify: 'Todavía no entendí cómo se hace. ¿Me lo explicas de otra forma, con un ejemplo con números y paso a paso?',
     probeSay: ['Ahora te pregunto yo. ¿Y si cambio el número?', 'Otra más. Cambio los números.', 'Última con números. ¿Y si ahora…?', 'Para terminar, cuéntamelo a tu manera.']
   };
 
@@ -254,6 +258,9 @@
     topics: topics,
     /** Lista de temas para mostrar en el selector del docente. */
     list: Object.keys(topics).map(function (id) { return { id: id, title: topics[id].meta.title }; }),
+    /** Lo que Chaski pide cuando casi no entendió la explicación (una sola vez por partida). */
+    clarify: { k: 'tc', say: 'No te entendí bien. ¿Me lo explicas de otra manera? Cuéntame un ejemplo con números, paso a paso.', label: 'Tu nueva explicación',
+      ph: 'Por ejemplo: si 1 pan cuesta…', min: 20, minWords: 6, needNumbers: true },
     teachMore: { k: 'tx', say: 'Cuéntame más. ¿Qué otra cosa quieres enseñarme?', label: 'Lo que quieres agregar',
       ph: 'Explícale algo que le falte o corrígelo…', min: 12, minWords: 4, needNumbers: false },
     /** Los tres identificadores de ficha y el descuido de cálculo ("S"), comunes a todos los temas. */

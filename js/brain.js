@@ -63,7 +63,7 @@
     var v = st === 'bien' ? (withSlip && problem.slip ? problem.slip : problem.ok) : problem.bad;
     var wrong = v !== problem.ok;
     return {
-      id: problem.id, text: problem.text, card: problem.card, state: st,
+      id: problem.id, text: problem.text, fig: problem.fig, card: problem.card, state: st,
       steps: v.steps, said: v.said, answer: problem.answer, errStep: wrong ? v.errStep : -1,
       hasError: wrong, cause: wrong ? (v === problem.bad ? problem.card : 'S') : null
     };
@@ -171,7 +171,15 @@
       .then(function (r) { if (timer) clearTimeout(timer); return r; });
   }
 
-  var api = {
+  /**
+   * ¿Chaski casi no entendió? Es verdad cuando ninguna de las tres ideas quedó enseñada, ni bien ni mal.
+   * Si alguna quedó «mal», no: ahí Chaski debe equivocarse para que el estudiante o su docente lo noten.
+   */
+  function vague(brain) {
+    return IDS.every(function (k) { return brain[k] && brain[k].state === 'ausente'; });
+  }
+
+  var api = { vague: vague,
     IDS: IDS, emptyBrain: emptyBrain, merge: merge, good: good, solve: solve, planRound: planRound,
     heuristicExtract: heuristicExtract, restate: restate, validExtraction: validExtraction, extract: extract
   };

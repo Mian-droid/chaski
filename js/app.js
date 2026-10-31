@@ -18,9 +18,9 @@
   var chaski = Scenery.chaski, hutSVG = Scenery.hut;
 
   /** Momento del día de cada escena: amanecer al entrar, día para jugar, atardecer en la rendición. */
-  var SCENE_TIME = { welcome: 'amanecer', intro: 'amanecer', teach: 'dia', brain: 'dia', map: 'dia', ex: 'dia', probe: 'dia', reveal: 'atardecer', end: 'atardecer' };
+  var SCENE_TIME = { welcome: 'amanecer', intro: 'amanecer', teach: 'dia', brain: 'dia', map: 'dia', ex: 'dia', probeintro: 'dia', probe: 'dia', reveal: 'atardecer', end: 'atardecer' };
   /** Pista breve bajo la pregunta, según la lección. */
-  var HINT = { t1: 'Escríbelo como se lo explicarías a un amigo.', t2: 'Usa números y cuéntalo paso a paso.', tx: 'Puedes agregar algo o corregir lo que dijiste.' };
+  var HINT = { t1: 'Escríbelo como se lo explicarías a un amigo.', t2: 'Usa números y cuéntalo paso a paso.', tx: 'Puedes agregar algo o corregir lo que dijiste.', tc: 'Hazlo con números, paso a paso.' };
 
   /* ---------- utilidades ---------- */
   function store(k, v) {
@@ -53,7 +53,7 @@
 
   /* ---------- registro de eventos ---------- */
   var Log = {
-    events: [], sent: 0,
+    events: [], sent: 0, lastSent: 0, timer: null, busy: false,
     load: function () { var d = store(KL); if (d) { this.events = d.events || []; this.sent = d.sent || 0; } },
     save: function () { store(KL, { events: this.events, sent: this.sent }); },
     push: function (type, data) {
@@ -62,6 +62,12 @@
       this.events.push(ev); this.save();
     },
     mine: function (type) { return this.events.filter(function (e) { return e.sid === S.sid && (!type || e.type === type); }); },
+    /** Envía pronto, pero sin pasar de un envío cada 8 segundos: el panel ve avanzar a cada estudiante sin que el servidor reciba un envío por clic. */
+    soon: function (force) {
+      var self = this, wait = 8000 - (Date.now() - self.lastSent);
+      if (force || wait <= 0) { clearTimeout(self.timer); self.timer = null; self.flush(); return; }
+      if (!self.timer) self.timer = setTimeout(function () { self.timer = null; self.flush(); }, wait);
+    },
     /** Envía los eventos que faltan por enviar, de a 100. Con la base de datos del propio sitio (ENDPOINT "/events") se comprueba la respuesta. */
     flush: function () {
       var self = this;
@@ -71,7 +77,8 @@
       var same = CFG.ENDPOINT.charAt(0) === '/';
       var opts = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ events: batch }) };
       if (!same) opts.mode = 'no-cors';
-      self.busy = true;
+      else if (opts.body.length < 60000) opts.keepalive = true; /* que el envío termine aunque se cierre la pestaña */
+      self.busy = true; self.lastSent = Date.now();
       fetch(CFG.ENDPOINT, opts).then(function (r) {
         if (same && r.status >= 500) throw new Error('servidor no disponible'); /* los 4xx no se arreglan reintentando */
         self.sent += batch.length; self.save(); self.busy = false; self.flush();
@@ -88,7 +95,7 @@
   function save() { store(KS, S); }
   function go(scene, i) {
     S.scene = scene; S.i = i || 0; save();
-    if (scene === 'reveal' || scene === 'end') Log.flush(); /* enviar a la hoja en los hitos */
+    Log.soon(scene === 'reveal' || scene === 'end'); /* el panel docente ve el avance; en los hitos finales se envía de inmediato */
     render();
   }
 
@@ -202,7 +209,7 @@
   function pageLink(href, text) { return h('a', { href: href, target: '_blank', rel: 'noopener', text: text }); }
   function sWelcome() {
     var alias = h('input', { id: 'alias', class: 'inp', type: 'text', maxlength: 16, placeholder: 'Un apodo (no tu nombre)', autocomplete: 'off' });
-    var cls = h('input', { id: 'cls', class: 'inp', type: 'text', maxlength: 10, placeholder: 'Código de la clase', autocomplete: 'off' });
+    var cls = h('input', { id: 'cls', class: 'inp', type: 'text', maxlength: 10, placeholder: 'Código de la clase (opcional)', autocomplete: 'off' });
     cls.value = urlParam('clase').slice(0, 10).toUpperCase();
     var ok = h('input', { id: 'ok', type: 'checkbox' });
     var msg = h('p', { class: 'msgerr', role: 'alert' });
@@ -210,7 +217,8 @@
     function read() {
       var a = alias.value.trim(), c = cls.value.trim().toUpperCase();
       if (a.length < 2) { msg.textContent = 'Escribe un apodo de al menos 2 letras.'; return false; }
-      if (c.length < 3) { msg.textContent = 'Escribe el código de tu clase (3 letras o números como mínimo).'; return false; }
+      if (c && c.length < 3) { msg.textContent = 'El código de la clase tiene 3 letras o números como mínimo. Si no lo tienes, déjalo vacío.'; return false; }
+      c = c || 'GENERAL'; /* la sala es solo una etiqueta para agrupar en el panel */
       if (!ok.checked) { msg.textContent = 'Marca la casilla para continuar.'; return false; }
       S = newState(a, c, C.topic.id); save(); Log.push('start', { version: CFG.VERSION, model: !!CFG.EXTRACT_URL });
       return true;
@@ -224,7 +232,7 @@
         h('div', { class: 'card' },
           h('p', { class: 'small', text: 'Un mensajero que solo sabe lo que tú le enseñes. ¿Lo enseñas bien?' }),
           h('label', { for: 'alias', text: 'Tu apodo' }), alias,
-          h('label', { for: 'cls', text: 'Código de la clase' }), cls,
+          h('label', { for: 'cls', text: 'Código de la clase (opcional)' }), cls,
           h('label', { class: 'check', for: 'ok' }, ok, h('span', { text: 'Estoy con un adulto responsable y no escribiré mi nombre ni datos personales.' })),
           h('p', { class: 'small' }, 'Lo que le enseñes a Chaski lo lee un servicio de inteligencia artificial (Google Gemini). Al continuar aceptas los ', pageLink('terminos.html', 'Términos de uso'), ' y la ', pageLink('privacidad.html', 'Política de privacidad'), '.'),
           msg,
@@ -247,7 +255,7 @@
   /* ---------- escenas: enseñar ---------- */
   /** Chaski plantea la pregunta en una placa de piedra; el estudiante responde en una tablilla; la lección ata un nudo. */
   function sTeach(i) {
-    var prompts = S.more ? [C.teachMore] : C.teach, p = prompts[i], t0 = Date.now(), busy = false;
+    var prompts = S.more === 'clarify' ? [C.clarify] : S.more ? [C.teachMore] : C.teach, p = prompts[i], t0 = Date.now(), busy = false;
     var cord = cordbar();
     var who = h('div', { class: 'who' }, chaski('listen', 118, 'bob'));
     var box = tablet({ ph: p.ph, label: 'Tu tablilla', min: p.min, onSend: function (text, pasted, st) {
@@ -262,7 +270,7 @@
         setTimeout(function () { if (i + 1 < prompts.length) { S.i = i + 1; save(); render(); } else go('brain'); }, 450);
       });
     } });
-    var lesson = S.more ? 'Una lección extra' : 'Lección ' + (i + 1) + ' de ' + prompts.length;
+    var lesson = S.more === 'clarify' ? 'Chaski no entendió' : S.more ? 'Una lección extra' : 'Lección ' + (i + 1) + ' de ' + prompts.length;
     frame({
       hud: hud(C.topic.title + ' · ' + S.cls),
       hero: [who, h('div', { class: 'hint', text: HINT[p.k] || '' })],
@@ -281,15 +289,24 @@
   function sBrain() {
     function drawBrain(res) {
       var reteach = S.phase === 'reteach', canMore = S.extraTurns < 3;
+      /* Chaski repregunta una sola vez, y solo cuando casi no entendió nada. Si el estudiante dijo algo equivocado no repregunta:
+         ahí Chaski debe equivocarse para que el estudiante, o su docente, lo note. */
+      var vague = !!S.lastVague && !S.clarified && !reteach;
       var buttons = [];
-      if (canMore) buttons.push(btn(reteach ? 'Quiero agregar algo más' : 'Quiero explicarle algo más', 'ghost', function () { S.extraTurns += 1; startTeach(true); }));
-      if (reteach) buttons.unshift(btn('Terminar', 'go', function () { go('end'); }));
-      else buttons.unshift(btn('¡Listo, a resolver!', 'go', function () { S.plan = Brain.planRound(S.brain); go('map', 0); }));
+      if (vague) {
+        buttons.push(btn('Explicárselo de nuevo', 'go', function () { S.clarified = true; S.lastVague = false; S.phase = 'aclaracion'; startTeach('clarify'); }));
+        buttons.push(btn('Seguir así', 'ghost', function () { S.clarified = true; S.lastVague = false; S.plan = Brain.planRound(S.brain); go('map', 0); }));
+      } else {
+        if (canMore) buttons.push(btn(reteach ? 'Quiero agregar algo más' : 'Quiero explicarle algo más', 'ghost', function () { S.extraTurns += 1; startTeach(true); }));
+        if (reteach) buttons.unshift(btn('Terminar', 'go', function () { go('end'); }));
+        else buttons.unshift(btn('¡Listo, a resolver!', 'go', function () { S.plan = Brain.planRound(S.brain); go('map', 0); }));
+      }
       var learning = Brain.IDS.some(function (k) { return S.brain[k].state !== 'ausente'; });
       frame({
         hud: hud('El cerebro de Chaski', h('span', { class: 'pill', text: learning ? 'Está aprendiendo' : 'Vacío' })),
         hero: [chaski('think', 108, 'bob')],
         main: [h('div', { class: 'thought' }, h('span', { class: 'kicker', text: 'Esto es lo que entendí' }), res.restatement),
+          vague ? h('p', { class: 'ask' }, h('b', { text: 'Chaski no entendió. ' }), C.lines.clarify) : null,
           hangTablets(),
           h('p', { class: 'legend', text: 'Una tablilla encendida significa que Chaski cree saber algo. No dice si lo sabe bien.' }),
           h('div', { class: 'stack' }, buttons)]
@@ -306,7 +323,9 @@
     Brain.extract(text, { url: CFG.EXTRACT_URL, topic: S.topic }).then(function (res) {
       if (!S || S.scene !== 'brain') return;
       S.brain = Brain.merge(S.brain, res.cards); S.lastRestatement = res.restatement; S.pending = [];
-      Log.push('brain', { cards: S.brain, read: res.cards, source: res.source, why: res.why || null, restatement: res.restatement, phase: S.phase });
+      /* «Casi no entendió» = lo leyó la IA y ninguna de las tres ideas quedó enseñada. Con la lectura por reglas no se repregunta: se equivocaría de más. */
+      S.lastVague = res.source === 'modelo' && !S.clarified && S.phase !== 'reteach' && Brain.vague(S.brain);
+      Log.push('brain', { cards: S.brain, read: res.cards, source: res.source, why: res.why || null, restatement: res.restatement, phase: S.phase, clarify: S.lastVague });
       save(); drawBrain(res);
     });
   }
@@ -339,12 +358,20 @@
     var rec = { ex: sol.id, rule: sol.cause, card: sol.card, cardState: sol.state, hasError: sol.hasError, said: sol.said };
     function finish() {
       rec.ms = Date.now() - t0; Log.push('ex', rec);
-      if (i + 1 < n) go('map', i + 1); else go('probe', 0);
+      if (i + 1 < n) go('map', i + 1); else go('probeintro');
     }
     /** Lo que va junto a Chaski: él, la choza del tambo y lo que dice. */
     function sceneHead(say, mood) {
       var c = chaski(mood, 104, 'bob'); c.id = 'chRun';
       return [h('div', { class: 'duo' }, c, hutSVG()), h('div', { class: 'bubble', text: say })];
+    }
+    /** Figura del problema (tabla, barra o balanza), si la tiene. Sale de datos fijos del contenido. */
+    function figEl() {
+      var svg = sol.fig && window.ChaskiFigures ? window.ChaskiFigures.svg(sol.fig) : '';
+      if (!svg) return null;
+      var d = h('div', { class: 'fig' });
+      d.innerHTML = svg;
+      return d;
     }
     function steps(asButtons, onPick) {
       return h('div', { class: 'quipu' }, sol.steps.map(function (s, k) {
@@ -357,7 +384,7 @@
       frame({
         hud: hud('Tambo ' + (i + 1) + ' de 6', msgPill(i)),
         hero: sceneHead(C.lines.confident[i % C.lines.confident.length], 'confident'),
-        main: [h('div', { class: 'board', text: sol.text }), steps(false),
+        main: [h('div', { class: 'board', text: sol.text }), figEl(), steps(false),
           h('div', { class: 'row2' },
             iconBtn(ICON_PASS, 'Dejar pasar', 'pass', function () {
               rec.saidError = false; rec.decideMs = Date.now() - t0;
@@ -371,7 +398,7 @@
       frame({
         hud: hud('Tambo ' + (i + 1) + ' de 6', h('span', { class: 'pill', text: 'Lupa' })),
         hero: sceneHead('¿Yo? ¿Equivocarme? A ver, ¿dónde?', 'oops'),
-        main: [h('div', { class: 'board', text: 'Toca el nudo donde se equivocó' }),
+        main: [h('div', { class: 'board', text: 'Toca el nudo donde se equivocó' }), figEl(),
           steps(true, function (k, el) {
             rec.step = k; rec.stepOk = sol.errStep === k; el.classList.remove('hot'); el.classList.add('sel');
             setTimeout(fix, 400);
@@ -392,6 +419,23 @@
       });
     }
     decide();
+  }
+
+  /**
+   * Pausa entre los seis problemas y las preguntas: explica qué viene y por qué. Antes las preguntas aparecían sin aviso y
+   * parecían ser sobre los problemas que el estudiante dejó pasar; son sobre las ideas, para ver si él las entendió.
+   */
+  function sProbeIntro() {
+    frame({
+      hud: hud('Fin del camino', h('span', { class: 'pill', text: 'Mensaje entregado' })),
+      hero: [chaski('listen', 110, 'bob')],
+      main: [h('div', { class: 'card' },
+          h('p', { class: 'kicker', text: 'Ahora te toca a ti' }),
+          h('p', { class: 'title', text: 'Chaski llegó al Cusco con su mensaje.' }),
+          h('p', { text: 'Todavía no te digo cómo le fue: eso lo ves al final.' }),
+          h('p', { text: 'Antes, Chaski te hace 4 preguntas para ver si tú entendiste las ideas, no solo si él acertó. Tres son con otros números y la última es para que lo expliques con tu propio ejemplo.' })),
+        btn('Ver las preguntas', 'go', function () { go('probe', 0); })]
+    });
   }
 
   function sProbe(i) {
@@ -481,9 +525,10 @@
   function render() {
     keyHandler = null; /* cada escena que use el teclado de piedra lo registra de nuevo */
     if (!S || !S.scene) return sWelcome();
-    var map = { intro: sIntro, teach: sTeach, brain: sBrain, map: sMap, ex: sEx, probe: sProbe, reveal: sReveal, end: sEnd };
+    var map = { intro: sIntro, teach: sTeach, brain: sBrain, map: sMap, ex: sEx, probeintro: sProbeIntro, probe: sProbe, reveal: sReveal, end: sEnd };
     (map[S.scene] || sWelcome)(S.i);
   }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') Log.soon(true); }); /* al cambiar de pestaña o cerrar, se envía lo pendiente */
   Scenery.setup();
   Log.load();
   C.use(urlParam('tema')); /* el docente elige el tema con el enlace; sin tema, proporciones */
