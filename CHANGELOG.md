@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Las versiones siguen un esquema simple `0.x` mientras sea un piloto.
 
+## [Sin publicar]
+
+### Agregado
+- `npm run build:site`: arma `dist/` solo con el juego, el panel y las cabeceras, y escribe las direcciones (`EXTRACT_URL`, `ENDPOINT`) ahí y no en el repositorio.
+- Cabeceras para Cloudflare Pages (`deploy/_headers`) y guía de despliegue en `docs/despliegue.md`.
+- Pruebas del empaquetado (5).
+
+### Cambiado
+- Las páginas no mandan el referente (`no-referrer`): el enlace lleva el código de clase y no debe viajar a Google Fonts.
+
 ## [0.2.0] - 2026-10-30
 
 ### Agregado

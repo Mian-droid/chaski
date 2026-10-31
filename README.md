@@ -42,8 +42,9 @@ Sin servidor intermedio configurado, Chaski lee la explicación con reglas de pa
 ## Pruebas
 
 ```bash
-npm test                  # núcleo (36 pruebas) y servidor (14 pruebas)
+npm test                  # núcleo (36), empaquetado del sitio (5) y servidor (14)
 npm run test:core         # solo el núcleo
+npm run test:site         # solo el empaquetado del sitio
 npm run test:worker       # solo el servidor
 ```
 
@@ -51,9 +52,11 @@ Requiere Node 22 o superior. No hay dependencias en el juego; el servidor usa el
 
 ## Despliegue
 
-**Juego y panel:** son solo archivos. Sirven Netlify Drop, GitHub Pages, Cloudflare Pages o Vercel, sin comando de compilación.
+Guía paso a paso para Cloudflare: [docs/despliegue.md](docs/despliegue.md).
 
-**Lectura con el modelo (opcional):** la clave de Anthropic no puede ir en la página. Hay un servidor intermedio en [worker/](worker/README.md). Después de desplegarlo, pon su dirección en `EXTRACT_URL` de `js/config.js`.
+**Juego y panel:** son solo archivos. `npm run build:site` arma `dist/` con lo que se debe publicar (sin pruebas, documentos ni servidor) y `npx wrangler pages deploy dist --project-name chaski` lo sube a Cloudflare Pages.
+
+**Lectura con el modelo (opcional):** la clave de Anthropic no puede ir en la página. Hay un servidor intermedio en [worker/](worker/README.md). Después de desplegarlo, empaqueta el sitio con `EXTRACT_URL=<dirección>/extract npm run build:site`.
 
 **Guardar datos de varios dispositivos (opcional):** un Apps Script que escribe en una hoja de Google. Pasos en [apps-script/README.md](apps-script/README.md). Sin esto, los datos quedan en el navegador de cada estudiante y el panel los lee de ese dispositivo o de un archivo JSON.
 
@@ -86,6 +89,7 @@ js/                        content, core, brain, app, panel, config
 tests/                     Pruebas del núcleo (sin dependencias)
 worker/                    Servidor intermedio (Cloudflare Worker, TypeScript)
 apps-script/               Guardado de eventos en una hoja de Google
+scripts/, deploy/          Empaquetado del sitio y cabeceras para Cloudflare Pages
 mockup/                    Maqueta interactiva del diseño (referencia)
 docs/                      Arquitectura, requerimientos y guía de contenido
 ```
@@ -94,7 +98,8 @@ Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 
 ## Límites conocidos
 
-- **El modelo real no se ha probado.** La ruta se probó con un modelo simulado. Falta correr `worker/scripts/live-test.mjs` con una clave real.
+- **El modelo real no se ha probado.** La ruta se probó con un modelo simulado y el servidor arrancó en el runtime local de Cloudflare con una clave falsa. Falta correr `worker/scripts/live-test.mjs` con una clave real.
+- **Nada se ha desplegado.** Los pasos de [docs/despliegue.md](docs/despliegue.md) no se han ejecutado contra una cuenta de Cloudflare.
 - **No se mide retención ni aprendizaje.** No hay examen final ni día 2, y tampoco pretest. El piloto describe cómo enseñan y revisan los estudiantes, no cuánto aprendieron.
 - **No hay limitador de uso** en el servidor. Restringe `ALLOWED_ORIGINS` a la dirección de tu juego.
 - **La señal de originalidad es heurística** y puede equivocarse con textos cortos o vocabulario muy común.

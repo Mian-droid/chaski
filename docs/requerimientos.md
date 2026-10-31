@@ -108,7 +108,9 @@ Probar aquí significa pruebas con datos simulados y un jugador simulado. Ningú
 | RNF-09 | Limitar el uso del servidor por origen o dirección para controlar el gasto. | Pendiente |
 | RNF-10 | Accesibilidad básica: foco visible, etiquetas en los controles, respeto de la preferencia de reducir movimiento. | Implementado. Sin probar con lector de pantalla |
 | RNF-11 | Español de Perú, con soles como moneda. | Implementado. Sin revisión de un docente |
-| RNF-12 | Pruebas automáticas del núcleo (36) y del servidor (14). | Probado: las 50 pasan |
+| RNF-12 | Pruebas automáticas del núcleo (36), del empaquetado del sitio (5) y del servidor (14). | Probado: las 55 pasan |
+| RNF-14 | Empaquetar el servidor como Cloudflare Worker y arrancarlo en el runtime de Workers. | Probado en local (workerd) con una clave falsa. Sin desplegar |
+| RNF-15 | Publicar solo el juego y el panel, sin pruebas, documentos ni servidor. | Probado (`npm run build:site`) |
 | RNF-13 | La tipografía del juego se carga de Google Fonts. Sin conexión, usa una fuente del sistema. | Implementado |
 
 ---
@@ -123,6 +125,7 @@ Probar aquí significa pruebas con datos simulados y un jugador simulado. Ningú
 | RD-04 | Definir cuánto tiempo se guardan los datos y quién puede borrarlos. | Pendiente |
 | RD-05 | Aclarar que el texto del estudiante se envía a un servicio externo cuando se usa el modelo. | Pendiente |
 | RD-06 | Dejar claro, en el juego y en el pitch, que es un piloto exploratorio y no una evaluación con nota ni una prueba de efecto. | Implementado en el juego |
+| RD-07 | No enviar a terceros la dirección con el código de clase (referente hacia Google Fonts). | Probado |
 
 ---
 
@@ -142,7 +145,7 @@ Probar aquí significa pruebas con datos simulados y un jugador simulado. Ningú
 
 | # | Pendiente | Responde a |
 |---|---|---|
-| 1 | Desplegar el juego y el panel como páginas estáticas (Netlify Drop, GitHub Pages, Cloudflare Pages o Vercel). | RC-03 |
+| 1 | Desplegar el juego y el panel como páginas estáticas (Cloudflare Pages: ver docs/despliegue.md). | RC-03 |
 | 2 | Desplegar el servidor intermedio, guardar la clave como secreto, poner su dirección en `EXTRACT_URL` y limitar `ALLOWED_ORIGINS` a la dirección del juego. | RC-03, RF-S03, RNF-06 |
 | 3 | Correr `worker/scripts/live-test.mjs` con una clave real y ajustar el prompt de cada tema si algún caso no coincide. | RF-E05, RNF-08 |
 | 4 | Jugar con al menos una persona que viva el problema (estudiante o docente), con un adulto presente, y anotar qué dijo, qué hizo y qué cambió. | RC-04 |

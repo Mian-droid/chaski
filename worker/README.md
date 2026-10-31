@@ -53,6 +53,8 @@ El juego ignora cualquier error y lee con reglas de palabras.
 
 ## Desplegar
 
+Guía completa, con el sitio y la verificación: [../docs/despliegue.md](../docs/despliegue.md). Solo el servidor:
+
 ```bash
 cd worker
 npm install
