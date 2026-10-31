@@ -39,6 +39,9 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RF-E18 | Retomar una sesión interrumpida con «Continuar donde me quedé». |
 | RF-E19 | Guardar los resultados propios en un archivo JSON. |
 | RF-E20 | Responder con un teclado numérico en pantalla y también con el teclado físico. |
+| RF-E21 | Si la explicación fue tan vaga que Chaski no pudo entender nada, pedir una vez que se la expliquen de otra manera, con un ejemplo con números. No repreguntar cuando Chaski entendió algo mal. |
+| RF-E22 | Mostrar un gráfico (tabla, barra de porcentaje o balanza) en los problemas que lo tienen, con los datos del enunciado y la incógnita marcada, sin revelar la respuesta. |
+| RF-E23 | Avisar, antes de las preguntas de seguimiento, qué viene y que todavía no se dice cómo le fue a Chaski. |
 
 ### 2.2 Docente
 
@@ -53,7 +56,8 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RF-D07 | Ver una tabla por estudiante con detección, falsas alarmas, correcciones, seguimiento, textos débiles, pegados, dependencia e ideas bien. |
 | RF-D08 | Leer las explicaciones de los estudiantes junto con las señales de originalidad. |
 | RF-D09 | Descargar los resultados en CSV. |
-| RF-D10 | Borrar del servidor los datos de una clase desde el panel. |
+| RF-D10 | Borrar del servidor los datos de una sala desde el panel. |
+| RF-D11 | Ver las partidas de todas las salas, o de una, con el progreso de cada estudiante y si Chaski le repreguntó, y que el panel se actualice solo mientras está abierto. El código de clase es opcional al jugar. |
 
 ### 2.3 Sistema y contenido
 
@@ -143,8 +147,9 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 | Qué | Dónde | Pruebas |
 |---|---|---|
 | Contenido de los tres temas con cuentas verificadas de forma independiente, cerebro, lectura con reglas y con servidor simulado, originalidad y métricas | `tests/core.test.js` | 36 |
+| Figuras de los problemas y detección de explicaciones vagas | `tests/figures.test.js` | 9 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
 | Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 18 |
-| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, borrado, topes de uso) | `worker/test/*.test.ts` | 37 |
+| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, lectura de todas las salas y de lo nuevo, borrado, topes de uso) | `worker/test/*.test.ts` | 39 |
 
 `npm test` las corre todas.

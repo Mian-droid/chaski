@@ -42,11 +42,12 @@ Sin servidor intermedio configurado, Chaski lee la explicación con reglas de pa
 ## Pruebas
 
 ```bash
-npm test                  # núcleo (36), dibujo (6), empaquetado del sitio (18) y servidor (37)
+npm test                  # núcleo (36), figuras (9), dibujo (6), empaquetado del sitio (18) y servidor (39)
 npm run test:core         # solo el núcleo
+npm run test:figures      # solo las figuras de los problemas (9)
 npm run test:scenery      # solo el dibujo (6)
 npm run test:site         # solo el empaquetado del sitio (18)
-npm run test:worker       # solo el servidor (37)
+npm run test:worker       # solo el servidor (39)
 ```
 
 Requiere Node 22 o superior. No hay dependencias en el juego; la lectura con el modelo usa solo `zod` (declarado en la raíz para que Cloudflare lo instale) y llama a la API de Gemini con `fetch`.
@@ -88,7 +89,7 @@ index.html, panel.html     Juego y panel docente
 privacidad.html, terminos.html, consentimiento.html, acerca.html
                            Política de privacidad, términos de uso, autorización imprimible para tutores y acerca de
 css/                       game.css (juego) y panel.css (panel)
-js/                        content, core, brain, scenery (paisaje y personaje), app, panel, config
+js/                        content, core, brain, figures (gráficos de los problemas), scenery (paisaje y personaje), app, panel, config
 tests/                     Pruebas del núcleo (sin dependencias)
 worker/                    Lector con el modelo: lógica y pruebas (TypeScript), desplegable como Worker
 functions/                 Pages Functions /extract (lectura con el modelo) y /events (base de datos): usan el código de worker/

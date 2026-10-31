@@ -26,10 +26,11 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 | `js/content.js` | Un paquete por tema: fichas, problemas con su solución correcta y su error típico, preguntas de seguimiento, reglas de palabras. `use(id)` activa un tema. | nada |
 | `js/core.js` | Funciones puras: leer números, señal de originalidad, métricas por sesión, agrupación por estudiante. | nada |
 | `js/brain.js` | Cerebro (fichas), solución por fichas, lectura de la explicación (servidor o reglas). | content, core |
+| `js/figures.js` | Gráficos de los problemas, en SVG: tabla de valores, barra de porcentaje y balanza. Reciben la descripción `fig` de cada problema y dibujan solo los datos del enunciado, con la incógnita marcada y sin la respuesta. Cada gráfico lleva su descripción para lectores de pantalla. Solo SVG, sin DOM. | nada |
 | `js/scenery.js` | Dibujo: paisaje panorámico en tres momentos del día (amanecer, día, atardecer), Chaski con cinco estados de ánimo y la choza del tambo. Solo SVG, sin lógica de juego. | nada |
-| `js/app.js` | Interfaz del juego: escenas, estado, registro de eventos. | content, core, brain, scenery |
+| `js/app.js` | Interfaz del juego: escenas, estado, registro de eventos. | content, core, brain, figures, scenery |
 | `privacidad.html`, `terminos.html`, `consentimiento.html`, `acerca.html` | Páginas informativas y legales, estáticas, con `css/legal.css`. `js/legal.js` muestra el correo de contacto si está configurado. | config |
-| `js/panel.js` | Panel docente: elegir tema y enlace, cargar datos, cifras, ideas por retomar y tabla de estudiantes. | content, core, scenery |
+| `js/panel.js` | Panel docente: elegir tema y enlace, cargar datos (de todas las salas o de una), actualizarse solo mientras está abierto, cifras, ideas por retomar y tabla de estudiantes con su progreso. | content, core, scenery |
 | `js/config.js` | Direcciones y opciones editables. | nada |
 | `functions/events.ts` | Pages Function que responde en `/events`: guarda, lee y borra los eventos en la base D1 enlazada como `DB`. Usa `handleEvents()` de `worker/src/events.ts`. | worker/ |
 | `functions/extract.ts` | Pages Function que responde en `/extract` y llama a `handle()` de `worker/`. Es el camino por defecto en Cloudflare Pages. | worker/ |
@@ -71,12 +72,19 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 ## Flujo de escenas
 
 ```
-welcome -> intro -> teach (2 mensajes) -> brain -> map -> ex (x6) -> probe (x4) -> reveal -> end
-                          ^                                                         |
-                          +------------ teach (una vez) -> brain ------------------+
+welcome -> intro -> teach (2 mensajes) -> brain -> map -> ex (x6) -> probeintro -> probe (x4) -> reveal -> end
+                          ^    |                                                                       |
+                          |    +-- teach (aclarar, una vez) -> brain                                   |
+                          +------------------- teach (una vez) -> brain ------------------------------+
 ```
 
 El estado se guarda en el dispositivo en cada cambio de escena, para poder retomar con «Continuar donde me quedé».
+
+**Pausa antes de las preguntas.** Al terminar los seis problemas, `probeintro` explica qué sigue (las preguntas de seguimiento) y que todavía no se dice cómo le fue a Chaski. Así el cambio de actividad no llega sin aviso.
+
+**Repregunta de Chaski.** Si la lectura con el modelo deja las tres fichas en «ausente» (la explicación fue demasiado vaga para entender nada), Chaski pide una vez que se lo expliquen de otra manera, con un ejemplo con números. Nunca repregunta cuando algo quedó «mal»: ahí debe equivocarse para que se note. No ocurre con la lectura por reglas. La segunda explicación se lee igual y no vuelve a repreguntar; el evento `brain` lo registra con `clarify`.
+
+**Gráficos en los problemas.** Cada problema puede llevar un campo `fig` (ver `docs/contenido-de-temas.md`). Se dibuja sobre la solución de Chaski, de modo que leer el gráfico forma parte de revisar el trabajo. El gráfico no depende de si la solución es correcta o equivocada.
 
 ## Eventos
 
@@ -86,7 +94,7 @@ Cada evento lleva `ts`, `type`, `sid` (partida), `alias`, `cls` (clase), `topic`
 |---|---|---|
 | `start` | Empieza una partida | `version`, `model` |
 | `teach` | El estudiante envía una explicación | `k`, `text`, `pasted`, `ms`, `orig` (señal de originalidad), `phase` |
-| `brain` | Se lee una explicación | `cards` (cerebro resultante), `read` (lo que se leyó), `source` (`modelo` o `reglas`), `why`, `restatement` |
+| `brain` | Se lee una explicación | `cards` (cerebro resultante), `read` (lo que se leyó), `source` (`modelo` o `reglas`), `why`, `restatement`, `clarify` (verdadero si Chaski pidió explicarlo de nuevo) |
 | `ex` | Se resuelve un problema | `ex`, `rule` (causa del error: `K1`..`K3`, `S` o null), `hasError`, `saidError`, `step`, `stepOk`, `correction`, `correctionOk`, `ms` |
 | `probe` | Pregunta de seguimiento | `k`, `kind` (`num` o `free`), `ok`, `text`, `orig`, `pasted` |
 
@@ -96,10 +104,10 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 
 - **Registro de eventos que solo se agrega.** Una tabla `events` (ver [`db/schema.sql`](../db/schema.sql)) con una fila por evento, el evento completo en JSON y un índice por clase, tema y hora. Un identificador por evento evita guardarlo dos veces si el juego reintenta un envío.
 - **Columnas de `events`:** `eid` (identificador único del evento: partida, hora, tipo y lección o problema), `ts` (hora en milisegundos), `cls` (código de clase en mayúsculas), `alias` (apodo, nunca el nombre), `topic` (tema), `sid` (partida), `type` (`start`, `teach`, `brain`, `ex` o `probe`) y `data` (el evento completo, en JSON).
-- **Pocas escrituras.** El juego envía los eventos en lotes de hasta 100, al llegar a la rendición y al cierre: unas dos o tres escrituras por partida, no una por clic. Una partida genera de 16 a 20 eventos.
+- **Pocas escrituras.** El juego envía los eventos en lotes de hasta 100, como máximo cada 8 segundos y siempre al llegar a la rendición y al cierre, de modo que el panel ve el avance sin una escritura por clic. Una partida genera de 16 a 20 eventos y, contando la tabla y sus dos índices, unas 70 filas escritas.
 - **Una sola puerta a la base.** Solo `worker/src/events.ts` conoce la base de datos, detrás de una interfaz mínima (`prepare`, `bind`, `run`, `all`, `batch`). Las pruebas la reemplazan por una base en memoria.
-- **Lectura acotada.** El panel pide los eventos de una sola clase y el servidor devuelve como máximo 20 000 filas.
-- **Capacidad.** Con los límites del plan gratuito de Cloudflare D1 (100 000 filas escritas por día y 500 MB por base), una base soporta del orden de 5 000 partidas por día y entre 10 000 y 30 000 partidas guardadas, según el tamaño de los textos. Las cifras salen de la documentación de D1 y de las dimensiones de un evento, no de una prueba de carga.
+- **Lectura acotada e incremental.** El panel pide los eventos de todas las salas o de una sola (`cls`, opcional) y el servidor devuelve como máximo 20 000 filas, con `last` (el último identificador) y `more`. Mientras está abierto, el panel pide cada 15 segundos solo lo nuevo (`since`). Las salas son una etiqueta visual: sin código, la partida va a la sala `GENERAL`. Borrar exige indicar la sala.
+- **Capacidad.** Con los límites del plan gratuito de Cloudflare D1 (100 000 filas escritas por día y 500 MB por base), una base soporta del orden de 1 400 partidas por día y entre 10 000 y 30 000 partidas guardadas, según el tamaño de los textos. Las cifras salen de la documentación de D1 y de las dimensiones de un evento, no de una prueba de carga.
 - **Cómo crece.** Primero, el plan de pago de D1 (10 GB por base y 50 millones de escrituras al mes incluidas). Después, una base por colegio o por clase, con réplicas de lectura. Si hicieran falta cuentas de docentes, permisos por colegio o consultas entre colegios, el registro de eventos se exporta con un `SELECT` y se importa a Postgres (por ejemplo Supabase) reescribiendo solo `events.ts`.
 
 ## Protección contra abuso
@@ -115,8 +123,9 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 | Qué | Dónde | Cuántas |
 |---|---|---|
 | Contenido de los tres temas (cuentas verificadas de forma independiente), cerebro, lectura con reglas y con servidor simulado, originalidad, métricas | `tests/core.test.js` | 36 |
+| Figuras de los problemas: cada gráfico muestra datos del enunciado, marca una sola incógnita y no revela la respuesta; detección de explicaciones demasiado vagas | `tests/figures.test.js` | 9 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
 | Empaquetado del sitio: qué se publica, direcciones, referente, favicon, vista previa al compartir y páginas legales | `tests/build-site.test.js` | 18 |
-| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/*.test.ts` | 37 |
+| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, lectura de todas las salas o de una y de lo nuevo, borrado, límites) | `worker/test/*.test.ts` | 39 |
 
 No hay pruebas automáticas de la interfaz.

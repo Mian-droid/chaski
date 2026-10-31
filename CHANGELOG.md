@@ -5,6 +5,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 ## [Sin publicar]
 
 ### Agregado
+- **Panel en vivo:** el panel muestra las partidas de todas las salas, o de una, con el progreso de cada estudiante (dónde va, hace cuánto) y un punto verde si está jugando. Se actualiza solo cada 15 segundos mientras está abierto, pidiendo únicamente lo nuevo. El código de clase es opcional al jugar. El juego envía los eventos cada pocos segundos y no solo al final. Borrar exige elegir la sala. Pruebas del servidor: 39.
+- **Gráficos en los problemas** (`js/figures.js`): tabla de valores, barra de porcentaje y balanza, en los tres temas. Muestran los datos del enunciado con la incógnita marcada y llevan descripción para lectores de pantalla. Pruebas de las figuras: 9.
+- **Repregunta de Chaski:** si la explicación fue tan vaga que no se entendió nada, Chaski pide una vez que se la expliquen con un ejemplo con números. No repregunta cuando entendió algo mal.
+- **Pausa antes de las preguntas de seguimiento:** una pantalla explica qué viene antes de pasar de los problemas a las preguntas.
 - **Páginas legales:** política de privacidad, términos de uso, autorización imprimible para madres, padres y tutores, y «Acerca de Chaski» (qué hace la IA y qué no, límites y créditos). El juego avisa en la bienvenida que lo escrito lo lee un servicio de IA y enlaza a ellas; el panel enlaza a la autorización. `CONTACT_EMAIL` fija el correo de contacto al empaquetar. `robots.txt` excluye el panel y las rutas de datos. Pruebas del empaquetado: 18.
 - **Límites de uso contra bots:** tope por IP cada 10 minutos para las lecturas con el modelo y los envíos de partidas, y tope diario de lecturas con el modelo. La IP se guarda solo como una huella que caduca. Tabla `rate` en `db/schema.sql`. Pruebas del servidor: 37.
 - **Base de datos para los resultados** (Cloudflare D1): ruta `/events` en el mismo proyecto de Pages para guardar los eventos de las partidas, y leerlos y borrarlos desde el panel con una clave. Esquema en `db/schema.sql`. El juego envía en lotes de hasta 100 y reintenta si el servidor no responde.
@@ -21,6 +25,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 - Cabeceras para Cloudflare Pages (`deploy/_headers`) y guía de despliegue en `docs/despliegue.md`.
 
 ### Cambiado
+- Tope por defecto de envíos de partidas por IP: 1 200 cada 10 minutos (un colegio entero comparte una IP y ahora se envía con más frecuencia).
+- La salida de Chaski al dejar pasar un problema ya no cruza la zona de la tarea: se recorta en su columna y se desvanece.
 - **La lectura con el modelo corre dentro de Cloudflare Pages** como Pages Function (`functions/extract.ts`): un solo proyecto, sin Worker aparte ni CORS. En el empaquetado, `EXTRACT_URL` acepta una ruta del mismo sitio y, en Pages, `/extract` se usa sola. `zod` pasa a la raíz. El Worker independiente sigue disponible.
 - **El servidor lee con Google Gemini** en lugar de Anthropic. Llama a `generateContent` con `fetch`, sin SDK (el paquete bajó de 1,7 MiB a 779 KiB). Secreto `GEMINI_API_KEY`; modelo por defecto `gemini-3.5-flash-lite`. El juego no cambió.
 - **Nueva dirección visual: textil andino de día.** Paneles de tela, paisaje en tres momentos del día, y un Chaski con más carácter. Sin morado: contornos y textos en cacao, y cielos de azul a coral y oro.

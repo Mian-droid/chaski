@@ -42,6 +42,7 @@ var mitema = {
 Notas:
 - Las expresiones de `heuristics` se aplican a texto en minúsculas y sin tildes. Sirven de respaldo sin conexión, así que basta con cubrir las formas más comunes de decirlo.
 - `slipOrder` debe listar problemas que tengan la variante `slip`; una prueba lo verifica.
+- Un problema puede llevar un gráfico con `fig(prob(...), spec)`. `spec` es `{ type: 'table', rows: [['Cuadernos', '2', '8'], ['Soles', '6', '?']] }`, `{ type: 'bar', pct: 20, whole: '150', part: '?', unit: 'estudiantes' }` o `{ type: 'balance', left: 'x + 8', right: '20' }`. Solo debe mostrar datos del enunciado y marcar con `?` lo que se pregunta; una prueba lo verifica.
 
 ## 2. Definición en el servidor
 
