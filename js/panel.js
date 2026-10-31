@@ -12,7 +12,7 @@
 
   var Core = window.ChaskiCore, C = window.ChaskiContent, CFG = window.CHASKI_CONFIG || {}, Scenery = window.ChaskiScenery;
   var $ = function (id) { return document.getElementById(id); };
-  var events = [], source = '', sortKey = null, sortDir = 1, lastId = 0, timer = null, topicChecked = false;
+  var events = [], source = '', sortKey = null, sortDir = 1, lastId = 0, timer = null, topicChecked = false, lastView = '';
 
   function put(el, c) {
     if (c == null || c === false) return;
@@ -69,10 +69,18 @@
   $('cls').addEventListener('input', refreshLink);
   $('voz').addEventListener('change', refreshLink);
   $('room').addEventListener('change', render);
+  /** El botón confirma con «Copiado» unos segundos y vuelve a su texto. */
+  function copied() {
+    var b = $('bCopy'), label = b.lastChild;
+    $('linkNote').textContent = 'Enlace copiado.';
+    b.classList.add('done'); label.textContent = 'Copiado';
+    clearTimeout(copied.t);
+    copied.t = setTimeout(function () { b.classList.remove('done'); label.textContent = 'Copiar'; }, 1800);
+  }
   $('bCopy').addEventListener('click', function () {
     var input = $('link');
     function fallback() { input.select(); $('linkNote').textContent = 'Copia el enlace con Ctrl+C.'; }
-    try { navigator.clipboard.writeText(input.value).then(function () { $('linkNote').textContent = 'Enlace copiado.'; }, fallback); }
+    try { navigator.clipboard.writeText(input.value).then(copied, fallback); }
     catch (e) { fallback(); }
   });
 
@@ -127,9 +135,10 @@
   }
   function remember(k) { try { sessionStorage.setItem('chaski.panelkey', k); } catch (e) { /* sin almacenamiento: se escribe de nuevo */ } }
   /** Trae lo nuevo de la base, de todas las salas, y lo suma a lo que ya se muestra. Con el Apps Script se pide una clase. */
+  function loading(on) { $('bSheet').classList.toggle('loading', on); $('bSheet').setAttribute('aria-busy', String(on)); }
   function pull(manual) {
     if (!SAME && !cls()) return say('Escribe el código de clase.');
-    if (manual) say('Cargando…');
+    if (manual) { say('Cargando…'); loading(true); }
     return storeCall('GET', SAME ? '?since=' + lastId : '?cls=' + encodeURIComponent(cls()))
       .then(function (d) {
         if (d.error) { stopAuto(); return say('Respondió ' + STORE + ': ' + d.error); }
@@ -140,7 +149,8 @@
         if (SAME && d.more) return pull(false);
         if (SAME) startAuto();
       })
-      .catch(function () { if (manual) say('No se pudo leer ' + STORE + '. Revisa la dirección y la clave.'); });
+      .catch(function () { if (manual) say('No se pudo leer ' + STORE + '. Revisa la dirección y la clave.'); })
+      .then(function () { if (manual) loading(false); });
   }
   function startAuto() {
     if (timer) return;
@@ -254,8 +264,8 @@
       ['Ideas bien', cb == null ? '·' : String(Core.round(cb, 1)).replace('.', ',') + ' / 3', cb == null ? null : cb / 3, 'de las 3 que Chaski podía aprender', 'var(--turq)']
     ];
     var box = $('kpis'); box.textContent = '';
-    kpis.forEach(function (k) {
-      var card = h('div', { class: 'kpi' }, h('span', { class: 'lbl', text: k[0] }), h('span', { class: 'v', text: k[1] }),
+    kpis.forEach(function (k, n) {
+      var card = h('div', { class: 'kpi', style: '--n:' + n }, h('span', { class: 'lbl', text: k[0] }), h('span', { class: 'v', text: k[1] }),
         k[2] == null ? null : h('div', { class: 'meter', 'aria-hidden': 'true' }, h('i', { style: 'width:' + Math.round(k[2] * 100) + '%' })),
         h('span', { class: 'd', text: k[3] }));
       card.style.setProperty('--c', k[4]);
@@ -270,9 +280,9 @@
     });
     var top = rows.reduce(function (m, r) { return r.p > m.p ? r : m; }, rows[0]);
     var box = $('ideas'); box.textContent = '';
-    rows.forEach(function (r) {
+    rows.forEach(function (r, n) {
       var first = r === top && r.p > 0;
-      box.appendChild(h('div', { class: 'idea' + (first ? ' first' : '') },
+      box.appendChild(h('div', { class: 'idea' + (first ? ' first' : ''), style: '--n:' + n },
         h('div', { class: 'top' },
           h('span', { class: 'name' }, r.name, first ? h('span', { class: 'badge', text: 'Retomar primero' }) : null),
           h('span', { class: 'pct' }, r.p + '%', h('small', { text: ' · ' + r.n + ' de ' + students.length }))),
@@ -343,7 +353,11 @@
     $('autoRow').hidden = !(SAME && events.length);
     var where = room() ? ' y sala' : '';
     if (events.length) $('statusText').textContent = events.length + ' eventos de ' + source + (has ? ' · ' + students.length + ' estudiantes en este tema' + where : ' · ninguno es de este tema' + where) + (timer && $('auto').checked ? ' · se actualiza solo' : '');
+    /* Las cifras entran con animación solo cuando aparecen o cambia lo que se mira, no en cada actualización automática. */
+    var view = topic() + '|' + room() + '|' + has;
+    $('results').classList.toggle('enter', has && view !== lastView); lastView = view;
     if (!has) return;
+    Array.prototype.forEach.call($('results').children, function (el, n) { el.style.setProperty('--n', n); });
     renderKpis(students); renderIdeas(students); renderTable(students); renderTexts();
   }
 
