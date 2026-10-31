@@ -30,9 +30,10 @@ El juego es una página estática. No hay servidor propio salvo el opcional que 
 | `js/app.js` | Interfaz del juego: escenas, estado, registro de eventos. | content, core, brain, scenery |
 | `js/panel.js` | Panel docente: elegir tema y enlace, cargar datos, cifras, ideas por retomar y tabla de estudiantes. | content, core, scenery |
 | `js/config.js` | Direcciones y opciones editables. | nada |
+| `functions/events.ts` | Pages Function que responde en `/events`: guarda, lee y borra los eventos en la base D1 enlazada como `DB`. Usa `handleEvents()` de `worker/src/events.ts`. | worker/ |
 | `functions/extract.ts` | Pages Function que responde en `/extract` y llama a `handle()` de `worker/`. Es el camino por defecto en Cloudflare Pages. | worker/ |
 | `worker/` | Servidor intermedio: valida, arma el prompt por tema, llama al modelo, sanea la respuesta. | API de Gemini (`fetch`), zod |
-| `apps-script/Code.gs` | Recibe eventos y los guarda en una hoja. | nada |
+| `apps-script/Code.gs` | Alternativa a la base de datos: recibe eventos y los guarda en una hoja. | nada |
 
 `content.js`, `core.js` y `brain.js` no usan el DOM, por eso se prueban en Node (`tests/core.test.js`).
 
@@ -90,12 +91,21 @@ Cada evento lleva `ts`, `type`, `sid` (partida), `alias`, `cls` (clase), `topic`
 
 Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los eventos sin `topic` se tratan como `proporciones`.
 
+## Datos y escalabilidad
+
+- **Registro de eventos que solo se agrega.** Una tabla `events` (ver [`db/schema.sql`](../db/schema.sql)) con una fila por evento, el evento completo en JSON y un índice por clase, tema y hora. Un identificador por evento evita guardarlo dos veces si el juego reintenta un envío.
+- **Pocas escrituras.** El juego envía los eventos en lotes de hasta 100, al llegar a la rendición y al cierre: unas dos o tres escrituras por partida, no una por clic. Una partida genera de 16 a 20 eventos.
+- **Una sola puerta a la base.** Solo `worker/src/events.ts` conoce la base de datos, detrás de una interfaz mínima (`prepare`, `bind`, `run`, `all`, `batch`). Las pruebas la reemplazan por una base en memoria.
+- **Lectura acotada.** El panel pide los eventos de una sola clase y el servidor devuelve como máximo 20 000 filas.
+- **Capacidad.** Con los límites del plan gratuito de Cloudflare D1 (100 000 filas escritas por día y 500 MB por base), una base soporta del orden de 5 000 partidas por día y entre 10 000 y 30 000 partidas guardadas, según el tamaño de los textos. Las cifras salen de la documentación de D1 y de las dimensiones de un evento, no de una prueba de carga.
+- **Cómo crece.** Primero, el plan de pago de D1 (10 GB por base y 50 millones de escrituras al mes incluidas). Después, una base por colegio o por clase, con réplicas de lectura. Si hicieran falta cuentas de docentes, permisos por colegio o consultas entre colegios, el registro de eventos se exporta con un `SELECT` y se importa a Postgres (por ejemplo Supabase) reescribiendo solo `events.ts`.
+
 ## Pruebas
 
 | Qué | Dónde | Cuántas |
 |---|---|---|
 | Contenido de los tres temas (cuentas verificadas de forma independiente), cerebro, lectura con reglas y con servidor simulado, originalidad, métricas | `tests/core.test.js` | 36 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
-| Servidor: formato, temas, CORS, clave solo en cabecera, errores de Gemini, defensa contra instrucciones escondidas, consistencia con el contenido del juego | `worker/test/worker.test.ts` | 18 |
+| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/worker.test.ts` y `worker/test/events.test.ts` | 29 |
 
 No hay pruebas automáticas de la interfaz.

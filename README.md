@@ -42,11 +42,11 @@ Sin servidor intermedio configurado, Chaski lee la explicación con reglas de pa
 ## Pruebas
 
 ```bash
-npm test                  # núcleo (36), dibujo (6), empaquetado del sitio (11) y servidor (18)
+npm test                  # núcleo (36), dibujo (6), empaquetado del sitio (12) y servidor (29)
 npm run test:core         # solo el núcleo
 npm run test:scenery      # solo el dibujo (6)
-npm run test:site         # solo el empaquetado del sitio (11)
-npm run test:worker       # solo el servidor (18)
+npm run test:site         # solo el empaquetado del sitio (12)
+npm run test:worker       # solo el servidor (29)
 ```
 
 Requiere Node 22 o superior. No hay dependencias en el juego; la lectura con el modelo usa solo `zod` (declarado en la raíz para que Cloudflare lo instale) y llama a la API de Gemini con `fetch`.
@@ -57,12 +57,12 @@ Guía paso a paso para Cloudflare: [docs/despliegue.md](docs/despliegue.md).
 
 **Todo en un proyecto de Cloudflare Pages.** El juego y el panel son archivos estáticos (`npm run build:site` arma `dist/`) y la lectura con el modelo es una Pages Function en [functions/](functions/extract.ts) que responde en `/extract`, en el mismo sitio. No hay Worker aparte, ni CORS, ni direcciones que copiar: solo se agrega el secreto `GEMINI_API_KEY` en el proyecto. El mismo código corre también como [Worker independiente](worker/README.md).
 
-**Guardar datos de varios dispositivos (opcional):** un Apps Script que escribe en una hoja de Google. Pasos en [apps-script/README.md](apps-script/README.md). Sin esto, los datos quedan en el navegador de cada estudiante y el panel los lee de ese dispositivo o de un archivo JSON.
+**Guardar datos de varios dispositivos (opcional):** la base de datos D1 del propio proyecto de Pages, en [functions/events.ts](functions/events.ts), con el esquema en [db/schema.sql](db/schema.sql). Pasos en [docs/despliegue.md](docs/despliegue.md#5-guardar-los-datos-de-los-estudiantes-opcional). Sin esto, los datos quedan en el navegador de cada estudiante y el panel los lee de ese dispositivo o de un archivo JSON. También se puede usar un Apps Script que escribe en una hoja de Google ([apps-script/](apps-script/README.md)).
 
 ## Datos y privacidad
 
 - Solo se piden un **apodo** y un **código de clase**. No se piden nombre ni datos personales.
-- Los textos que escribe el estudiante se guardan (en su dispositivo y, si se configura, en la hoja). Cada campo recuerda no escribir datos personales.
+- Los textos que escribe el estudiante se guardan (en su dispositivo y, si se configura, en la base de datos o en la hoja). Cada campo recuerda no escribir datos personales. El docente puede borrar de la base los datos de su clase desde el panel.
 - Cuando se usa el modelo, el texto del estudiante se envía a un servicio externo (Google Gemini) a través del servidor intermedio. Los términos de la API de Gemini restringen su uso en clientes dirigidos a menores de 18 años; para aplicarlo con menores, el juego funciona sin modelo, con reglas de palabras (ver [docs/despliegue.md](docs/despliegue.md#privacidad-y-datos)).
 - Con menores, siempre con un adulto responsable presente. El permiso de tutores y el tiempo de conservación de los datos corresponden a la institución o al docente que aplique el piloto (ver [docs/requerimientos.md](docs/requerimientos.md)).
 
@@ -87,8 +87,9 @@ css/                       game.css (juego) y panel.css (panel)
 js/                        content, core, brain, scenery (paisaje y personaje), app, panel, config
 tests/                     Pruebas del núcleo (sin dependencias)
 worker/                    Lector con el modelo: lógica y pruebas (TypeScript), desplegable como Worker
-functions/                 Pages Function /extract: usa el código de worker/ dentro del mismo sitio
-apps-script/               Guardado de eventos en una hoja de Google
+functions/                 Pages Functions /extract (lectura con el modelo) y /events (base de datos): usan el código de worker/
+db/                        Esquema SQL de la base de datos (Cloudflare D1)
+apps-script/               Alternativa: guardado de eventos en una hoja de Google
 scripts/, deploy/          Empaquetado del sitio y cabeceras para Cloudflare Pages
 brand/                     Favicon e imagen para compartir por WhatsApp (ver brand/README.md)
 mockup/                    Primeras exploraciones de diseño (A: noche, B: textil andino de día)

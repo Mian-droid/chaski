@@ -1,6 +1,6 @@
 # Guardar los datos en una hoja de Google
 
-Opcional. Sin esto, los datos de cada estudiante quedan en su navegador y el panel docente los lee de ese dispositivo o de un archivo JSON.
+Opcional, y alternativa a la base de datos D1 del propio sitio (ver [../docs/despliegue.md](../docs/despliegue.md#5-guardar-los-datos-de-los-estudiantes-opcional)). Sin ninguna de las dos, los datos de cada estudiante quedan en su navegador y el panel docente los lee de ese dispositivo o de un archivo JSON.
 
 `Code.gs` recibe los eventos del juego y los guarda en una hoja. El panel docente los lee de ahí.
 

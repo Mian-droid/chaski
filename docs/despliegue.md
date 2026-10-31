@@ -81,7 +81,31 @@ npx wrangler pages dev dist --binding GEMINI_API_KEY=tu-clave
 
 **Vista previa al compartir (WhatsApp):** el juego trae favicon y una imagen con el personaje. Detalles y cómo probarla en [../brand/README.md](../brand/README.md).
 
-**Guardar datos de varios dispositivos:** agrega la variable `ENDPOINT` con la dirección del Apps Script (ver [../apps-script/README.md](../apps-script/README.md)).
+**Guardar datos de varios dispositivos:** ver el paso 5.
+
+## 5. Guardar los datos de los estudiantes (opcional)
+
+Sin esto, cada partida queda solo en el navegador del estudiante. Con la base de datos **D1** de Cloudflare, el panel docente muestra los resultados de todos los dispositivos. Todo se configura en el panel de Cloudflare, sin instalar nada.
+
+1. *Storage & Databases → D1 SQL database → Create*. Nombre: `chaski-db`.
+2. En esa base, pestaña *Console*: pega el contenido de [`db/schema.sql`](../db/schema.sql) y ejecútalo. Crea la tabla `events` y su índice.
+3. En el proyecto de Pages: *Settings → Bindings → Add → D1 database*. Variable `DB`, base `chaski-db` (en producción y en vistas previas).
+4. En *Variables and Secrets*: un secreto `PANEL_KEY` con una clave larga (20 caracteres o más) y una variable de texto `ENDPOINT` con el valor `/events`.
+5. Reintenta el último despliegue.
+
+Para comprobarlo, juega una partida y pide los datos con la clave (el encabezado es obligatorio; la clave nunca va en la dirección):
+
+```bash
+curl -s -H "X-Panel-Key: TU_CLAVE" "https://chaski.pages.dev/events?cls=3A2026"
+```
+
+Debe responder `{"events":[...]}`. Sin el encabezado responde 401. En el panel docente, escribe el código de clase y la clave y toca **Base de datos**.
+
+- **Guardar** lo hace el juego de cada estudiante, sin clave: acepta hasta 100 eventos por envío, valida cada evento y descarta los que no tienen la forma esperada. Con `ALLOWED_ORIGINS` definido solo acepta la página del juego.
+- **Leer y borrar** son del panel y exigen `PANEL_KEY`. El botón *Borrar del servidor los datos de esta clase* elimina todos los eventos de esa clase.
+- El juego reintenta el envío en la siguiente pantalla clave si el servidor no responde, y la copia del dispositivo no se pierde.
+- Para probar todo en tu computadora: `$env:ENDPOINT="/events"; $env:CF_PAGES="1"; npm run build:site` (PowerShell) y `npx wrangler pages dev dist --d1=DB --binding PANEL_KEY=una-clave`. Las tablas se crean antes con `npx wrangler d1 execute` y `db/schema.sql`.
+- Alternativa sin base de datos: un Apps Script que escribe en una hoja de Google ([../apps-script/README.md](../apps-script/README.md)); en ese caso `ENDPOINT` es la dirección del script.
 
 ## Alternativa: un Worker aparte
 
@@ -105,7 +129,8 @@ Para subir el sitio sin conectar GitHub: `EXTRACT_URL=... npm run build:site` y 
 - El texto que escribe el estudiante se envía a Google (Gemini) a través de la función. Dilo antes de jugar y define el permiso de tutores si son menores.
 - **Plan gratuito de Gemini:** según los términos de Google, lo que se envía se usa para mejorar sus productos y personas pueden leerlo (desvinculado de tu cuenta). Google pide no enviar información personal. Con el plan de pago, Google dice que no usa los datos para mejorar sus productos. Cada campo del juego ya recuerda no escribir datos personales.
 - **Menores de 18 años:** los términos de la API de Gemini piden ser mayor de 18 y no permiten usar el servicio en un cliente dirigido a menores de 18 o que probablemente lo usen. Chaski es para secundaria, así que para aplicarlo con menores conviene consultar esos términos o usar el juego sin modelo, con reglas de palabras: basta no definir `GEMINI_API_KEY`.
-- El panel docente es una página pública. Los datos que muestra son los del dispositivo, un archivo o la hoja de Google (esta última protegida con una clave). No hay cuentas.
+- El panel docente es una página pública. Los datos que muestra son los del dispositivo, un archivo, la base de datos o la hoja de Google (estas dos últimas protegidas con una clave). No hay cuentas.
+- Con la base de datos, los textos que escriben los estudiantes se guardan en el servidor hasta que el docente los borre desde el panel. No hay borrado automático: el tiempo de conservación lo decide quien aplique el piloto.
 
 ## Límites y costos
 

@@ -5,6 +5,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 ## [Sin publicar]
 
 ### Agregado
+- **Base de datos para los resultados** (Cloudflare D1): ruta `/events` en el mismo proyecto de Pages para guardar los eventos de las partidas, y leerlos y borrarlos desde el panel con una clave. Esquema en `db/schema.sql`. El juego envía en lotes de hasta 100 y reintenta si el servidor no responde. Pruebas del servidor: 29 en total.
+- El panel docente carga los resultados de la base de datos y permite borrar los datos de una clase.
 - **Paisaje a pantalla completa** en celular, tablet y laptop, con Chaski y la tarea en dos columnas centradas en pantallas anchas. Pruebas del dibujo: 6.
 - **Panel docente rediseñado:** cabecera con paisaje, enlace con botón de WhatsApp, cifras con su significado, barras con porcentaje, tabla ordenable con el texto de cada estudiante y estado sin datos.
 - **Favicon con el personaje** (`brand/`): SVG, `.ico` y el ícono de iOS.

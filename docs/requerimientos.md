@@ -46,20 +46,21 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 |---|---|
 | RF-D01 | Elegir entre los tres temas (proporciones, porcentajes, ecuaciones de primer grado) y obtener el enlace para los estudiantes, con la clase ya escrita. |
 | RF-D02 | Copiar el enlace con un botón. |
-| RF-D03 | Cargar los resultados desde el dispositivo, desde un archivo JSON o desde la hoja de Google. |
+| RF-D03 | Cargar los resultados desde el dispositivo, desde un archivo JSON o desde la base de datos del sitio (o la hoja de Google). |
 | RF-D04 | Ver los resultados filtrados por tema y por clase. |
 | RF-D05 | Ver el resumen: detección media, falsas alarmas, dependencia media e ideas bien enseñadas. |
 | RF-D06 | Ver qué ideas de Chaski se dejaron pasar con más frecuencia, para retomarlas en clase. |
 | RF-D07 | Ver una tabla por estudiante con detección, falsas alarmas, correcciones, seguimiento, textos débiles, pegados, dependencia e ideas bien. |
 | RF-D08 | Leer las explicaciones de los estudiantes junto con las señales de originalidad. |
 | RF-D09 | Descargar los resultados en CSV. |
+| RF-D10 | Borrar del servidor los datos de una clase desde el panel. |
 
 ### 2.3 Sistema y contenido
 
 | ID | Requerimiento |
 |---|---|
 | RF-S01 | Registrar cada evento (enseñanza, lectura del cerebro, problemas, preguntas) con apodo, clase, tema y hora. |
-| RF-S02 | Guardar los eventos en el dispositivo y, opcionalmente, enviarlos a una hoja de Google mediante un Apps Script. |
+| RF-S02 | Guardar los eventos en el dispositivo y, opcionalmente, enviarlos a la base de datos del sitio (Cloudflare D1, ruta `/events`) o a una hoja de Google mediante un Apps Script. |
 | RF-S03 | Leer la explicación con un modelo desde un servidor intermedio que guarda la clave como secreto y arma el prompt según el tema. |
 | RF-S04 | Agregar un tema sin tocar la interfaz: un paquete en `js/content.js` y una definición en el servidor (ver [contenido-de-temas.md](contenido-de-temas.md)). |
 | RF-S05 | Configurar sin tocar el código: dirección del servidor, dirección de la hoja, y si Chaski avisa que puede equivocarse. |
@@ -102,6 +103,8 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RNF-13 | El fondo animado y el vuelo del texto respetan la preferencia de reducir movimiento. |
 | RNF-14 | La lectura con el modelo corre como Cloudflare Pages Function (`functions/extract.ts`) o como Worker independiente, con el mismo código. |
 | RNF-15 | Publicar solo el juego y el panel, sin pruebas, documentos ni servidor (`npm run build:site`). |
+| RNF-16 | Leer y borrar datos de la base exige una clave (`PANEL_KEY`, en la cabecera `X-Panel-Key`, nunca en la dirección). Guardar solo se acepta de la página del juego, con un máximo de 100 eventos por envío, y cada evento se valida. |
+| RNF-17 | Registrar los eventos en lotes y sin duplicados, con un índice por clase, y acotar la lectura a una clase por consulta. |
 
 ---
 
@@ -137,7 +140,7 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 |---|---|---|
 | Contenido de los tres temas con cuentas verificadas de forma independiente, cerebro, lectura con reglas y con servidor simulado, originalidad y métricas | `tests/core.test.js` | 36 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
-| Empaquetado del sitio: qué se publica, direcciones, referente, favicon y vista previa al compartir | `tests/build-site.test.js` | 11 |
-| Servidor y función de Pages: formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas | `worker/test/worker.test.ts` | 18 |
+| Empaquetado del sitio: qué se publica, direcciones, referente, favicon y vista previa al compartir | `tests/build-site.test.js` | 12 |
+| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/worker.test.ts` y `worker/test/events.test.ts` | 29 |
 
 `npm test` las corre todas.
