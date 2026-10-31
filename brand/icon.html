@@ -1,0 +1,11 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Chaski · ícono (para generar los PNG)</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } svg { width: 100vw; height: 100vh; display: block; }</style>
+<script>
+  /* Muestra favicon.svg a pantalla completa. Con ?sq=1 sin esquinas redondeadas (ícono de iOS, que pone sus propias esquinas). */
+  fetch('favicon.svg').then(function (r) { return r.text(); }).then(function (t) {
+    if (new URLSearchParams(location.search).get('sq')) t = t.replace('rx="14"', 'rx="0"');
+    document.body.innerHTML = t;
+  });
+</script>

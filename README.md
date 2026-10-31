@@ -42,9 +42,9 @@ Sin servidor intermedio configurado, Chaski lee la explicación con reglas de pa
 ## Pruebas
 
 ```bash
-npm test                  # núcleo (36), empaquetado del sitio (5) y servidor (17)
+npm test                  # núcleo (36), empaquetado del sitio (8) y servidor (17)
 npm run test:core         # solo el núcleo
-npm run test:site         # solo el empaquetado del sitio
+npm run test:site         # solo el empaquetado del sitio (8)
 npm run test:worker       # solo el servidor (17)
 ```
 
@@ -90,6 +90,7 @@ tests/                     Pruebas del núcleo (sin dependencias)
 worker/                    Servidor intermedio (Cloudflare Worker, TypeScript)
 apps-script/               Guardado de eventos en una hoja de Google
 scripts/, deploy/          Empaquetado del sitio y cabeceras para Cloudflare Pages
+brand/                     Favicon e imagen para compartir por WhatsApp (ver brand/README.md)
 mockup/                    Maquetas interactivas del diseño: A (noche) y B (textil andino de día)
 docs/                      Arquitectura, requerimientos y guía de contenido
 ```

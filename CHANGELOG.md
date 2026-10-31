@@ -5,11 +5,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 ## [Sin publicar]
 
 ### Agregado
+- **Favicon con el personaje** (`brand/`): SVG, `.ico` y el ícono de iOS.
+- **Vista previa al compartir** por WhatsApp y redes: título, descripción e imagen de 1200 x 630 con Chaski. `SITE_URL` fija la dirección de la imagen al empaquetar.
+- El panel docente lleva favicon y no se indexa.
+- Pruebas del empaquetado: 8 en total.
 - Pruebas del servidor: clave solo en cabecera, nombre de modelo validado, detalle de errores que no llega al navegador (17 en total).
 - `js/scenery.js`: el dibujo (fondo, personaje y choza) separado de la lógica del juego.
 - `npm run build:site`: arma `dist/` solo con el juego, el panel y las cabeceras, y escribe las direcciones (`EXTRACT_URL`, `ENDPOINT`) ahí y no en el repositorio.
 - Cabeceras para Cloudflare Pages (`deploy/_headers`) y guía de despliegue en `docs/despliegue.md`.
-- Pruebas del empaquetado (5).
 
 ### Cambiado
 - **El servidor lee con Google Gemini** en lugar de Anthropic. Llama a `generateContent` con `fetch`, sin SDK (el paquete bajó de 1,7 MiB a 779 KiB). Secreto `GEMINI_API_KEY`; modelo por defecto `gemini-3.5-flash-lite`. El juego no cambió.

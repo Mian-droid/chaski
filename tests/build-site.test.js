@@ -54,6 +54,43 @@ t('las páginas no mandan el referente (el enlace lleva el código de clase)', (
   assert.match(read(dist, '_headers'), /Referrer-Policy: no-referrer/);
 });
 
+const meta = (html, attr, name) => { const m = html.match(new RegExp('<meta ' + attr + '="' + name + '" content="([^"]*)"')); return m && m[1]; };
+
+t('el juego trae favicon y vista previa para compartir, con la imagen en dirección completa y publicada', () => {
+  assert.strictEqual(build({}).status, 0);
+  const html = read(dist, 'index.html');
+  assert.match(html, /<link rel="icon" href="brand\/favicon\.svg" type="image\/svg\+xml">/);
+  assert.match(html, /<link rel="apple-touch-icon" href="brand\/apple-touch-icon\.png">/);
+  assert.ok((meta(html, 'name', 'description') || '').length > 40, 'falta la descripción');
+  assert.ok(meta(html, 'property', 'og:title') && meta(html, 'property', 'og:description'));
+  assert.strictEqual(meta(html, 'name', 'twitter:card'), 'summary_large_image');
+  const image = meta(html, 'property', 'og:image');
+  assert.match(image, /^https:\/\//, 'WhatsApp pide la imagen con dirección completa');
+  ['brand/favicon.svg', 'brand/favicon.ico', 'brand/apple-touch-icon.png', 'brand/og-image.jpg']
+    .forEach((f) => assert.ok(fs.existsSync(path.join(dist, f)), 'debe estar ' + f));
+  assert.strictEqual(new URL(image).pathname, '/brand/og-image.jpg');
+  assert.ok(fs.statSync(path.join(dist, 'brand/og-image.jpg')).size < 300 * 1024, 'la imagen para compartir debe pesar menos de 300 KB');
+  ['brand/og-image.html', 'brand/icon.html', 'brand/make-ico.mjs'].forEach((f) => assert.ok(!fs.existsSync(path.join(dist, f)), 'no debe estar ' + f));
+});
+
+t('SITE_URL cambia la dirección de la imagen al compartir, solo en dist/', () => {
+  const before = read(root, 'index.html');
+  const r = build({ SITE_URL: 'https://juega.ejemplo.org/cualquier/ruta' });
+  assert.strictEqual(r.status, 0, r.stderr);
+  const html = read(dist, 'index.html');
+  assert.strictEqual(meta(html, 'property', 'og:image'), 'https://juega.ejemplo.org/brand/og-image.jpg');
+  assert.ok(!html.includes('chaski.pages.dev'), 'no debe quedar la dirección por defecto');
+  assert.strictEqual(read(root, 'index.html'), before, 'index.html del repositorio no debe cambiar');
+  assert.notStrictEqual(build({ SITE_URL: 'http://inseguro.example' }).status, 0);
+});
+
+t('el panel lleva favicon y no se indexa', () => {
+  build({});
+  const html = read(dist, 'panel.html');
+  assert.match(html, /<link rel="icon" href="brand\/favicon\.svg"/);
+  assert.match(html, /<meta name="robots" content="noindex">/);
+});
+
 let ok = 0;
 for (const [name, fn] of tasks) {
   try { fn(); ok++; console.log('ok  ' + name); } catch (e) { console.log('FALLA  ' + name + '\n   ' + (e && e.message)); process.exitCode = 1; }

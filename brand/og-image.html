@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Chaski · imagen para compartir (1200 x 630)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap">
+<style>
+/* Fuente de og-image.png. Se genera con Chrome sin ventana (ver brand/README.md). WhatsApp y las redes recortan al centro,
+   por eso el título y el personaje quedan lejos de los bordes. */
+:root { --ink: #3A2412; --cream: #FFF4DA; --magenta: #C2185B; --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --zig: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='12' viewBox='0 0 28 12'><rect width='28' height='12' fill='%230B5A69'/><path d='M0 12 L7 2 L14 12 L21 2 L28 12' fill='none' stroke='%23FFC83D' stroke-width='3'/><path d='M0 6 L7 -4 L14 6 L21 -4 L28 6' fill='none' stroke='%23C2185B' stroke-width='2'/></svg>"); }
+* { box-sizing: border-box; } html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #7FD0EC; }
+.land { position: absolute; inset: 0; } .land svg { width: 100%; height: 100%; display: block; }
+.w-condor { display: none; }
+.title { position: absolute; left: 70px; top: 82px; }
+.tag { display: inline-block; background: var(--magenta); color: #fff; font: 800 26px var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 4px 22px; border-radius: 99px; border: 5px solid var(--ink); }
+.logo { margin: 6px 0 0; font: 800 188px/1 var(--display); color: var(--cream); -webkit-text-stroke: 22px var(--ink); paint-order: stroke fill; text-shadow: 0 10px 0 rgba(58, 36, 18, .3); }
+.card { position: absolute; left: 70px; top: 392px; width: 600px; background: var(--cream); border: 5px solid var(--ink); border-radius: 26px; padding: 30px 26px 20px; box-shadow: 0 8px 0 rgba(58, 36, 18, .38); font: 800 40px/1.12 var(--display); color: var(--ink); }
+.card::before { content: ""; position: absolute; left: 16px; right: 16px; top: -5px; height: 14px; background: var(--zig) repeat-x; border-radius: 0 0 9px 9px; }
+.card small { display: block; margin-top: 8px; font: 600 25px/1.2 var(--display); color: #6B4A2E; }
+.bubble { position: absolute; left: 826px; top: 62px; background: #fff; border: 5px solid var(--ink); border-radius: 26px; padding: 8px 26px; font: 800 44px/1.1 var(--display); color: var(--ink); box-shadow: 0 7px 0 rgba(58, 36, 18, .35); }
+.bubble::after { content: ""; position: absolute; left: 70px; bottom: -22px; border: 18px solid transparent; border-top-color: var(--ink); border-bottom: 0; }
+.chaski { position: absolute; left: 838px; top: 156px; width: 330px; height: 471px; filter: drop-shadow(0 12px 0 rgba(58, 36, 18, .25)); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs"></defs></svg>
+<div class="land" id="land"></div>
+<div class="title"><span class="tag">Juego de matemática</span><h1 class="logo">Chaski</h1></div>
+<div class="card">Un mensajero que solo sabe lo que tú le enseñas<small>Explícale, revisa sus respuestas y atrapa sus errores.</small></div>
+<div class="bubble">¿Me enseñas?</div>
+<svg class="chaski" viewBox="0 0 140 200"><use href="#ch-happy"/></svg>
+<script src="../js/scenery.js"></script>
+<script src="../mockup/paisaje.js"></script>
+<script>
+  document.getElementById('defs').innerHTML = ChaskiScenery.symbol('happy').replace(/#2B1B3D/gi, '#3A2412').replace(/#3B2A8C/gi, '#0B5A69');
+  document.getElementById('land').innerHTML = Paisaje.world('dia', { viewBox: '0 170 1200 630', par: 'xMidYMax slice' });
+</script>
+</body>
+</html>

@@ -7,6 +7,10 @@
  *   ENDPOINT=https://script.google.com/macros/s/.../exec            npm run build:site
  *
  * Sin EXTRACT_URL, Chaski lee la explicación con reglas de palabras en vez del modelo.
+ *
+ * La vista previa al compartir (WhatsApp, redes) pide la imagen con dirección completa. index.html trae la de
+ * https://chaski.pages.dev; si el sitio vive en otra, pásala al empaquetar:
+ *   SITE_URL=https://juega.ejemplo.org npm run build:site
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -22,7 +26,14 @@ const FILES = [
   ["css", "css"],
   ["js", "js"],
   ["deploy/_headers", "_headers"],
+  ["brand/favicon.svg", "brand/favicon.svg"],
+  ["brand/favicon.ico", "brand/favicon.ico"],
+  ["brand/apple-touch-icon.png", "brand/apple-touch-icon.png"],
+  ["brand/og-image.jpg", "brand/og-image.jpg"],
 ];
+
+/** Dirección del sitio que trae index.html. */
+const DEFAULT_SITE = "https://chaski.pages.dev";
 
 /** Valida una dirección https y la devuelve limpia; falla con un mensaje claro si no sirve. */
 function httpsUrl(name, value) {
@@ -60,6 +71,14 @@ if (extract) config = setConfig(config, "EXTRACT_URL", extract);
 if (endpoint) config = setConfig(config, "ENDPOINT", endpoint);
 writeFileSync(configPath, config);
 
+/* Dirección del sitio para la vista previa al compartir. */
+const site = process.env.SITE_URL ? new URL(httpsUrl("SITE_URL", process.env.SITE_URL)).origin : DEFAULT_SITE;
+if (site !== DEFAULT_SITE) {
+  const indexPath = path.join(out, "index.html");
+  writeFileSync(indexPath, readFileSync(indexPath, "utf8").split(DEFAULT_SITE).join(site));
+}
+
 console.log(`dist/ listo: ${countFiles(out)} archivos.`);
 console.log(extract ? `  Lectura con el modelo: ${extract}` : "  Sin EXTRACT_URL: Chaski leerá con reglas de palabras, no con el modelo.");
+console.log(`  Vista previa al compartir: ${site}/brand/og-image.jpg`);
 console.log(endpoint ? `  Hoja de Google: ${endpoint}` : "  Sin ENDPOINT: los datos quedan en el dispositivo de cada estudiante.");

@@ -65,6 +65,8 @@ npx wrangler pages deploy dist --project-name chaski
 
 Atajo: `npm run deploy:site` hace los dos pasos, pero necesita `EXTRACT_URL` en el entorno.
 
+**Vista previa al compartir (WhatsApp):** el juego trae favicon y una imagen con el personaje. La imagen se pide con dirección completa y `index.html` trae `https://chaski.pages.dev`. Si tu sitio tiene otra dirección, empaqueta con `SITE_URL=https://tu-dominio` (en Cloudflare, agrégala como variable de texto). Detalles y cómo probarla en [../brand/README.md](../brand/README.md).
+
 **Para guardar los datos de varios dispositivos** agrega también `ENDPOINT=` con la dirección del Apps Script (ver [../apps-script/README.md](../apps-script/README.md)).
 
 ## 4. Cerrar el origen del servidor
