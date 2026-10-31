@@ -9,7 +9,7 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist');
-const build = (env) => spawnSync(process.execPath, ['scripts/build-site.mjs'], { cwd: root, env: Object.assign({}, process.env, { EXTRACT_URL: '', ENDPOINT: '' }, env), encoding: 'utf8' });
+const build = (env) => spawnSync(process.execPath, ['scripts/build-site.mjs'], { cwd: root, env: Object.assign({}, process.env, { EXTRACT_URL: '', ENDPOINT: '', CF_PAGES: '', SITE_URL: '' }, env), encoding: 'utf8' });
 const read = (...p) => fs.readFileSync(path.join(...p), 'utf8');
 const tasks = [];
 const t = (name, fn) => tasks.push([name, fn]);
@@ -89,6 +89,30 @@ t('el panel lleva favicon y no se indexa', () => {
   const html = read(dist, 'panel.html');
   assert.match(html, /<link rel="icon" href="brand\/favicon\.svg"/);
   assert.match(html, /<meta name="robots" content="noindex">/);
+});
+
+t('EXTRACT_URL acepta una ruta del mismo sitio y rechaza rutas raras', () => {
+  const r = build({ EXTRACT_URL: '/extract' });
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.match(read(dist, 'js', 'config.js'), /EXTRACT_URL:\s*"\/extract"/);
+  ['//otro.example/x', '/con espacio', '/../x', 'extract'].forEach((v) => assert.notStrictEqual(build({ EXTRACT_URL: v }).status, 0, v));
+});
+
+t('en Cloudflare Pages (CF_PAGES=1) usa /extract sin configurar nada, salvo que se indique otra dirección', () => {
+  const auto = build({ CF_PAGES: '1' });
+  assert.strictEqual(auto.status, 0, auto.stderr);
+  assert.match(read(dist, 'js', 'config.js'), /EXTRACT_URL:\s*"\/extract"/);
+  assert.match(auto.stdout, /Pages Function/);
+  build({ CF_PAGES: '1', EXTRACT_URL: 'https://otro.ejemplo.workers.dev/extract' });
+  assert.match(read(dist, 'js', 'config.js'), /EXTRACT_URL:\s*"https:\/\/otro\.ejemplo\.workers\.dev\/extract"/);
+  build({});
+  assert.match(read(dist, 'js', 'config.js'), /EXTRACT_URL:\s*""/, 'fuera de Pages no se activa solo');
+});
+
+t('las funciones de Pages no viajan dentro de dist/ (Pages las toma de la raíz del proyecto)', () => {
+  build({});
+  assert.ok(!fs.existsSync(path.join(dist, 'functions')));
+  assert.ok(fs.existsSync(path.join(root, 'functions', 'extract.ts')));
 });
 
 let ok = 0;

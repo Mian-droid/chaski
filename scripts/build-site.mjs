@@ -7,6 +7,8 @@
  *   ENDPOINT=https://script.google.com/macros/s/.../exec            npm run build:site
  *
  * Sin EXTRACT_URL, Chaski lee la explicación con reglas de palabras en vez del modelo.
+ * EXTRACT_URL puede ser una ruta del mismo sitio ("/extract", la Pages Function de functions/) o una dirección https.
+ * En Cloudflare Pages (CF_PAGES=1) y sin EXTRACT_URL, se usa "/extract" solo: la función viene en este repositorio.
  *
  * La vista previa al compartir (WhatsApp, redes) pide la imagen con dirección completa. index.html trae la de
  * https://chaski.pages.dev; si el sitio vive en otra, pásala al empaquetar:
@@ -43,6 +45,12 @@ function httpsUrl(name, value) {
   return u.toString();
 }
 
+/** Dirección del servidor de lectura: una ruta del mismo sitio ("/extract") o una dirección https. */
+function extractUrl(value) {
+  if (/^\/[A-Za-z0-9_\-\/]*$/.test(value) && !value.startsWith("//")) return value;
+  return httpsUrl("EXTRACT_URL", value);
+}
+
 /** Reemplaza el valor de una clave de js/config.js. Falla si no la encuentra, para no publicar sin darse cuenta. */
 function setConfig(source, key, value) {
   const re = new RegExp(`(${key}:\\s*)"[^"]*"`);
@@ -65,7 +73,9 @@ for (const [from, to] of FILES) {
 
 const configPath = path.join(out, "js", "config.js");
 let config = readFileSync(configPath, "utf8");
-const extract = process.env.EXTRACT_URL ? httpsUrl("EXTRACT_URL", process.env.EXTRACT_URL) : "";
+let extract = process.env.EXTRACT_URL ? extractUrl(process.env.EXTRACT_URL) : "";
+const onPages = process.env.CF_PAGES === "1";
+if (!extract && onPages) extract = "/extract";
 const endpoint = process.env.ENDPOINT ? httpsUrl("ENDPOINT", process.env.ENDPOINT) : "";
 if (extract) config = setConfig(config, "EXTRACT_URL", extract);
 if (endpoint) config = setConfig(config, "ENDPOINT", endpoint);
@@ -79,6 +89,7 @@ if (site !== DEFAULT_SITE) {
 }
 
 console.log(`dist/ listo: ${countFiles(out)} archivos.`);
-console.log(extract ? `  Lectura con el modelo: ${extract}` : "  Sin EXTRACT_URL: Chaski leerá con reglas de palabras, no con el modelo.");
+const viaPages = onPages && !process.env.EXTRACT_URL ? " (Cloudflare Pages Function)" : "";
+console.log(extract ? `  Lectura con el modelo: ${extract}${viaPages}` : "  Sin EXTRACT_URL: Chaski leerá con reglas de palabras, no con el modelo.");
 console.log(`  Vista previa al compartir: ${site}/brand/og-image.jpg`);
 console.log(endpoint ? `  Hoja de Google: ${endpoint}` : "  Sin ENDPOINT: los datos quedan en el dispositivo de cada estudiante.");
