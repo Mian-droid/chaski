@@ -32,6 +32,7 @@ const FILES = [
   ["terminos.html", "terminos.html"],
   ["consentimiento.html", "consentimiento.html"],
   ["acerca.html", "acerca.html"],
+  ["404.html", "404.html"],
   ["css", "css"],
   ["js", "js"],
   ["deploy/_headers", "_headers"],

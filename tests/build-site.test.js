@@ -131,6 +131,17 @@ t('se publican las páginas legales, el robots.txt y el script del correo de con
   assert.match(read(dist, 'robots.txt'), /Disallow: \/panel\.html/);
 });
 
+t('una dirección que no existe muestra la página 404 con sus recursos desde la raíz', () => {
+  build({});
+  const html = read(dist, '404.html');
+  assert.match(html, /No encontramos esa página/);
+  (html.match(/(?:href|src)="(\/[^"]+)"/g) || []).forEach((m) => {
+    const target = m.match(/"\/([^"]+)"/)[1];
+    assert.ok(fs.existsSync(path.join(dist, target)), '404.html enlaza a /' + target + ', que no existe');
+  });
+  assert.doesNotMatch(html, /(?:href|src)="(?!\/|https:)[^"#]/, 'los enlaces relativos se romperían en rutas profundas');
+});
+
 t('los enlaces entre las páginas legales, el juego y el panel no están rotos', () => {
   build({});
   ['index.html', 'panel.html'].concat(LEGAL).forEach((page) => {
