@@ -104,6 +104,7 @@ Piloto exploratorio para la Grieta 02, «Aprender sin pensar», del DSC Hack 202
 | RNF-14 | La lectura con el modelo corre como Cloudflare Pages Function (`functions/extract.ts`) o como Worker independiente, con el mismo código. |
 | RNF-15 | Publicar solo el juego y el panel, sin pruebas, documentos ni servidor (`npm run build:site`). |
 | RNF-16 | Leer y borrar datos de la base exige una clave (`PANEL_KEY`, en la cabecera `X-Panel-Key`, nunca en la dirección). Guardar solo se acepta de la página del juego, con un máximo de 100 eventos por envío, y cada evento se valida. |
+| RNF-18 | Limitar el uso por IP (lecturas con el modelo y envíos de partidas) y el total diario de lecturas con el modelo, guardando solo una huella de la IP, y responder 429 sin romper el juego. |
 | RNF-17 | Registrar los eventos en lotes y sin duplicados, con un índice por clase, y acotar la lectura a una clase por consulta. |
 
 ---
@@ -141,6 +142,6 @@ El permiso de los tutores y el tiempo de conservación de los datos corresponden
 | Contenido de los tres temas con cuentas verificadas de forma independiente, cerebro, lectura con reglas y con servidor simulado, originalidad y métricas | `tests/core.test.js` | 36 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
 | Empaquetado del sitio: qué se publica, direcciones, referente, favicon y vista previa al compartir | `tests/build-site.test.js` | 12 |
-| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/worker.test.ts` y `worker/test/events.test.ts` | 30 |
+| Servidor y funciones de Pages: lectura con el modelo y base de datos (validación, duplicados, clave del panel, borrado, topes de uso) | `worker/test/*.test.ts` | 37 |
 
 `npm test` las corre todas.

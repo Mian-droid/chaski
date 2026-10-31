@@ -11,3 +11,9 @@ CREATE TABLE IF NOT EXISTS events (
 );
 
 CREATE INDEX IF NOT EXISTS events_by_class ON events (cls, topic, ts);
+
+CREATE TABLE IF NOT EXISTS rate (
+  k TEXT PRIMARY KEY,
+  n INTEGER NOT NULL,
+  exp INTEGER NOT NULL
+);

@@ -101,12 +101,20 @@ Las métricas se calculan en `core.js` (`metricsFor`, `groupStudents`). Los even
 - **Capacidad.** Con los límites del plan gratuito de Cloudflare D1 (100 000 filas escritas por día y 500 MB por base), una base soporta del orden de 5 000 partidas por día y entre 10 000 y 30 000 partidas guardadas, según el tamaño de los textos. Las cifras salen de la documentación de D1 y de las dimensiones de un evento, no de una prueba de carga.
 - **Cómo crece.** Primero, el plan de pago de D1 (10 GB por base y 50 millones de escrituras al mes incluidas). Después, una base por colegio o por clase, con réplicas de lectura. Si hicieran falta cuentas de docentes, permisos por colegio o consultas entre colegios, el registro de eventos se exporta con un `SELECT` y se importa a Postgres (por ejemplo Supabase) reescribiendo solo `events.ts`.
 
+## Protección contra abuso
+
+- **Por IP.** Cada IP tiene un máximo de lecturas con el modelo y de envíos de partidas en ventanas de 10 minutos. El contador es una fila de la tabla `rate` que se actualiza con una sola sentencia (`INSERT ... ON CONFLICT ... RETURNING`), sin carreras entre solicitudes simultáneas.
+- **Diario.** Un tope de lecturas con el modelo por día, sumando todas las IP, protege la cuota de Gemini aunque el ataque venga de muchas direcciones.
+- **Privacidad.** La IP se guarda solo como una huella corta (los primeros 8 bytes de un SHA-256) con fecha de caducidad; los contadores vencidos se borran solos.
+- **Falla hacia abrir.** Si la base no está o falla, no se limita nada: un error del límite no debe dejar a una clase sin juego.
+- **Qué no cubre.** No distingue personas de bots ni frena un ataque distribuido grande. Para eso están las reglas de Cloudflare y Turnstile (ver [despliegue.md](despliegue.md)).
+
 ## Pruebas
 
 | Qué | Dónde | Cuántas |
 |---|---|---|
 | Contenido de los tres temas (cuentas verificadas de forma independiente), cerebro, lectura con reglas y con servidor simulado, originalidad, métricas | `tests/core.test.js` | 36 |
 | Dibujo: el paisaje panorámico y los símbolos de Chaski | `tests/scenery.test.js` | 6 |
-| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/worker.test.ts` y `worker/test/events.test.ts` | 30 |
+| Servidor y funciones de Pages: lectura con el modelo (formato, temas, CORS, clave en cabecera, errores de Gemini, instrucciones escondidas, consistencia con el juego) y base de datos (validación, duplicados, clave del panel, borrado, límites) | `worker/test/*.test.ts` | 37 |
 
 No hay pruebas automáticas de la interfaz.

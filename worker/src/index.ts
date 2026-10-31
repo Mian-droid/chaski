@@ -3,9 +3,10 @@
    La clave de Gemini vive solo aquí, como secreto. Nunca va en la página. */
 import { DEFAULT_MODEL, buildRequest, parseReply, sanitize } from "./extract.ts";
 import { corsHeaders, json } from "./http.ts";
+import { checkLimits, type LimitsEnv } from "./limits.ts";
 import { isTopic } from "./topics.ts";
 
-export interface Env {
+export interface Env extends LimitsEnv {
   GEMINI_API_KEY?: string;
   MODEL?: string;
   ALLOWED_ORIGINS?: string;
@@ -49,6 +50,8 @@ export async function handle(req: Request, env: Env, deps: { fetch?: Fetcher } =
   }
 
   if (!env.GEMINI_API_KEY) return json({ error: "el servidor no tiene clave configurada" }, 500, h);
+  const lim = await checkLimits(env, req, "extract");
+  if (!lim.ok) return json({ error: lim.error }, 429, { ...h, "Retry-After": String(lim.retryAfter) });
   const call: Fetcher = deps.fetch ?? ((u, i) => fetch(u, i));
 
   let upstream: Response;

@@ -3,20 +3,13 @@
    GET    /events?cls=CLASE  + X-Panel-Key    -> devuelve { events: [...] } de esa clase. Lo lee el panel docente.
    DELETE /events?cls=CLASE  + X-Panel-Key    -> borra los eventos de esa clase.
    Lo que pide el panel (leer y borrar) exige la clave PANEL_KEY; guardar no, porque lo hace el juego de cada estudiante. */
+import type { Db } from "./db.ts";
 import { corsHeaders, json } from "./http.ts";
+import { checkLimits, type LimitsEnv } from "./limits.ts";
 import { isTopic } from "./topics.ts";
 
-/* Lo mínimo que se usa de D1, para poder probar con una base simulada. */
-export interface DbStatement {
-  bind(...values: unknown[]): DbStatement;
-  run(): Promise<unknown>;
-  all(): Promise<{ results?: unknown[] }>;
-}
-export interface Db {
-  prepare(sql: string): DbStatement;
-  batch(statements: DbStatement[]): Promise<unknown>;
-}
-export interface EventsEnv {
+export type { Db, DbStatement } from "./db.ts";
+export interface EventsEnv extends LimitsEnv {
   DB?: Db;
   PANEL_KEY?: string;
   ALLOWED_ORIGINS?: string;
@@ -69,6 +62,8 @@ export async function handleEvents(req: Request, env: EventsEnv): Promise<Respon
 
   try {
     if (req.method === "POST") {
+      const lim = await checkLimits(env, req, "events");
+      if (!lim.ok) return json({ error: lim.error }, 429, { ...h, "Retry-After": String(lim.retryAfter) });
       const raw = await req.text();
       if (raw.length > MAX_BODY) return json({ error: "cuerpo demasiado grande" }, 413, h);
       let body: any;

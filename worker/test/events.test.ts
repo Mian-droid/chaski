@@ -14,6 +14,7 @@ function fakeDb() {
   const stmt = (sql: string, args: unknown[] = []) => ({
     bind: (...v: unknown[]) => stmt(sql, v),
     run: async () => {
+      if (sql.includes("FROM rate")) return { meta: { changes: 0 } };
       calls.push(sql);
       if (sql.startsWith("INSERT OR IGNORE")) {
         const [eid, ts, cls, alias, topic, sid, type, data] = args as any[];
@@ -28,6 +29,7 @@ function fakeDb() {
       throw new Error("sentencia no esperada: " + sql);
     },
     all: async () => {
+      if (sql.includes("INTO rate")) return { results: [{ n: 1 }] }; // los contadores de límite no son parte de lo que se prueba aquí
       calls.push(sql);
       assert.match(sql, /^SELECT data FROM events WHERE cls = \?/);
       return { results: rows.filter((r) => r.cls === args[0]).sort((a, b) => a.ts - b.ts).map((r) => ({ data: r.data })) };

@@ -88,7 +88,7 @@ npx wrangler pages dev dist --binding GEMINI_API_KEY=tu-clave
 Sin esto, cada partida queda solo en el navegador del estudiante. Con la base de datos **D1** de Cloudflare, el panel docente muestra los resultados de todos los dispositivos. Todo se configura en el panel de Cloudflare, sin instalar nada.
 
 1. *Storage & Databases → D1 SQL database → Create*. Nombre: `chaski-db`.
-2. En esa base, pestaña *Console*: pega el contenido de [`db/schema.sql`](../db/schema.sql) y ejecútalo. Crea la tabla `events` y su índice. El archivo no lleva comentarios a propósito: la consola junta lo pegado en una línea y un comentario taparía el resto. Si da error, ejecuta las dos sentencias por separado.
+2. En esa base, pestaña *Console*: pega el contenido de [`db/schema.sql`](../db/schema.sql) y ejecútalo. Crea la tabla `events` con su índice y la tabla `rate`, que usan los límites de uso. El archivo no lleva comentarios a propósito: la consola junta lo pegado en una línea y un comentario taparía el resto. Si da error, ejecuta las dos sentencias por separado.
 3. En el proyecto de Pages: *Settings → Bindings → Add → D1 database*. Variable `DB`, base `chaski-db` (en producción y en vistas previas).
 4. En *Variables and Secrets*: un secreto `PANEL_KEY` con una clave larga (20 caracteres o más) y una variable de texto `ENDPOINT` con el valor `/events`.
 5. Reintenta el último despliegue.
@@ -102,10 +102,19 @@ curl -s -H "X-Panel-Key: TU_CLAVE" "https://chaski.pages.dev/events?cls=3A2026"
 Debe responder `{"events":[...]}`. Sin el encabezado responde 401. En el panel docente, escribe el código de clase y la clave y toca **Base de datos**.
 
 - **Guardar** lo hace el juego de cada estudiante, sin clave: acepta hasta 100 eventos por envío, valida cada evento y descarta los que no tienen la forma esperada. Con `ALLOWED_ORIGINS` definido solo acepta la página del juego.
+- **Límites de uso.** Con la base enlazada, el servidor frena a quien llame de más: cada IP puede hacer 150 lecturas con el modelo y 400 envíos de partidas cada 10 minutos (un colegio entero comparte una IP, por eso son holgados), y en total hay un tope de 3 000 lecturas con el modelo por día. Al frenar responde 429 con `Retry-After` y el juego sigue con reglas de palabras. Se ajustan con las variables de texto `RATE_LIMIT_EXTRACT`, `RATE_LIMIT_EVENTS` y `DAILY_MODEL_CALLS`. La IP no se guarda: solo una huella corta que caduca a los pocos minutos. Si la base falla, no se limita nada para no dejar sin juego a la clase.
 - **Leer y borrar** son del panel y exigen `PANEL_KEY`. El botón *Borrar del servidor los datos de esta clase* elimina todos los eventos de esa clase.
 - El juego reintenta el envío en la siguiente pantalla clave si el servidor no responde, y la copia del dispositivo no se pierde.
 - Para probar todo en tu computadora: `$env:ENDPOINT="/events"; $env:CF_PAGES="1"; npm run build:site` (PowerShell) y `npx wrangler pages dev dist --d1=DB --binding PANEL_KEY=una-clave`. Las tablas se crean antes con `npx wrangler d1 execute` y `db/schema.sql`.
 - Alternativa sin base de datos: un Apps Script que escribe en una hoja de Google ([../apps-script/README.md](../apps-script/README.md)); en ese caso `ENDPOINT` es la dirección del script.
+
+## 6. Protección adicional contra bots (opcional)
+
+Los límites del servidor frenan abusos sencillos. Para más protección, Cloudflare ofrece dos capas sin tocar el código:
+
+- **Regla de límite de solicitudes (WAF).** En el panel de Cloudflare del dominio: *Security → WAF → Rate limiting rules*. El plan gratuito permite una regla, por ejemplo: la ruta `/extract` más de 30 solicitudes en 10 segundos desde la misma IP, con la acción *Block*.
+- **Turnstile.** Un desafío invisible que distingue personas de bots, para exigirlo antes de leer con el modelo. Requiere agregarlo al juego, así que no está incluido.
+- Mantén `ALLOWED_ORIGINS` con la dirección del sitio: sin ella, cualquier página puede llamar a `/extract` desde un navegador.
 
 ## Alternativa: un Worker aparte
 
