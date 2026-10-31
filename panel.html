@@ -4,67 +4,102 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#2FA4DE">
 <title>Chaski · Panel docente</title>
 <meta name="description" content="Panel docente de Chaski: elige el tema, comparte el enlace con tu clase y revisa cómo enseñaron los estudiantes.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="brand/favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="brand/apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Patrick+Hand&display=swap">
 <link rel="stylesheet" href="css/panel.css">
 </head>
 <body>
-<main class="wrap panel" id="app">
-  <h1>Panel docente</h1>
-  <p class="small">Datos de un piloto exploratorio. Las cifras son señales para conversar con la clase, no una evaluación ni una prueba de efecto.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4 9h16M4 15h16M10 9v12" stroke="currentColor" stroke-width="2.2"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z M14 3v4h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 11v6M12 7.5v.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+</defs></svg>
 
-  <section class="card" aria-labelledby="h-enlace">
-    <h2 id="h-enlace">1. Elige el tema y comparte el enlace</h2>
-    <div class="tools">
-      <label for="tema">Tema<select id="tema"></select></label>
-      <label for="cls">Código de clase<input id="cls" type="text" placeholder="Ej. 3A2026" maxlength="10" autocomplete="off"></label>
+<header class="hero">
+  <div class="land" id="land" aria-hidden="true"></div>
+  <div class="in">
+    <div class="brand"><span class="tag">Panel docente</span><h1 class="logo">Chaski</h1></div>
+    <svg class="chsvg bob" viewBox="0 0 140 200" aria-hidden="true"><use href="#ch-happy"/></svg>
+  </div>
+</header>
+
+<div class="shell" id="app">
+  <aside class="side">
+    <section class="panel" aria-labelledby="h-enlace">
+      <h2 id="h-enlace"><span class="num">1</span>Comparte el juego</h2>
+      <label class="field" for="tema"><span>Tema</span><select class="inp" id="tema"></select></label>
+      <label class="field" for="cls"><span>Código de clase</span><input class="inp" id="cls" type="text" placeholder="Ej. 3A2026" maxlength="10" autocomplete="off"></label>
+      <div class="field"><label for="link"><span>Enlace para tus estudiantes</span></label>
+        <div class="linkrow"><input class="inp" id="link" type="text" readonly><button class="btn primary" type="button" id="bCopy"><svg><use href="#i-link"/></svg>Copiar</button></div></div>
+      <div class="share"><a class="btn wa" id="bWa" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>WhatsApp</a><a class="btn" id="bTest" target="_blank" rel="noopener">Probar el juego</a></div>
+      <p class="help" id="linkNote">Los estudiantes abren el enlace y juegan con ese tema. El código de clase ya va escrito.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="h-datos">
+      <h2 id="h-datos"><span class="num">2</span>Trae los resultados</h2>
+      <div class="srcs">
+        <button class="src" type="button" id="bSheet" hidden><span class="ic"><svg><use href="#i-sheet"/></svg></span><span><b>Hoja de Google</b><small>Todos los dispositivos, con la clave del panel</small></span></button>
+        <button class="src" type="button" id="bLocal"><span class="ic"><svg><use href="#i-phone"/></svg></span><span><b>Este dispositivo</b><small>Lo que se jugó en este navegador</small></span></button>
+        <label class="src" for="file" tabindex="0" id="bFile"><span class="ic"><svg><use href="#i-file"/></svg></span><span><b>Archivo JSON</b><small>Un respaldo que guardaste antes</small></span><input id="file" type="file" accept="application/json,.json" hidden></label>
+      </div>
+      <label class="field" for="key" id="keybox" hidden><span>Clave del panel (la del Apps Script)</span><input class="inp" id="key" type="text" autocomplete="off"></label>
+      <p class="status" id="status" role="status" hidden><i></i><span id="statusText"></span></p>
+      <p class="msg" id="msg" role="status"></p>
+      <button class="link" id="bClear" type="button" hidden>Quitar los datos cargados</button>
+    </section>
+  </aside>
+
+  <main class="main">
+    <div class="bar">
+      <h2>Resultados</h2>
+      <div class="chips"><span class="chip"><b>Tema</b> <span id="chipT"></span></span><span class="chip"><b>Clase</b> <span id="chipC"></span></span></div>
     </div>
-    <div class="tools">
-      <label for="link" style="flex:1;min-width:260px">Enlace para tus estudiantes<input id="link" type="text" readonly></label>
-      <button class="btn primary" type="button" id="bCopy">Copiar enlace</button>
+    <p class="notice"><svg><use href="#i-info"/></svg><span>Datos de un piloto exploratorio. Las cifras son señales para conversar con la clase, no una evaluación ni una prueba de efecto.</span></p>
+
+    <section class="panel empty" id="empty">
+      <svg class="chsvg" width="110" height="157" viewBox="0 0 140 200" aria-hidden="true"><use href="#ch-listen"/></svg>
+      <h2>Todavía no hay resultados</h2>
+      <p>Cuando tus estudiantes terminen una partida, aquí verás cómo enseñaron y qué dejaron pasar.</p>
+      <ol class="steps"><li><span class="num">1</span>Comparte el enlace de arriba</li><li><span class="num">2</span>Pide que jueguen un tema completo</li><li><span class="num">3</span>Trae los resultados</li></ol>
+    </section>
+
+    <div class="results" id="results" hidden>
+      <div class="kpis" id="kpis"></div>
+
+      <section class="panel" aria-labelledby="h-ideas">
+        <h2 id="h-ideas">Qué retomar en clase</h2>
+        <p class="help">Porcentaje de estudiantes que dejó pasar el error de cada idea. Lo más alto es lo primero que conviene volver a explicar.</p>
+        <div class="ideas" id="ideas"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-est">
+        <div class="bar"><h2 id="h-est">Estudiantes</h2><button class="btn" type="button" id="bCsv"><svg><use href="#i-down"/></svg>Descargar CSV</button></div>
+        <div class="scroll"><table id="tbl"></table></div>
+        <p class="help"><b>Dependencia</b>: de 0 a 1, más alto es más dependencia (errores que se le pasaron, preguntas de seguimiento falladas y explicaciones que no parecen propias). Es un índice exploratorio: las etiquetas Baja (menos de 0,34), Media y Alta (desde 0,67) son cortes orientativos. <b>Ideas bien</b>: cuántas de las 3 ideas quedaron bien enseñadas.</p>
+      </section>
+
+      <section class="panel" id="textsCard" aria-labelledby="h-textos">
+        <h2 id="h-textos">Lo que escribieron</h2>
+        <p class="help">Léelas tú: la señal automática de originalidad puede equivocarse.</p>
+        <div class="texts" id="texts"></div>
+      </section>
     </div>
-    <p class="small" id="linkNote">Los estudiantes abren este enlace y juegan con ese tema. El código de clase queda ya escrito.</p>
-  </section>
-
-  <section class="card" aria-labelledby="h-datos">
-    <h2 id="h-datos">2. Ver los resultados</h2>
-    <p class="small">Se muestran los resultados del tema y la clase de arriba.</p>
-    <div class="tools">
-      <label for="key" id="keybox">Clave del panel<input id="key" type="text" placeholder="La del Apps Script" autocomplete="off"></label>
-      <button class="btn primary" type="button" id="bSheet">Cargar de la hoja</button>
-      <button class="btn" type="button" id="bLocal">Cargar de este dispositivo</button>
-      <label class="btn" for="file" style="cursor:pointer">Cargar archivo<input id="file" type="file" accept="application/json,.json" hidden></label>
-    </div>
-    <p class="msg" id="msg" role="status"></p>
-  </section>
-
-  <section class="card" id="summary" hidden aria-labelledby="h-clase">
-    <h2 id="h-clase">La clase</h2>
-    <div class="stats" id="stats"></div>
-    <h2>Ideas que Chaski no aprendió</h2>
-    <p class="small">Porcentaje de estudiantes que dejó pasar el error de cada idea. Es lo primero que conviene retomar en clase.</p>
-    <div class="bars" id="bars"></div>
-  </section>
-
-  <section class="card" id="tableCard" hidden aria-labelledby="h-est">
-    <div class="tools" style="justify-content:space-between"><h2 id="h-est">Estudiantes</h2><button class="btn" type="button" id="bCsv">Descargar CSV</button></div>
-    <div class="scroll"><table id="tbl"></table></div>
-    <p class="small">Dependencia: de 0 a 1, más alto = más dependencia (errores que se le pasaron, preguntas de seguimiento falladas y explicaciones que no parecen propias). Es un índice exploratorio sin validar. Ideas bien: cuántas de las 3 ideas quedaron bien enseñadas según lo que leyó el modelo o las reglas.</p>
-  </section>
-
-  <section class="card" id="textsCard" hidden aria-labelledby="h-textos">
-    <h2 id="h-textos">Explicaciones de los estudiantes</h2>
-    <p class="small">Léelas tú: la señal automática de originalidad puede equivocarse.</p>
-    <div class="stack" id="texts"></div>
-  </section>
-</main>
+  </main>
+</div>
 <script src="js/config.js"></script>
 <script src="js/content.js"></script>
 <script src="js/core.js"></script>
+<script src="js/scenery.js"></script>
 <script src="js/panel.js"></script>
 </body>
 </html>
