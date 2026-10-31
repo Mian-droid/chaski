@@ -4,6 +4,8 @@ Cloudflare Worker que lee la explicación del estudiante con un modelo de Google
 
 El modelo **solo lee**: nunca resuelve problemas. Ver [../docs/arquitectura.md](../docs/arquitectura.md).
 
+Este código corre de dos formas: dentro del sitio como Pages Function (`../functions/extract.ts`, la forma recomendada, ver [../docs/despliegue.md](../docs/despliegue.md)) o como Worker independiente (esta carpeta). Las pruebas cubren las dos.
+
 ## Interfaz
 
 `POST /extract`
@@ -68,7 +70,7 @@ Copia la dirección que muestra, agrega `/extract` y ponla en `EXTRACT_URL` de `
 ## Pruebas
 
 ```bash
-npm test                         # 17 pruebas con un fetch simulado: no llaman a Gemini ni gastan cuota
+npm test                         # 18 pruebas con un fetch simulado: no llaman a Gemini ni gastan cuota
 GEMINI_API_KEY=... npm run live  # prueba en vivo con Gemini: usa tu cuota (PowerShell: $env:GEMINI_API_KEY="..."; npm run live)
 ```
 

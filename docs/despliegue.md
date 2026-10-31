@@ -1,21 +1,93 @@
 # Despliegue en Cloudflare
 
-Dos piezas, en este orden:
+Todo vive en **un solo proyecto de Cloudflare Pages**: el juego y el panel (archivos estáticos) y la lectura con el modelo (una *Pages Function* en [`functions/extract.ts`](../functions/extract.ts), que responde en `/extract`). No hay que desplegar un Worker aparte ni configurar CORS.
 
-1. **El servidor** (Worker): lee la explicación con el modelo (Google Gemini). Lleva la clave de Gemini.
-2. **El sitio** (Pages): el juego y el panel docente, como archivos estáticos.
+Si solo quieres probar el juego sin el modelo, no pongas la clave: Chaski leerá con reglas de palabras.
 
-Si solo quieres probar el juego sin el modelo, salta al paso 3 y empaqueta sin `EXTRACT_URL`: Chaski leerá con reglas de palabras.
-
-> Estado: el servidor se empaquetó (779 KiB, 124 KiB comprimido) y su código se probó con un `fetch` simulado. **Nunca se ha desplegado** ni se ha llamado a Gemini con una clave real. Los pasos de abajo no se han ejecutado contra una cuenta.
+> Estado: la función se compiló como Pages Function (también sin `worker/node_modules`, como en Cloudflare), corrió en local con `wrangler pages dev` y respondió en `/extract`. Su código se probó con un `fetch` simulado. **Nunca se ha desplegado** ni se ha llamado a Gemini con una clave real.
 
 ## Qué necesitas
 
-- Una cuenta de Cloudflare (el plan gratuito alcanza para un piloto).
-- Una clave de API de Gemini, de [Google AI Studio](https://aistudio.google.com/apikey). Si usas un plan de pago, fija un **límite de gasto** antes de exponer el servidor. Antes de elegir plan, lee la sección *Privacidad y datos*.
-- Node 22 o superior.
+- Una cuenta de Cloudflare (el plan gratuito alcanza para un piloto) y el repositorio en GitHub con la rama `main`.
+- Una clave de API de Gemini, de [Google AI Studio](https://aistudio.google.com/apikey). Si usas un plan de pago, fija un **límite de gasto**. Antes de elegir plan, lee *Privacidad y datos*.
+- Node 22 o superior para las pruebas locales.
 
-## 1. Servidor
+## 1. Crear el proyecto de Pages (conectado a GitHub)
+
+En el panel de Cloudflare: *Workers y Pages → Crear → Pages → Conectar con Git* y elige el repositorio.
+
+| Campo | Valor |
+|---|---|
+| Nombre del proyecto | `chaski` (la dirección será `chaski.pages.dev`) |
+| Rama de producción | `main` |
+| Framework preset | `None` |
+| Comando de construcción | `npm run build:site` |
+| Directorio de salida | `dist` |
+| Directorio raíz | vacío |
+
+Cloudflare instala las dependencias de la raíz (`zod`) y compila la carpeta `functions/` sola. Cada cambio en `main` se publica solo.
+
+## 2. Variables y secretos
+
+En el proyecto: *Settings → Variables and Secrets*.
+
+| Tipo | Nombre | Valor | Para qué |
+|---|---|---|---|
+| Secreto | `GEMINI_API_KEY` | tu clave | La usa la función para llamar a Gemini. Nunca va en el código ni en la página. |
+| Texto | `NODE_VERSION` | `22` | El empaquetado pide Node 22 o superior. |
+| Texto | `ALLOWED_ORIGINS` | `https://chaski.pages.dev` | Páginas que pueden llamar a `/extract`. Sin esto acepta cualquiera. |
+| Texto | `MODEL` | opcional | Por defecto `gemini-3.5-flash-lite`. `gemini-3.8-flash` lee mejor pero tarda más. |
+| Texto | `SITE_URL` | opcional | Solo si tu sitio no es `chaski.pages.dev`: dirección de la imagen al compartir por WhatsApp. |
+| Texto | `ENDPOINT` | opcional | Dirección del Apps Script para guardar datos de varios dispositivos. |
+
+- **No hace falta `EXTRACT_URL`.** Cuando el empaquetado corre en Cloudflare Pages usa `/extract` solo. Si la defines, manda la tuya (por ejemplo, la de un Worker aparte).
+- Los cambios de variables se aplican en el **siguiente despliegue**: después de editarlas, reintenta el último despliegue.
+- Las vistas previas de Pages usan otras direcciones (`https://<hash>.chaski.pages.dev`). Con `ALLOWED_ORIGINS` cerrado, en esas vistas el juego lee con reglas de palabras. Prueba en la dirección principal.
+
+## 3. Probar el modelo real
+
+Antes de que lo use ningún estudiante. En tu computadora, dentro de `worker/` (el servidor y la función comparten el mismo código):
+
+```bash
+cd worker && npm install
+GEMINI_API_KEY=tu-clave npm run live           # tarda unos 90 s; usa tu cuota
+```
+
+En PowerShell: `$env:GEMINI_API_KEY="tu-clave"; npm run live`.
+
+Corre explicaciones de los tres temas y dice si el modelo leyó lo esperado. Si algún caso falla, ajusta el prompt del tema en `worker/src/topics.ts` y vuelve a probar. Esta prueba **todavía no se ha corrido**.
+
+Ya desplegado, prueba la función (el encabezado `Origin` es necesario si cerraste `ALLOWED_ORIGINS`):
+
+```bash
+curl -s -X POST https://chaski.pages.dev/extract \
+  -H "Content-Type: application/json" -H "Origin: https://chaski.pages.dev" \
+  -d '{"text":"Si compras el doble pagas el doble.","topic":"proporciones"}'
+```
+
+Debe responder 200 con `"source":"modelo"`. Sin el encabezado `Origin` debe dar 403.
+
+Para probar todo el sitio en tu computadora antes de subirlo:
+
+```bash
+CF_PAGES=1 npm run build:site
+npx wrangler pages dev dist --binding GEMINI_API_KEY=tu-clave
+```
+
+## 4. Verificar
+
+1. Abre `https://chaski.pages.dev/panel.html`, elige un tema y copia el enlace para estudiantes.
+2. Ábrelo en un celular y juega un tema completo.
+3. Con las herramientas del navegador, pestaña Red: la petición `POST /extract` debe dar 200. Si da error, el juego sigue funcionando con reglas de palabras, así que **un juego que funciona no prueba que el modelo esté conectado**: mira la respuesta, que debe traer `"source":"modelo"`.
+4. En el panel de Cloudflare, *Functions → Real-time logs* muestra los errores de Google (la clave inválida, la cuota). El navegador nunca los recibe.
+
+**Vista previa al compartir (WhatsApp):** el juego trae favicon y una imagen con el personaje. Detalles y cómo probarla en [../brand/README.md](../brand/README.md).
+
+**Guardar datos de varios dispositivos:** agrega la variable `ENDPOINT` con la dirección del Apps Script (ver [../apps-script/README.md](../apps-script/README.md)).
+
+## Alternativa: un Worker aparte
+
+Sirve si prefieres separar la lectura del sitio, o alojar el sitio en otro lugar. El mismo código corre como Worker independiente:
 
 ```bash
 cd worker
@@ -25,91 +97,25 @@ npx wrangler secret put GEMINI_API_KEY        # pega tu clave cuando la pida
 npx wrangler deploy
 ```
 
-`deploy` muestra la dirección del servidor, por ejemplo `https://chaski-lector.tu-cuenta.workers.dev`. Guárdala.
+Cierra su origen poniendo la dirección real del sitio en `ALLOWED_ORIGINS` de `worker/wrangler.toml` y vuelve a desplegar. Después, en Pages define `EXTRACT_URL=https://chaski-lector.tu-cuenta.workers.dev/extract` y reintenta el despliegue.
 
-## 2. Probar el servidor con el modelo real
-
-Antes de que lo use ningún estudiante, dentro de `worker/`:
-
-```bash
-GEMINI_API_KEY=tu-clave npm run live           # tarda unos 90 s; usa tu cuota
-```
-
-En PowerShell: `$env:GEMINI_API_KEY="tu-clave"; npm run live`.
-
-Corre explicaciones de los tres temas y dice si el modelo leyó lo esperado. Si algún caso falla, ajusta el prompt del tema en `worker/src/topics.ts` y vuelve a probar. Esta prueba **todavía no se ha corrido**.
-
-Prueba también el servidor ya desplegado:
-
-```bash
-curl -s -X POST https://chaski-lector.tu-cuenta.workers.dev/extract \
-  -H "Content-Type: application/json" \
-  -d '{"text":"Si compras el doble pagas el doble.","topic":"proporciones"}'
-```
-
-Debe responder 200 con `"source":"modelo"`.
-
-## 3. Sitio
-
-Desde la raíz del repositorio, con la dirección del servidor y `/extract` al final:
-
-```bash
-EXTRACT_URL=https://chaski-lector.tu-cuenta.workers.dev/extract npm run build:site
-npx wrangler pages deploy dist --project-name chaski
-```
-
-- `build:site` arma `dist/` con solo el juego, el panel y las cabeceras. Deja fuera pruebas, documentos y el servidor. La dirección se escribe en `dist/`, no en el repositorio.
-- La primera vez, `pages deploy` crea el proyecto. Si el nombre `chaski` ya está tomado, usa otro.
-- Muestra la dirección del sitio, por ejemplo `https://chaski.pages.dev`.
-- Si conectaste el repositorio de GitHub desde el panel de Cloudflare, no uses `wrangler pages deploy`: en el proyecto pon como comando de construcción `npm run build:site`, como carpeta de salida `dist` y las variables `NODE_VERSION=22` y `EXTRACT_URL`. Cada cambio en `main` se publica solo. Para que `EXTRACT_URL` surta efecto, reintenta el despliegue.
-
-Atajo: `npm run deploy:site` hace los dos pasos, pero necesita `EXTRACT_URL` en el entorno.
-
-**Vista previa al compartir (WhatsApp):** el juego trae favicon y una imagen con el personaje. La imagen se pide con dirección completa y `index.html` trae `https://chaski.pages.dev`. Si tu sitio tiene otra dirección, empaqueta con `SITE_URL=https://tu-dominio` (en Cloudflare, agrégala como variable de texto). Detalles y cómo probarla en [../brand/README.md](../brand/README.md).
-
-**Para guardar los datos de varios dispositivos** agrega también `ENDPOINT=` con la dirección del Apps Script (ver [../apps-script/README.md](../apps-script/README.md)).
-
-## 4. Cerrar el origen del servidor
-
-Mientras `ALLOWED_ORIGINS` sea `*`, cualquier página puede gastar tu clave. En `worker/wrangler.toml` pon la dirección real del sitio (varias, separadas por coma) y vuelve a desplegar:
-
-```toml
-ALLOWED_ORIGINS = "https://chaski.pages.dev"
-```
-
-```bash
-cd worker && npx wrangler deploy
-```
-
-Las vistas previas de Pages usan otras direcciones (`https://<hash>.chaski.pages.dev`). Si las usas, agrégalas o prueba solo con la dirección principal.
-
-## 5. Verificar
-
-1. Abre `https://chaski.pages.dev/panel.html`, elige un tema y copia el enlace para estudiantes.
-2. Ábrelo en un celular y juega un tema completo.
-3. Con las herramientas del navegador, pestaña Red: la petición `POST .../extract` debe dar 200. Si da error, el juego sigue funcionando con reglas de palabras, así que **un juego que funciona no prueba que el modelo esté conectado**: mira la respuesta, que debe traer `"source":"modelo"`.
-4. Revisa que el servidor rechace otros orígenes: desde una página distinta, la petición debe dar 403.
+Para subir el sitio sin conectar GitHub: `EXTRACT_URL=... npm run build:site` y `npx wrangler pages deploy dist --project-name chaski`. No mezcles esto con un proyecto conectado a Git.
 
 ## Privacidad y datos
 
 - El enlace lleva el código de clase (`?clase=`). Las páginas no mandan el referente (`no-referrer`), así que ese código no viaja a Google Fonts.
-- El texto que escribe el estudiante se envía a Google (Gemini) a través del servidor. Dilo antes de jugar y define el permiso de tutores si son menores.
+- El texto que escribe el estudiante se envía a Google (Gemini) a través de la función. Dilo antes de jugar y define el permiso de tutores si son menores.
 - **Plan gratuito de Gemini:** según los términos de Google, lo que se envía se usa para mejorar sus productos y personas pueden leerlo (desvinculado de tu cuenta). Google pide no enviar información personal. Con el plan de pago, Google dice que no usa los datos para mejorar sus productos. Cada campo del juego ya recuerda no escribir datos personales.
-- **Menores de 18 años:** los términos de la API de Gemini (consultados el 31 de octubre de 2026) piden ser mayor de 18 y no permiten usar el servicio en un cliente dirigido a menores de 18 o que probablemente lo usen. Chaski es para secundaria. Es razonable para una demostración con adultos (jurado, docentes). Para un piloto con estudiantes, confírmalo con Google o con el docente antes. Mientras tanto, el juego funciona sin modelo, con reglas de palabras: basta publicar sin `EXTRACT_URL`.
+- **Menores de 18 años:** los términos de la API de Gemini (consultados el 31 de octubre de 2026) piden ser mayor de 18 y no permiten usar el servicio en un cliente dirigido a menores de 18 o que probablemente lo usen. Chaski es para secundaria. Es razonable para una demostración con adultos (jurado, docentes). Para un piloto con estudiantes, confírmalo con Google o con el docente antes. Mientras tanto, el juego funciona sin modelo, con reglas de palabras: basta no poner `GEMINI_API_KEY`.
 - El panel docente es una página pública. Los datos que muestra son los del dispositivo, un archivo o la hoja de Google (esta última protegida con una clave). No hay cuentas.
 
 ## Límites y costos
 
-- Workers y Pages tienen cuotas gratuitas diarias que sobran para un piloto. Revisa los límites vigentes en tu cuenta.
-- El plan gratuito de Gemini tiene un límite de solicitudes por minuto y por día; revisa los vigentes en AI Studio. Si un estudiante lo pasa, el servidor responde 503 y el juego lee con reglas de palabras.
-- `MODEL` en `wrangler.toml`: `gemini-3.5-flash-lite` (por defecto) responde rápido. `gemini-3.8-flash` lee mejor pero piensa más y puede tardar más de los 12 s que espera el juego.
-- El servidor no tiene limitador de uso. Con el origen cerrado el riesgo es bajo, pero existe.
+- Las Pages Functions cuentan en la cuota gratuita diaria de Workers. Sobra para un piloto; revisa el límite vigente en tu cuenta.
+- El plan gratuito de Gemini tiene un límite de solicitudes por minuto y por día; revisa los vigentes en AI Studio. Si se pasa, la función responde 503 y el juego lee con reglas de palabras.
+- `gemini-3.8-flash` puede tardar más de los 12 s que espera el juego; en ese caso lee con reglas.
+- No hay limitador de uso. Con `ALLOWED_ORIGINS` cerrado el riesgo es bajo, pero existe: quien llame desde otro origen recibe 403, pero un navegador de la propia página sí puede repetir llamadas.
 
 ## Deshacer
 
-```bash
-cd worker && npx wrangler delete                       # quita el servidor
-npx wrangler pages project delete chaski               # quita el sitio
-```
-
-Y borra la clave de Gemini en AI Studio si ya no la necesitas.
+Borra el proyecto en el panel de Cloudflare (*Settings → Delete project*) o con `npx wrangler pages project delete chaski`, y borra la clave de Gemini en AI Studio si ya no la necesitas. Si usaste el Worker aparte: `cd worker && npx wrangler delete`.

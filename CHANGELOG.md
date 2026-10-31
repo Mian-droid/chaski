@@ -8,13 +8,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 - **Favicon con el personaje** (`brand/`): SVG, `.ico` y el ícono de iOS.
 - **Vista previa al compartir** por WhatsApp y redes: título, descripción e imagen de 1200 x 630 con Chaski. `SITE_URL` fija la dirección de la imagen al empaquetar.
 - El panel docente lleva favicon y no se indexa.
-- Pruebas del empaquetado: 8 en total.
-- Pruebas del servidor: clave solo en cabecera, nombre de modelo validado, detalle de errores que no llega al navegador (17 en total).
+- Pruebas del empaquetado: 11 en total.
+- Pruebas del servidor: clave solo en cabecera, nombre de modelo validado, detalle de errores que no llega al navegador, y la función de Pages (18 en total).
 - `js/scenery.js`: el dibujo (fondo, personaje y choza) separado de la lógica del juego.
 - `npm run build:site`: arma `dist/` solo con el juego, el panel y las cabeceras, y escribe las direcciones (`EXTRACT_URL`, `ENDPOINT`) ahí y no en el repositorio.
 - Cabeceras para Cloudflare Pages (`deploy/_headers`) y guía de despliegue en `docs/despliegue.md`.
 
 ### Cambiado
+- **La lectura con el modelo corre dentro de Cloudflare Pages** como Pages Function (`functions/extract.ts`): un solo proyecto, sin Worker aparte ni CORS. En el empaquetado, `EXTRACT_URL` acepta una ruta del mismo sitio y, en Pages, `/extract` se usa sola. `zod` pasa a la raíz. El Worker independiente sigue disponible.
 - **El servidor lee con Google Gemini** en lugar de Anthropic. Llama a `generateContent` con `fetch`, sin SDK (el paquete bajó de 1,7 MiB a 779 KiB). Secreto `GEMINI_API_KEY`; modelo por defecto `gemini-3.5-flash-lite`. El juego no cambió.
 - **Nueva dirección visual: textil andino de día.** Paneles de tela, paisaje por capas en tres momentos del día, y un Chaski con más carácter.
 - **Enseñar ya no es un chat.** Pregunta en una placa de piedra, respuesta en una tablilla de arcilla, y cada lección ata un nudo en la cuerda de Chaski (se puede releer tocándolo). El cerebro pasa a ser una nube de pensamiento y tres tablillas colgadas.

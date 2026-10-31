@@ -42,21 +42,19 @@ Sin servidor intermedio configurado, Chaski lee la explicación con reglas de pa
 ## Pruebas
 
 ```bash
-npm test                  # núcleo (36), empaquetado del sitio (8) y servidor (17)
+npm test                  # núcleo (36), empaquetado del sitio (11) y servidor (18)
 npm run test:core         # solo el núcleo
-npm run test:site         # solo el empaquetado del sitio (8)
-npm run test:worker       # solo el servidor (17)
+npm run test:site         # solo el empaquetado del sitio (11)
+npm run test:worker       # solo el servidor (18)
 ```
 
-Requiere Node 22 o superior. No hay dependencias en el juego; el servidor usa solo `zod` y llama a la API de Gemini con `fetch`.
+Requiere Node 22 o superior. No hay dependencias en el juego; la lectura con el modelo usa solo `zod` (declarado en la raíz para que Cloudflare lo instale) y llama a la API de Gemini con `fetch`.
 
 ## Despliegue
 
 Guía paso a paso para Cloudflare: [docs/despliegue.md](docs/despliegue.md).
 
-**Juego y panel:** son solo archivos. `npm run build:site` arma `dist/` con lo que se debe publicar (sin pruebas, documentos ni servidor) y `npx wrangler pages deploy dist --project-name chaski` lo sube a Cloudflare Pages.
-
-**Lectura con el modelo (opcional):** la clave de Gemini no puede ir en la página. Hay un servidor intermedio en [worker/](worker/README.md). Después de desplegarlo, empaqueta el sitio con `EXTRACT_URL=<dirección>/extract npm run build:site`.
+**Todo en un proyecto de Cloudflare Pages.** El juego y el panel son archivos estáticos (`npm run build:site` arma `dist/`) y la lectura con el modelo es una Pages Function en [functions/](functions/extract.ts) que responde en `/extract`, en el mismo sitio. No hay Worker aparte, ni CORS, ni direcciones que copiar: solo se agrega el secreto `GEMINI_API_KEY` en el proyecto. El mismo código corre también como [Worker independiente](worker/README.md).
 
 **Guardar datos de varios dispositivos (opcional):** un Apps Script que escribe en una hoja de Google. Pasos en [apps-script/README.md](apps-script/README.md). Sin esto, los datos quedan en el navegador de cada estudiante y el panel los lee de ese dispositivo o de un archivo JSON.
 
@@ -87,7 +85,8 @@ index.html, panel.html     Juego y panel docente
 css/                       game.css (juego) y panel.css (panel)
 js/                        content, core, brain, scenery (dibujo), app, panel, config
 tests/                     Pruebas del núcleo (sin dependencias)
-worker/                    Servidor intermedio (Cloudflare Worker, TypeScript)
+worker/                    Lector con el modelo: lógica y pruebas (TypeScript), desplegable como Worker
+functions/                 Pages Function /extract: usa el código de worker/ dentro del mismo sitio
 apps-script/               Guardado de eventos en una hoja de Google
 scripts/, deploy/          Empaquetado del sitio y cabeceras para Cloudflare Pages
 brand/                     Favicon e imagen para compartir por WhatsApp (ver brand/README.md)
@@ -100,7 +99,7 @@ Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 ## Límites conocidos
 
 - **Gemini no se ha probado con una clave real.** La ruta se probó con un `fetch` simulado. Falta correr `worker/scripts/live-test.mjs` con una clave real.
-- **Nada se ha desplegado.** Los pasos de [docs/despliegue.md](docs/despliegue.md) no se han ejecutado contra una cuenta de Cloudflare.
+- **Nada se ha desplegado.** La función corrió en local con `wrangler pages dev`, pero los pasos de [docs/despliegue.md](docs/despliegue.md) no se han ejecutado contra una cuenta de Cloudflare.
 - **No se mide retención ni aprendizaje.** No hay examen final ni día 2, y tampoco pretest. El piloto describe cómo enseñan y revisan los estudiantes, no cuánto aprendieron.
 - **No hay limitador de uso** en el servidor. Restringe `ALLOWED_ORIGINS` a la dirección de tu juego.
 - **La señal de originalidad es heurística** y puede equivocarse con textos cortos o vocabulario muy común.
